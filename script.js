@@ -3,7 +3,6 @@ class WarriorCardGame {
     constructor() {
         this.cards = [];
         this.score = 0;
-        this.level = 1;
         this.moves = 0;
         this.draggedCard = null;
         this.dragStartPos = null;
@@ -221,7 +220,6 @@ class WarriorCardGame {
                 // Add score
                 this.score += randomCoinScore;
                 this.moves++;
-                this.level = Math.floor(this.score / 50) + 1;
                 
                 // Re-render with appear effect
                 this.renderCardsWithAppearEffect(monsterIndex);
@@ -259,7 +257,6 @@ class WarriorCardGame {
             
             // Update moves and score
             this.moves++;
-            this.level = Math.floor(this.score / 50) + 1;
             
             // Update UI immediately
             this.updateUI();
@@ -1014,7 +1011,6 @@ class WarriorCardGame {
             // Update score and moves using the stored card type
             this.score += eatenCardScore;
             this.moves++;
-            this.level = Math.floor(this.score / 50) + 1;
             
             // Update Warrior HP if eating Fatui
             if (eatenCardType === 'fatuice') {
@@ -1095,7 +1091,6 @@ class WarriorCardGame {
     // Reset game
     resetGame() {
         this.score = 0;
-        this.level = 1;
         this.moves = 0;
         this.warriorHP = 10; // Reset Warrior HP to max
         this.healFood1 = 0; // Reset food1 healing counter
@@ -1110,7 +1105,6 @@ class WarriorCardGame {
     // Start a new game
     newGame() {
         this.score = 0;
-        this.level = 1;
         this.moves = 0;
         this.warriorHP = 10; // Reset Warrior HP to max
         this.healFood1 = 0; // Reset food1 healing counter
@@ -1125,7 +1119,6 @@ class WarriorCardGame {
     // Update the UI
     updateUI() {
         this.updateScore();
-        this.updateLevel();
         this.updateMoves();
         this.updateWarriorDisplay();
     }
@@ -1135,10 +1128,7 @@ class WarriorCardGame {
         document.getElementById('score').textContent = this.score;
     }
 
-    // Update level display
-    updateLevel() {
-        document.getElementById('level').textContent = this.level;
-    }
+
 
     // Update moves display
     updateMoves() {
