@@ -3,6 +3,7 @@ class WarriorCardGame {
     constructor() {
         this.cards = [];
         this.score = 0;
+        this.highScore = localStorage.getItem('warriorCardHighScore') || 0;
         this.moves = 0;
         this.draggedCard = null;
         this.dragStartPos = null;
@@ -88,11 +89,47 @@ class WarriorCardGame {
         return this.fatuiImages[randomIndex];
     }
 
-    // Get random card image (Fatui or Coin)
+    // Get random card image with weighted probability (increased Fatui chance)
     getRandomCardImage() {
-        const randomIndex = Math.floor(Math.random() * this.allCardImages.length);
-        return this.allCardImages[randomIndex];
+        // Tạo mảng trọng số cho từng loại thẻ (cố định)
+        const cardWeights = {
+            fatui: 50,    // 50% chance cho Fatui
+            coin: 20,     // 20% chance cho Coin
+            food: 15,     // 15% chance cho Food
+            sword: 15     // 15% chance cho Sword
+        };
+        
+        // Tính tổng trọng số
+        const totalWeight = cardWeights.fatui + cardWeights.coin + cardWeights.food + cardWeights.sword;
+        
+        // Tạo số ngẫu nhiên
+        const random = Math.random() * totalWeight;
+        
+        // Chọn loại thẻ dựa trên trọng số
+        let currentWeight = 0;
+        
+        if (random < (currentWeight += cardWeights.fatui)) {
+            // Chọn Fatui
+            const randomIndex = Math.floor(Math.random() * this.fatuiImages.length);
+            return this.fatuiImages[randomIndex];
+        } else if (random < (currentWeight += cardWeights.coin)) {
+            // Chọn Coin
+            const randomIndex = Math.floor(Math.random() * this.coinImages.length);
+            return this.coinImages[randomIndex];
+        } else if (random < (currentWeight += cardWeights.food)) {
+            // Chọn Food
+            const randomIndex = Math.floor(Math.random() * this.foodImages.length);
+            return this.foodImages[randomIndex];
+        } else {
+            // Chọn Sword
+            const randomIndex = Math.floor(Math.random() * this.swordImages.length);
+            return this.swordImages[randomIndex];
+        }
     }
+
+
+
+
 
     // Get card type based on image name
     getCardType(imageName) {
@@ -546,7 +583,14 @@ class WarriorCardGame {
         if (card.type === 'warrior') {
             title.textContent = 'Thông tin thẻ';
             name.textContent = 'Warrior';
-            effect.textContent = `Thẻ không có hiệu ứng nào - HP: ${this.warriorHP}/10`;
+            let effectText = `HP: ${this.warriorHP}/10`;
+            
+            // Thêm thông tin vũ khí nếu có
+            if (this.warriorWeapon > 0) {
+                effectText += ` - Vũ khí: ${this.warriorWeapon} độ bền`;
+            }
+            
+            effect.textContent = effectText;
         } else if (card.type === 'fatuice') {
             title.textContent = 'Thông tin thẻ';
             name.textContent = 'Fatui';
@@ -1126,6 +1170,18 @@ class WarriorCardGame {
     // Update score display
     updateScore() {
         document.getElementById('score').textContent = this.score;
+        
+        // Update high score if current score is higher
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('warriorCardHighScore', this.highScore);
+            
+            // Show new high score message
+            this.showMessage(`🎉 Kỉ lục mới: ${this.highScore} điểm!`);
+        }
+        
+        // Update high score display
+        document.getElementById('high-score').textContent = this.highScore;
     }
 
 
@@ -1261,6 +1317,17 @@ class WarriorCardGame {
         // Game over dialog events
         document.getElementById('restart-game').addEventListener('click', () => {
             this.restartFromGameOver();
+        });
+
+
+
+        // Reset high score button (double click on high score)
+        document.getElementById('high-score').addEventListener('dblclick', () => {
+            if (confirm('Bạn có muốn reset kỉ lục điểm không?')) {
+                this.highScore = 0;
+                localStorage.removeItem('warriorCardHighScore');
+                document.getElementById('high-score').textContent = '0';
+            }
         });
 
         // Escape key to close dialogs

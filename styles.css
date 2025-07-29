@@ -39,6 +39,13 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.high-score-display {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
 .game-stats {
     display: flex;
     justify-content: space-around;
