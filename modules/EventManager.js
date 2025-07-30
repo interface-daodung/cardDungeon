@@ -73,7 +73,7 @@ class EventManager {
         });
 
         cardElement.addEventListener('touchend', (e) => {
-            this.handleTouchEnd(e);
+            this.handleTouchEnd(e, index);
         });
 
         cardElement.addEventListener('mousedown', (e) => {
@@ -126,19 +126,8 @@ class EventManager {
             });
         }
 
-        if (cardElement.dataset.type !== 'warrior') {
-            cardElement.addEventListener('touchstart', (e) => {
-                this.handleLongPressStart(e, index);
-            });
-
-            cardElement.addEventListener('touchend', (e) => {
-                this.handleLongPressEnd(e);
-            });
-
-            cardElement.addEventListener('touchcancel', (e) => {
-                this.handleLongPressCancel(e);
-            });
-        }
+        // Touch events đã được xử lý trong setupDragEvents
+        // Không cần thêm duplicate touch events ở đây
     }
 
     handleWarriorClick(e, index) {
@@ -213,54 +202,74 @@ class EventManager {
     handleTouchStart(e, index) {
         e.preventDefault();
         
-        if (this.cardManager.getCard(index).type !== 'warrior') {
-            return;
-        }
+        // Lưu thời điểm bắt đầu touch để phát hiện tap
+        this.gameState.setTouchStartTime(Date.now());
+        this.gameState.setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
         
-        this.gameState.setDraggedCard(index);
-        this.gameState.setDragStartPos({ row: Math.floor(index / 3), col: index % 3 });
-        e.target.closest('.card').classList.add('dragging');
+        // Bắt đầu long press timer cho non-warrior cards
+        if (this.cardManager.getCard(index).type !== 'warrior') {
+            this.handleLongPressStart(e, index);
+        }
     }
 
     handleTouchMove(e) {
         e.preventDefault();
-        this.uiManager.showValidTargets(this.gameState.getDraggedCard(), this.cardManager);
+        // Không làm gì - chỉ để ngăn scroll
     }
 
-    handleTouchEnd(e) {
+    handleTouchEnd(e, index) {
         e.preventDefault();
-        const touch = e.changedTouches[0];
-        const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetCard = element.closest('.card');
         
-        const draggedCardIndex = this.gameState.getDraggedCard();
-        if (draggedCardIndex !== null && this.cardManager.getCard(draggedCardIndex).type === 'warrior') {
-            if (targetCard) {
-                const targetIndex = this.uiManager.getCardIndexFromElement(targetCard);
-                if (targetIndex !== null && this.uiManager.isValidMove(draggedCardIndex, targetIndex, this.cardManager)) {
-                    this.moveWarrior(draggedCardIndex, targetIndex);
-                }
+        const touchEndTime = Date.now();
+        const touchStartTime = this.gameState.getTouchStartTime();
+        const touchStartPos = this.gameState.getTouchStartPos();
+        const touchEndPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        
+        // Tính khoảng cách di chuyển
+        const distance = Math.sqrt(
+            Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
+            Math.pow(touchEndPos.y - touchStartPos.y, 2)
+        );
+        
+        // Dừng long press timer
+        if (this.cardManager.getCard(index).type !== 'warrior') {
+            this.handleLongPressEnd(e);
+        }
+        
+        // Nếu là tap (thời gian ngắn và khoảng cách nhỏ)
+        if (touchEndTime - touchStartTime < 300 && distance < 10) {
+            // Xử lý như click
+            if (this.cardManager.getCard(index).type === 'warrior') {
+                this.handleWarriorClick(e, index);
+            } else {
+                this.handleCardClick(e, index);
             }
         }
         
-        this.uiManager.clearValidTargets();
-        if (this.gameState.getDraggedCard() !== null) {
-            document.querySelector(`[data-index="${this.gameState.getDraggedCard()}"]`).classList.remove('dragging');
-        }
-        this.gameState.clearDraggedCard();
-        this.gameState.clearDragStartPos();
+        this.gameState.clearTouchStartTime();
+        this.gameState.clearTouchStartPos();
     }
 
     handleLongPressStart(e, index) {
         e.preventDefault();
-        const timer = setTimeout(() => {
-            this.uiManager.showCardInfo(index, this.cardManager);
-        }, this.gameState.getLongPressDelay());
-        this.gameState.setLongPressTimer(timer);
+        
+        // Chỉ bắt đầu timer nếu chưa có timer nào
+        if (!this.gameState.getLongPressTimer()) {
+            const timer = setTimeout(() => {
+                this.uiManager.showCardInfo(index, this.cardManager);
+            }, this.gameState.getLongPressDelay());
+            this.gameState.setLongPressTimer(timer);
+        }
     }
 
     handleLongPressEnd(e) {
-        this.gameState.clearLongPressTimer();
+        // Chỉ clear timer nếu touch time < long press delay
+        const touchStartTime = this.gameState.getTouchStartTime();
+        const currentTime = Date.now();
+        
+        if (touchStartTime && (currentTime - touchStartTime) < this.gameState.getLongPressDelay()) {
+            this.gameState.clearLongPressTimer();
+        }
     }
 
     handleLongPressCancel(e) {

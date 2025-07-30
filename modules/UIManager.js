@@ -8,6 +8,7 @@ class UIManager {
     updateUI() {
         this.updateScore();
         this.updateMoves();
+        this.updateHighScore();
         this.updateWarriorDisplay();
     }
 
@@ -17,6 +18,10 @@ class UIManager {
 
     updateMoves() {
         document.getElementById('moves').textContent = this.gameState.getMoves();
+    }
+
+    updateHighScore() {
+        document.getElementById('high-score').textContent = this.gameState.getHighScore();
     }
 
     updateWarriorDisplay() {

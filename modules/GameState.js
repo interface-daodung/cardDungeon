@@ -4,10 +4,13 @@ class GameState {
     constructor() {
         this.score = 0; // Điểm số hiện tại
         this.moves = 0; // Số lượt di chuyển
+        this.highScore = this.loadHighScore(); // High score từ localStorage
         this.draggedCard = null; // Thẻ đang được kéo
         this.dragStartPos = null; // Vị trí bắt đầu kéo
         this.longPressTimer = null; // Timer cho long press
-        this.longPressDelay = 500; // Thời gian delay cho long press (ms)
+        this.longPressDelay = 1500; // Thời gian delay cho long press (1.5 giây)
+        this.touchStartTime = null; // Thời điểm bắt đầu touch
+        this.touchStartPos = null; // Vị trí bắt đầu touch
     }
 
     // Reset tất cả trạng thái về ban đầu
@@ -17,11 +20,15 @@ class GameState {
         this.draggedCard = null; // Reset thẻ đang kéo
         this.dragStartPos = null; // Reset vị trí bắt đầu
         this.longPressTimer = null; // Reset timer
+        this.touchStartTime = null; // Reset touch start time
+        this.touchStartPos = null; // Reset touch start position
+        // Không reset high score
     }
 
     // Thêm điểm vào tổng điểm
     addScore(points) { 
         this.score += points; 
+        this.updateHighScore(); // Cập nhật high score khi score thay đổi
     }
     
     // Tăng số lượt di chuyển
@@ -37,6 +44,11 @@ class GameState {
     // Lấy số lượt di chuyển
     getMoves() { 
         return this.moves; 
+    }
+    
+    // Lấy high score
+    getHighScore() {
+        return this.highScore;
     }
     
     // Set thẻ đang được kéo
@@ -90,5 +102,49 @@ class GameState {
     // Lấy thời gian delay cho long press
     getLongPressDelay() { 
         return this.longPressDelay; 
+    }
+    
+    // Touch tracking methods
+    setTouchStartTime(time) {
+        this.touchStartTime = time;
+    }
+    
+    getTouchStartTime() {
+        return this.touchStartTime;
+    }
+    
+    clearTouchStartTime() {
+        this.touchStartTime = null;
+    }
+    
+    setTouchStartPos(pos) {
+        this.touchStartPos = pos;
+    }
+    
+    getTouchStartPos() {
+        return this.touchStartPos;
+    }
+    
+    clearTouchStartPos() {
+        this.touchStartPos = null;
+    }
+    
+    // Load high score từ localStorage
+    loadHighScore() {
+        const saved = localStorage.getItem('cardDungeonHighScore');
+        return saved ? parseInt(saved) : 0;
+    }
+    
+    // Save high score vào localStorage
+    saveHighScore(score) {
+        if (score > this.highScore) {
+            this.highScore = score;
+            localStorage.setItem('cardDungeonHighScore', score.toString());
+        }
+    }
+    
+    // Update high score nếu score hiện tại cao hơn
+    updateHighScore() {
+        this.saveHighScore(this.score);
     }
 } 

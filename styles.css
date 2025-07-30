@@ -39,6 +39,13 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.high-score {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
 .game-stats {
     display: flex;
     justify-content: space-around;
@@ -103,8 +110,8 @@ body {
 }
 
 .card.warrior {
-    border-color: #4CAF50;
-    box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+    border-color: #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
@@ -127,8 +134,8 @@ body {
 }
 
 .card.fatuice {
-    border-color: #2196F3;
-    box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+    border-color: #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
@@ -282,14 +289,14 @@ body {
 }
 
 .card.coin {
-    border-color: #2196F3;
-    box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+    border-color: #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
 .card.food {
-    border-color: #4CAF50;
-    box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+    border-color: #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
@@ -312,8 +319,8 @@ body {
 }
 
 .card.sword {
-    border-color: #FF9800;
-    box-shadow: 0 0 12px rgba(255, 152, 0, 0.4);
+    border-color: #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
 }
 
