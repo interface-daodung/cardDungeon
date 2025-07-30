@@ -13,7 +13,6 @@
         <!-- Header -->
         <header class="game-header">
             <h1>Dungeon Card Game</h1>
-            <div class="high-score-display">High Score: <span id="high-score">0</span></div>
             <div class="game-stats">
                 <span class="score">Score: <span id="score">0</span></span>
                 <span class="moves">Moves: <span id="moves">0</span></span>
@@ -62,6 +61,17 @@
         </div>
     </div>
 
+    <!-- Load tất cả modules theo thứ tự -->
+    <script src="modules/CardManager.js"></script>
+    <script src="modules/GameState.js"></script>
+    <script src="modules/WarriorManager.js"></script>
+    <script src="modules/AnimationManager.js"></script>
+    <script src="modules/UIManager.js"></script>
+    <script src="modules/CombatManager.js"></script>
+    <script src="modules/EventManager.js"></script>
+    <script src="modules/WarriorCardGame.js"></script>
+    
+    <!-- Load script chính -->
     <script src="script.js"></script>
 </body>
 </html> 

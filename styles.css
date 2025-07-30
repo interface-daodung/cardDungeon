@@ -39,13 +39,6 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.high-score-display {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-    font-weight: normal;
-}
-
 .game-stats {
     display: flex;
     justify-content: space-around;
@@ -62,6 +55,8 @@ body {
     align-items: center;
     justify-content: center;
     padding: 10px;
+    max-width: 340px; /* Giới hạn chiều rộng để hiển thị cả 9 thẻ */
+    margin: 0 auto; /* Căn giữa */
 }
 
 /* Cards Grid - 3x3 Layout with rectangular cards */
@@ -71,14 +66,14 @@ body {
     grid-template-rows: repeat(3, 1fr);
     gap: 4px;
     width: 100%;
-    max-width: 320px;
+    max-width: 300px; /* Giảm max-width để phù hợp với game-main 340px */
     /* Remove aspect-ratio: 1 to allow rectangular cards */
 }
 
-/* Card Styles - Rectangular card proportions (2.6:1 ratio) */
+/* Card Styles - Tỷ lệ 9:16 (chiều rộng : chiều cao) */
 .card {
     width: 100%;
-    height: 69px; /* 100px width / 2.6 = ~38.5px, but we use 69px for better visibility */
+    aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -702,6 +697,10 @@ body {
         padding: 20px;
     }
     
+    .game-main {
+        max-width: 340px; /* Duy trì chiều rộng cho tablet */
+    }
+    
     .game-header h1 {
         font-size: 2rem;
     }
@@ -717,12 +716,12 @@ body {
     }
     
     .cards-grid {
-        max-width: 400px;
+        max-width: 300px; /* Duy trì max-width cho tablet */
         gap: 6px;
     }
     
     .card {
-        height: 92px; /* 120px width / 2.6 = ~46px, but we use 92px for better visibility */
+        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
 }
 
@@ -731,13 +730,17 @@ body {
         max-width: 600px;
     }
     
+    .game-main {
+        max-width: 340px; /* Duy trì chiều rộng cho desktop */
+    }
+    
     .cards-grid {
-        max-width: 500px;
+        max-width: 300px; /* Duy trì max-width cho desktop */
         gap: 8px;
     }
     
     .card {
-        height: 180px; /* 180px height, width = 180/2.6 = ~69px */
+        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
 }
 
@@ -771,7 +774,7 @@ body {
     }
     
     .card {
-        height: 58px; /* 75px width / 2.6 = ~28.8px, but we use 58px for better visibility */
+        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
     
     .game-controls {
@@ -793,7 +796,7 @@ body {
     }
     
     .card {
-        height: 77px; /* 100px width / 2.6 = ~38.5px, but we use 77px for better visibility */
+        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
         border-width: 1px;
     }
     

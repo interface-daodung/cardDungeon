@@ -58,55 +58,107 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 
 ```
 CardDungeon/
-├── index.html          # Giao diện HTML chính
-├── script.js           # Logic game JavaScript
-├── styles.css          # CSS với responsive design
-├── README.md           # Tài liệu hướng dẫn
-├── favicon.ico         # Icon website
-└── resources/          # Thư mục tài nguyên
-    ├── Warrior.png     # Hình ảnh Warrior
-    ├── Fatui0-3.png   # Hình ảnh quái vật
-    ├── coin0-6.png    # Hình ảnh đồng xu
-    ├── food0-1.png    # Hình ảnh thức ăn
-    ├── sword0-2.png   # Hình ảnh kiếm
-    ├── bomb.png       # Hình ảnh bom
-    ├── bow0-2.png     # Hình ảnh cung
-    ├── poison0.png    # Hình ảnh độc
-    └── treasure*.png  # Hình ảnh kho báu
+├── index.html              # Giao diện HTML chính
+├── script.js               # File khởi tạo game (chỉ 5 dòng)
+├── styles.css              # CSS với responsive design
+├── README.md               # Tài liệu hướng dẫn
+├── favicon.ico             # Icon website
+├── modules/                # Thư mục chứa các class riêng biệt
+│   ├── CardManager.js      # Quản lý thẻ và tạo thẻ
+│   ├── GameState.js        # Quản lý trạng thái game
+│   ├── WarriorManager.js   # Quản lý Warrior
+│   ├── AnimationManager.js # Quản lý animation
+│   ├── UIManager.js        # Quản lý giao diện
+│   ├── CombatManager.js    # Quản lý chiến đấu
+│   ├── EventManager.js     # Quản lý events
+│   └── WarriorCardGame.js  # Class chính điều phối
+└── resources/              # Thư mục tài nguyên
+    ├── Warrior.png         # Hình ảnh Warrior
+    ├── Fatui0-3.png       # Hình ảnh quái vật
+    ├── coin0-6.png        # Hình ảnh đồng xu
+    ├── food0-1.png        # Hình ảnh thức ăn
+    ├── sword0-2.png       # Hình ảnh kiếm
+    ├── bomb.png           # Hình ảnh bom
+    ├── bow0-2.png         # Hình ảnh cung
+    ├── poison0.png        # Hình ảnh độc
+    └── treasure*.png      # Hình ảnh kho báu
 ```
 
-## 💻 Cấu Trúc Code
+## 💻 Kiến Trúc Code (Modular)
 
-### JavaScript (script.js)
+### 🎯 **CardManager.js** - Quản Lý Thẻ
 ```javascript
-class WarriorCardGame {
-    // Game State
-    - cards[]: Mảng các thẻ trên bàn
-    - score: Điểm số
-    - moves: Số lượt di chuyển
-    - warriorHP: HP của Warrior
-    - warriorWeapon: Vũ khí của Warrior
-    
-    // Core Methods
-    - initializeGame(): Khởi tạo game
-    - createCards(): Tạo bàn chơi 3x3
-    - renderCards(): Hiển thị các thẻ
-    - moveWarriorDual(): Di chuyển Warrior
-    - attackMonsterWithWeapon(): Tấn công quái vật
-    - checkGameOver(): Kiểm tra kết thúc game
-}
+// Chức năng chính:
+- createCards()           # Tạo bộ thẻ ban đầu 3x3
+- getRandomCardImage()    # Lấy hình ảnh thẻ ngẫu nhiên
+- findWarriorIndex()      # Tìm vị trí Warrior
+- findCardToMove()        # Tìm thẻ cần di chuyển (hiệu ứng domino)
+- createRandomCard()      # Tạo thẻ mới ngẫu nhiên
 ```
 
-### CSS (styles.css)
-- **Mobile-First Design**: Responsive breakpoints
-- **Glass Morphism**: Hiệu ứng trong suốt
-- **Smooth Animations**: Transition và keyframes
-- **Touch-Friendly**: Tối ưu cho mobile
+### 🎮 **GameState.js** - Quản Lý Trạng Thái
+```javascript
+// Chức năng chính:
+- score, moves            # Điểm số và số lượt
+- draggedCard            # Thẻ đang được kéo
+- dragStartPos           # Vị trí bắt đầu kéo
+- longPressTimer         # Timer cho long press
+```
 
-### HTML (index.html)
-- **Semantic Structure**: Header, Main, Controls
-- **Bootstrap Integration**: UI components
-- **Dialog System**: Card info và game over
+### ⚔️ **WarriorManager.js** - Quản Lý Warrior
+```javascript
+// Chức năng chính:
+- warriorHP              # HP của Warrior (0-10)
+- warriorWeapon          # Độ bền vũ khí
+- healFood1              # Số lượt hồi phục từ thức ăn đặc biệt
+- processCardConsumption() # Xử lý khi ăn thẻ
+```
+
+### 🎨 **AnimationManager.js** - Quản Lý Animation
+```javascript
+// Chức năng chính:
+- renderCards()          # Render thẻ lên màn hình
+- createCardElement()    # Tạo element HTML cho thẻ
+- startCombatAnimation() # Animation chiến đấu
+- createDamagePopup()    # Hiển thị sát thương
+- triggerGameOver()      # Hiệu ứng game over
+```
+
+### 🖥️ **UIManager.js** - Quản Lý Giao Diện
+```javascript
+// Chức năng chính:
+- updateUI()             # Cập nhật giao diện
+- showCardInfo()         # Hiển thị thông tin thẻ
+- showValidTargets()     # Hiển thị ô có thể di chuyển
+- isValidMove()          # Kiểm tra nước đi hợp lệ
+```
+
+### ⚔️ **CombatManager.js** - Quản Lý Chiến Đấu
+```javascript
+// Chức năng chính:
+- attackMonsterWithWeapon() # Tấn công monster bằng vũ khí
+- attackMonsterFromDistance() # Tấn công từ xa
+- processCardEating()     # Xử lý khi ăn thẻ
+- moveWarriorAfterCombat() # Di chuyển Warrior sau combat
+```
+
+### 🎮 **EventManager.js** - Quản Lý Events
+```javascript
+// Chức năng chính:
+- setupCardEvents()       # Setup events cho thẻ
+- handleDragStart()       # Xử lý bắt đầu kéo
+- handleDrop()           # Xử lý thả thẻ
+- moveWarrior()          # Di chuyển Warrior
+- handleLongPress()      # Xử lý long press
+```
+
+### 🎯 **WarriorCardGame.js** - Class Chính
+```javascript
+// Chức năng chính:
+- Khởi tạo tất cả managers
+- Điều phối các module
+- initializeGame()       # Khởi tạo game
+```
 
 ## 🚀 Cách Chạy
 
@@ -160,7 +212,7 @@ Sau đó truy cập `http://localhost:8000`
 ### Thêm Tính Năng Mới
 1. **Thêm loại thẻ mới**:
    ```javascript
-   // Trong script.js
+   // Trong CardManager.js
    this.newCardImages = ['resources/newcard.png'];
    this.allCardImages = [...this.allCardImages, ...this.newCardImages];
    ```
@@ -249,7 +301,7 @@ MIT License - Tự do sử dụng và phát triển.
 
 ## 🙏 Tác Giả
 
-CardDungeon được phát triển với ❤️ bằng HTML, CSS và JavaScript thuần.
+CardDungeon được phát triển với ❤️ bằng HTML, CSS và JavaScript thuần, sử dụng kiến trúc modular để dễ bảo trì và mở rộng.
 
 ---
 
