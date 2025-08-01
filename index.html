@@ -30,7 +30,7 @@
         <!-- Game Controls -->
         <div class="game-controls">
             <button class="btn btn-primary" id="new-game">New Game</button>
-            <button class="btn btn-danger" id="reset">Reset</button>
+            <button class="btn btn-warning" id="sell-weapon" style="display: none;">Sell Weapon</button>
         </div>
 
         <!-- Card Info Dialog -->
@@ -63,14 +63,68 @@
     </div>
 
     <!-- Load tất cả modules theo thứ tự -->
+    <!-- Load Card classes trước -->
+    <script src="modules/cards/Card.js"></script>
+    <script src="modules/cards/Fatui0.js"></script>
+    <script src="modules/cards/Fatui1.js"></script>
+    <script src="modules/cards/Fatui2.js"></script>
+    <script src="modules/cards/Fatui3.js"></script>
+    <script src="modules/cards/Food0.js"></script>
+    <script src="modules/cards/Food1.js"></script>
+    <script src="modules/cards/Food2.js"></script>
+    <script src="modules/cards/Food3.js"></script>
+    <script src="modules/cards/Sword0.js"></script>
+    <script src="modules/cards/Sword1.js"></script>
+    <script src="modules/cards/Sword2.js"></script>
+    <script src="modules/cards/Sword3.js"></script>
+    <script src="modules/cards/Sword4.js"></script>
+    <script src="modules/cards/Sword5.js"></script>
+    <script src="modules/cards/Sword6.js"></script>
+    <script src="modules/cards/Coin0.js"></script>
+    <script src="modules/cards/Coin1.js"></script>
+    <script src="modules/cards/Coin2.js"></script>
+    <script src="modules/cards/Coin3.js"></script>
+    <script src="modules/cards/Coin4.js"></script>
+    <script src="modules/cards/Coin5.js"></script>
+    <script src="modules/cards/Coin6.js"></script>
+    <script src="modules/cards/CoinUp0.js"></script>
+    <script src="modules/cards/CoinUp1.js"></script>
+    <script src="modules/cards/CoinUp2.js"></script>
+    <script src="modules/cards/CoinUp3.js"></script>
+    <script src="modules/cards/CoinUp4.js"></script>
+    <script src="modules/cards/CoinUp5.js"></script>
+    <script src="modules/cards/CoinUp6.js"></script>
+    <script src="modules/cards/Warrior.js"></script>
+    <script src="modules/cards/Trap.js"></script>
+    <script src="modules/cards/Poison.js"></script>
+    <script src="modules/cards/Boom.js"></script>
+    <script src="modules/cards/Quicksand.js"></script>
+    <script src="modules/cards/Treasure0.js"></script>
+    <script src="modules/cards/Treasure1.js"></script>
+    <script src="modules/cards/Bribery.js"></script>
+    <script src="modules/cards/Catalyst0.js"></script>
+    <script src="modules/cards/Catalyst1.js"></script>
+    <script src="modules/cards/Catalyst2.js"></script>
+    <script src="modules/cards/Eremite0.js"></script>
+    <script src="modules/cards/Eremite1.js"></script>
+    <script src="modules/cards/AbyssLector0.js"></script>
+    <script src="modules/cards/AbyssLector1.js"></script>
+    <script src="modules/cards/AbyssLector2.js"></script>
+    <script src="modules/cards/Apep.js"></script>
+    <script src="modules/cards/Narwhal.js"></script>
+    <script src="modules/cards/Operative.js"></script>
+    <script src="modules/cards/Void.js"></script>
+    <script src="modules/cards/CardFactory.js"></script>
+    
+    <!-- Load các manager -->
     <script src="modules/CardManager.js"></script>
     <script src="modules/GameState.js"></script>
-    <script src="modules/WarriorManager.js"></script>
+    <script src="modules/CharacterManager.js"></script>
     <script src="modules/AnimationManager.js"></script>
     <script src="modules/UIManager.js"></script>
     <script src="modules/CombatManager.js"></script>
     <script src="modules/EventManager.js"></script>
-    <script src="modules/WarriorCardGame.js"></script>
+    <script src="modules/DungeonCardGame.js"></script>
     
     <!-- Load script chính -->
     <script src="script.js"></script>
