@@ -335,6 +335,12 @@ class CombatManager {
         
         console.log(`✅ cardEffect result:`, result);
         
+        // ===== XỬ LÝ TRAP ANIMATION NẾU CẦN =====
+        if (targetCard.nameId === 'trap' && result && result.shouldTriggerAnimation) {
+            console.log(`🎯 Trap được kích hoạt, bắt đầu animation`);
+            this.animationManager.startTrapActivationAnimation(toIndex, targetCard, this.cardManager);
+        }
+        
         // ===== TRẢ VỀ THÔNG TIN THẺ BỊ ĂN =====
         return result;
     }

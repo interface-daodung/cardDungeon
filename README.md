@@ -7,11 +7,12 @@ Một game thẻ bài chiến đấu với thiết kế responsive, tối ưu ch
 CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giản nhưng thú vị:
 - **Warrior** (Chiến binh) ở giữa bàn chơi với HP và vũ khí
 - **Enemy** (Quái vật) xung quanh với HP khác nhau
-- **Coin** (Đồng xu) để tăng điểm
+- **Coin** (Đồng xu) để tăng điểm với hệ thống upgrade
 - **Food** (Thức ăn) để hồi máu
 - **Weapon** (Vũ khí) để tăng sát thương
 - **Boom** (Bom) với countdown và explosion effect
 - **Treasure** (Kho báu) với durability và interaction
+- **Trap** (Bẫy) với arrow rotation
 - **Void** (Thẻ trống) không có tác dụng
 
 ## 🎯 Cách Chơi
@@ -22,6 +23,7 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 - Giữ Warrior sống sót
 - Tương tác với Treasure để nhận phần thưởng
 - Tránh Boom explosion hoặc sử dụng chúng chiến lược
+- Tạo 3 coin liên tục để upgrade thành coin mạnh hơn
 
 ### Cơ Chế Chơi
 1. **Di Chuyển**: Kéo thả Warrior đến ô trống để di chuyển
@@ -31,6 +33,7 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 5. **Vũ Khí**: Thu thập Weapon để tăng sát thương
 6. **Tương Tác**: Click vào Treasure để nhận phần thưởng
 7. **Boom**: Tránh hoặc sử dụng Boom explosion chiến lược
+8. **Coin Upgrade**: Tạo 3 coin liên tục để upgrade
 
 ### Điều Khiển
 - **Desktop**: Click chuột để chọn và kéo thả
@@ -51,10 +54,12 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 - ✅ **Bán vũ khí** để lấy điểm
 - ✅ **Boom cards** với countdown và explosion
 - ✅ **Treasure interaction** với durability
+- ✅ **Trap cards** với arrow rotation
 - ✅ **Void cards** không có tác dụng
 - ✅ **Tấn công từ xa** khi có vũ khí
 - ✅ **Domino effect** khi di chuyển
 - ✅ **Quicksand shuffle** effect
+- ✅ **Coin upgrade system** - 3 coin liên tục → upgrade
 
 ### Giao Diện
 - ✅ **Responsive Design** - Tối ưu cho mọi thiết bị
@@ -65,6 +70,7 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 - ✅ **Damage Popup** - Hiển thị sát thương
 - ✅ **Boom Countdown Display** - Hiển thị countdown
 - ✅ **Boom Damage Display** - Hiển thị damage
+- ✅ **Trap Arrow Display** - Hiển thị arrow của trap
 
 ### Hiệu Ứng
 - ✅ **Combat Animation** - Hiệu ứng chiến đấu
@@ -76,6 +82,7 @@ CardDungeon là một game thẻ bài chiến đấu với cơ chế đơn giả
 - ✅ **Flip Card** - Hiệu ứng lật thẻ
 - ✅ **Shuffle Animation** - Hiệu ứng xáo trộn
 - ✅ **Appear Effect** - Hiệu ứng xuất hiện
+- ✅ **Coin Upgrade Effect** - Hiệu ứng upgrade coin
 
 ## 📁 Cấu Trúc Dự Án
 
@@ -149,6 +156,14 @@ CardDungeon/
 - getDisplayInfo()        # Thông tin hiển thị cho dialog
 - clone()                 # Tạo bản sao thẻ
 
+// Coin0.js - Thẻ coin cơ bản
+- upCoinEffect()          # Hiệu ứng upgrade khi 3 coin liên tục
+- score                   # Điểm số ngẫu nhiên 1-9
+
+// CoinUp0.js - Thẻ coin nâng cấp
+- score                   # Điểm số gấp đôi coin gốc
+- Không có upCoinEffect() # Không thể upgrade tiếp
+
 // Boom.js - Thẻ bom với countdown
 - countdown               # Đếm ngược
 - damage                 # Sát thương explosion
@@ -158,6 +173,10 @@ CardDungeon/
 // Treasure.js - Kho báu với durability
 - durability              # Độ bền
 - interactWithCharacter() # Tương tác với character
+
+// Trap.js - Thẻ bẫy với arrow rotation
+- transformationAgency()  # Xoay arrow sau mỗi move
+- arrowTop, arrowBottom, arrowLeft, arrowRight # Hướng arrow
 
 // Void.js - Thẻ trống
 - score = 0              # Không cộng điểm
@@ -217,6 +236,7 @@ CardDungeon/
 - flipCards()            # Animation lật thẻ
 - updateBoomDisplay()    # Cập nhật hiển thị boom countdown
 - updateCharacterDisplay() # Cập nhật hiển thị character
+- renderCardsWithAppearEffect() # Render thẻ với hiệu ứng xuất hiện
 ```
 
 ### 🖥️ **UIManager.js** - Quản Lý Giao Diện
@@ -251,6 +271,10 @@ CardDungeon/
 - interactWithBoom()     # Tương tác với boom
 - decreaseBoomCountdown() # Giảm countdown boom
 - handleBoomExplosion()  # Xử lý boom explosion
+- checkCoinRowsAndColumns() # Kiểm tra 3 coin liên tục
+- processCoinRow()       # Xử lý upgrade hàng coin
+- processCoinColumn()    # Xử lý upgrade cột coin
+- transformAllTrapArrows() # Xoay arrow của trap cards
 ```
 
 ### 🎯 **DungeonCardGame.js** - Class Chính
@@ -290,6 +314,7 @@ Sau đó truy cập `http://localhost:8000`
 - Warrior ở giữa với 10 HP
 - Quái vật xung quanh với HP ngẫu nhiên
 - Boom cards với countdown 5
+- Trap cards với arrow rotation
 
 ### Bước 2: Di Chuyển
 - **Click/Kéo** Warrior đến ô trống
@@ -310,19 +335,38 @@ Sau đó truy cập `http://localhost:8000`
 - **Treasure**: Click để tương tác và nhận phần thưởng
 - **Boom**: Tránh hoặc sử dụng chiến lược
 
-### Bước 5: Boom Mechanics
+### Bước 5: Coin Upgrade System
+- **3 Coin liên tục**: Tự động upgrade thành CoinUp
+- **Hàng hoặc cột**: Cả hai đều được hỗ trợ
+- **Score gấp đôi**: CoinUp có điểm gấp đôi coin gốc
+- **Ngay lập tức**: Upgrade xảy ra ngay sau move
+
+### Bước 6: Boom Mechanics
 - **Countdown**: Giảm 1 sau mỗi move
 - **Explosion**: Khi countdown = 0, gây damage cho thẻ liền kề
 - **Interaction**: Click để đổi vị trí với character
 - **Damage**: Gây damage cho enemy, food, coin, weapon
 
-### Bước 6: Chiến Thắng
+### Bước 7: Trap Mechanics
+- **Arrow Rotation**: Arrow xoay sau mỗi move
+- **Direction**: Chỉ ra hướng tấn công
+- **Visual**: Hiển thị arrow trên thẻ
+
+### Bước 8: Chiến Thắng
 - Tiêu diệt tất cả quái vật
 - Thu thập càng nhiều điểm càng tốt
 - Giữ Warrior sống sót
 - Tương tác với treasure để nhận phần thưởng
+- Tạo coin upgrade để tăng điểm
 
 ## 🎨 Tính Năng Mới
+
+### 🪙 **Coin Upgrade System**
+- **3 Coin liên tục**: Tự động phát hiện hàng/cột có 3 coin
+- **Upgrade ngay lập tức**: Xảy ra ngay sau khi move hoàn thành
+- **Score gấp đôi**: CoinUp có điểm gấp đôi coin gốc
+- **Không upgrade tiếp**: CoinUp không thể upgrade thêm
+- **Visual feedback**: Hiệu ứng xuất hiện khi upgrade
 
 ### 🧨 **Boom Cards**
 - **Countdown**: 5 lượt trước khi nổ
@@ -358,6 +402,11 @@ Sau đó truy cập `http://localhost:8000`
 - **Khi ăn Quicksand**: Xáo trộn toàn bộ bàn chơi
 - **Animation**: Flip card effect
 - **Random**: Vị trí mới ngẫu nhiên
+
+### 🎯 **Trap Cards**
+- **Arrow Rotation**: Arrow xoay sau mỗi move
+- **Visual Display**: Hiển thị arrow trên thẻ
+- **Direction**: Chỉ ra hướng tấn công
 
 ## 🔧 Phát Triển Tiếp
 
@@ -414,6 +463,8 @@ Sau đó truy cập `http://localhost:8000`
 - **Buttons**: Bootstrap blue/red
 - **Boom**: Red border và shake effect
 - **Void**: Không có màu đặc biệt
+- **Coin**: Gold/yellow theme
+- **Trap**: Arrow indicators
 
 ### Typography
 - **Font**: Arial, sans-serif
@@ -429,6 +480,7 @@ Sau đó truy cập `http://localhost:8000`
 
 ### Cơ Chế Điểm
 - **Coin**: +1-6 điểm mỗi đồng (tùy loại)
+- **CoinUp**: +2-12 điểm mỗi đồng (gấp đôi coin gốc)
 - **Enemy**: +1-9 điểm mỗi quái vật
 - **Treasure**: +1-5 điểm mỗi kho báu
 - **Void**: 0 điểm
@@ -450,6 +502,12 @@ Sau đó truy cập `http://localhost:8000`
 - **Damage**: 10-18 sát thương
 - **Range**: 4 ô liền kề (trên, dưới, trái, phải)
 - **Interaction**: Đổi vị trí với character
+
+### Coin Upgrade System
+- **Trigger**: 3 coin liên tục (hàng hoặc cột)
+- **Timing**: Ngay sau khi move hoàn thành
+- **Effect**: Upgrade thành CoinUp với score gấp đôi
+- **Visual**: Hiệu ứng xuất hiện khi upgrade
 
 ## 🤝 Đóng Góp
 

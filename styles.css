@@ -490,11 +490,154 @@ body {
 .card.trap {
     border-color: #8e44ad;
     box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+    position: relative;
 }
 
 .card.trap:hover {
     transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
+}
+
+/* Trap damage display */
+.card.trap .damage-display {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid #FF0000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Trap arrows styling */
+.card.trap .trap-arrow {
+    position: absolute;
+    color: #FF8C00; /* Màu cam nổi bật */
+    font-size: 24px; /* Tăng kích thước từ 18px lên 24px */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    z-index: 2;
+}
+
+/* Trap activation animation */
+.card.trap-activating {
+    border-color: #FF0000 !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+    animation: trapActivation 0.6s ease-in-out;
+}
+
+@keyframes trapActivation {
+    0% {
+        transform: scale(1);
+        border-color: #8e44ad;
+        box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+    }
+    25% {
+        transform: scale(1.1);
+        border-color: #FF0000;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+    }
+    50% {
+        transform: scale(0.9);
+        border-color: #FF0000;
+        box-shadow: 0 0 25px rgba(255, 0, 0, 1);
+    }
+    75% {
+        transform: scale(1.05);
+        border-color: #FF0000;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
+    }
+    100% {
+        transform: scale(1);
+        border-color: #8e44ad;
+        box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+    }
+}
+
+/* Adjacent cards targeted by trap arrows */
+.card.trap-targeted {
+    border-color: #FF0000 !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+    animation: trapTargetShake 0.6s ease-in-out;
+}
+
+@keyframes trapTargetShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* Animation cho mũi tên di chuyển lên xuống */
+@keyframes arrowBounceTop {
+    0%, 100% {
+        transform: translateX(-50%) rotate(-90deg) scaleX(0.4) translateX(0px);
+    }
+    50% {
+        transform: translateX(-50%) rotate(-90deg) scaleX(0.4) translateX(-8px);
+    }
+}
+
+@keyframes arrowBounceBottom {
+    0%, 100% {
+        transform: translateX(-50%) rotate(90deg) scaleX(0.4) translateX(0px);
+    }
+    50% {
+        transform: translateX(-50%) rotate(90deg) scaleX(0.4) translateX(-8px);
+    }
+}
+
+@keyframes arrowBounceLeft {
+    0%, 100% {
+        transform: translateY(-50%) rotate(180deg) scaleX(0.4) translateX(0px);
+    }
+    50% {
+        transform: translateY(-50%) rotate(180deg) scaleX(0.4) translateX(-8px);
+    }
+}
+
+@keyframes arrowBounceRight {
+    0%, 100% {
+        transform: translateY(-50%) rotate(0deg) scaleX(0.4) translateX(0px);
+    }
+    50% {
+        transform: translateY(-50%) rotate(0deg) scaleX(0.4) translateX(-8px);
+    }
+}
+
+.card.trap .trap-arrow.top-center {
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg) scaleX(0.4);
+    animation: arrowBounceTop 2s ease-in-out infinite;
+}
+
+.card.trap .trap-arrow.bottom-center {
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg) scaleX(0.4);
+    animation: arrowBounceBottom 2s ease-in-out infinite;
+}
+
+.card.trap .trap-arrow.left-center {
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg) scaleX(0.4);
+    animation: arrowBounceLeft 2s ease-in-out infinite;
+}
+
+.card.trap .trap-arrow.right-center {
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg) scaleX(0.4);
+    animation: arrowBounceRight 2s ease-in-out infinite;
 }
 
 /* Boom card styling */

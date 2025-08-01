@@ -42,4 +42,23 @@ class Coin4 extends Card {
             score: this.score
         };
     }
+    
+    /**
+     * Hiệu ứng khi coin được upgrade (3 coin liên tục)
+     * Tạo thẻ CoinUp4 với score gấp đôi
+     */
+    upCoinEffect() {
+        console.log(`🎯 Coin4 upCoinEffect được gọi, score hiện tại: ${this.score}`);
+        
+        // Tạo thẻ CoinUp4 với score gấp đôi
+        const coinUp4 = new CoinUp4();
+        coinUp4.score = this.score * 2;
+        console.log(`🎯 Tạo CoinUp4 với score: ${coinUp4.score}`);
+        
+        return {
+            type: 'coin_upgrade',
+            newCard: coinUp4,
+            effect: `Upgrade thành CoinUp4 với score ${coinUp4.score}`
+        };
+    }
 } 

@@ -1,44 +1,44 @@
-﻿// CoinUp4.js - Tháº» coin tÄƒng Ä‘iá»ƒm loáº¡i 4
-// Chá»©c nÄƒng: Tháº» coin tÄƒng Ä‘iá»ƒm sá»‘
+// CoinUp4.js - Thẻ coin tăng điểm loại 4
+// Chức năng: Thẻ coin tăng điểm số
 
 class CoinUp4 extends Card {
     constructor() {
         super(
-            "Cá»™ng HÆ°á»Ÿng NguyÃªn Tá»‘: Nham KiÃªn Äá»‹nh", 
+            "Cộng Hưởng Nguyên Tố: Nham Kiên Cố", 
             "coinUp", 
             "resources/coinUp4.webp", 
-            "Coin tÄƒng Ä‘iá»ƒm loáº¡i 4"
+            "Coin tăng điểm loại 4"
         );
-        this.score = 6; // Äiá»ƒm sá»‘ nháº­n Ä‘Æ°á»£c
+        this.score = 0; // Điểm số mặc định (có thể được override)
     }
 
     /**
-     * Hiá»‡u á»©ng khi tháº» bá»‹ Äƒn
-     * @param {CharacterManager} characterManager - Manager quáº£n lÃ½ character
-     * @param {GameState} gameState - Manager quáº£n lÃ½ game state
+     * Hiệu ứng khi thẻ bị ăn
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {GameState} gameState - Manager quản lý game state
      * @returns
-     * @param {CardManager} cardManager - Manager quáº£n lÃ½ tháº» {Object} ThÃ´ng tin káº¿t quáº£
+     * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
     cardEffect(characterManager, gameState, cardManager) {
-        // ThÃªm Ä‘iá»ƒm sá»‘
+        // Thêm điểm số 
         gameState.addScore(this.score);
         
         return {
             type: 'coinUp',
             score: this.score,
-            message: `Nháº­n Ä‘Æ°á»£c ${this.score} Ä‘iá»ƒm tá»« coin tÄƒng!`
+            message: `Nhận được ${this.score} điểm từ coin tăng!`
         };
     }
 
     /**
-     * Láº¥y thÃ´ng tin hiá»ƒn thá»‹ cho dialog
-     * @returns {Object} ThÃ´ng tin Ä‘á»ƒ hiá»ƒn thá»‹
+     * Lấy thông tin hiển thị cho dialog
+     * @returns {Object} Thông tin để hiển thị
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tÄƒng Ä‘iá»ƒm hiáº¿m - Nháº­n ${this.score} Ä‘iá»ƒm`,
+            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
             score: this.score
         };
     }

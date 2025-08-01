@@ -461,7 +461,8 @@ class EventManager {
         // ===== TĂNG MOVES KHI WARRIOR DI CHUYỂN =====
         this.gameState.incrementMoves();
         
-        this.uiManager.updateUI(); // Cập nhật UI ngay lập tức
+        // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
+        this.onMoveCompleted();
         
         if (eatingResult === true) {
             console.log(`⚔️ Đã xử lý combat (tấn công từ xa) - không cần làm gì thêm`);
@@ -490,15 +491,8 @@ class EventManager {
             
             // ===== CẬP NHẬT UI SAU KHI ĂN THẺ =====
             console.log(`🔄 Cập nhật UI sau khi ăn thẻ`);
-            this.uiManager.updateUI();
             this.animationManager.updateCharacterDisplay();
             this.uiManager.updateSellButtonVisibility();
-            
-            // ===== KIỂM TRA GAME OVER =====
-            if (this.combatManager.checkGameOver()) {
-                this.animationManager.triggerGameOver();
-                return;
-            }
         }
 
         // ===== TÌM THẺ CẦN DI CHUYỂN (DOMINO EFFECT) =====
@@ -578,14 +572,6 @@ class EventManager {
             // ===== SETUP EVENTS LẠI CHO CÁC THẺ MỚI =====
             this.setupCardEvents();
             
-            // ===== KHÔNG XỬ LÝ HỒI PHỤC HP Ở ĐÂY NỮA - CHỈ XỬ LÝ TRONG incrementMoves() =====
-            
-            // ===== KIỂM TRA GAME OVER SAU KHI HỒI PHỤC =====
-            if (this.combatManager.checkGameOver()) {
-                this.animationManager.triggerGameOver();
-                return;
-            }
-            
             // ===== KIỂM TRA GAME COMPLETE =====
             if (this.cardManager.isGameComplete()) {
                 this.animationManager.showMessage("Congratulations! You've eaten all cards!");
@@ -602,14 +588,222 @@ class EventManager {
                 }, 100); // Chờ 100ms để đảm bảo thẻ đã được xử lý xong
             }
             
-            // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS (SAU KHI MOVE HOÀN THÀNH) =====
-            this.decreaseBoomCountdown();
+            // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
+            this.checkCoinRowsAndColumns();
             
             // ===== KẾT THÚC ANIMATION =====
             this.animationManager.endAnimation();
         }, 300); // Giảm từ 400ms xuống 300ms để responsive hơn
     }
 
+    /**
+     * Hàm được gọi khi move hoàn thành thành công
+     * Chứa tất cả logic cần chạy sau mỗi move
+     */
+    onMoveCompleted() {
+        console.log(`🎯 onMoveCompleted: Bắt đầu xử lý sau khi move hoàn thành`);
+        
+        // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS =====
+        this.decreaseBoomCountdown();
+        
+        // ===== XOAY ARROW CỦA TẤT CẢ TRAP CARDS =====
+        this.transformAllTrapArrows();
+        
+        // ===== CẬP NHẬT UI =====
+        this.uiManager.updateUI();
+        
+        // ===== KIỂM TRA GAME OVER =====
+        if (this.combatManager.checkGameOver()) {
+            this.animationManager.triggerGameOver();
+            return;
+        }
+        
+        // ===== LƯU Ý: COIN UPGRADE ĐÃ ĐƯỢC XỬ LÝ TRONG moveCharacter() =====
+        // Không cần gọi checkCoinRowsAndColumns() ở đây nữa vì đã được gọi ngay sau animation
+        
+        console.log(`🎯 onMoveCompleted: Hoàn thành xử lý sau khi move`);
+    }
+    
+    /**
+     * Kiểm tra hàng và cột có 3 thẻ coin liên tục
+     */
+    checkCoinRowsAndColumns() {
+        console.log(`🎯 Bắt đầu kiểm tra hàng/cột coin liên tục`);
+        
+        const allCards = this.cardManager.getAllCards();
+        
+        // Kiểm tra 3 hàng
+        for (let row = 0; row < 3; row++) {
+            const rowCards = [
+                allCards[row * 3],     // Cột 0
+                allCards[row * 3 + 1], // Cột 1
+                allCards[row * 3 + 2]  // Cột 2
+            ];
+            
+            if (this.isCoinRow(rowCards)) {
+                console.log(`🎯 Tìm thấy hàng ${row} có 3 coin liên tục!`);
+                this.processCoinRow(row, rowCards);
+            }
+        }
+        
+        // Kiểm tra 3 cột
+        for (let col = 0; col < 3; col++) {
+            const colCards = [
+                allCards[col],         // Hàng 0
+                allCards[col + 3],     // Hàng 1
+                allCards[col + 6]      // Hàng 2
+            ];
+            
+            if (this.isCoinColumn(colCards)) {
+                console.log(`🎯 Tìm thấy cột ${col} có 3 coin liên tục!`);
+                this.processCoinColumn(col, colCards);
+            }
+        }
+    }
+    
+    /**
+     * Kiểm tra xem hàng có 3 thẻ coin liên tục không
+     * @param {Array} rowCards - Mảng 3 thẻ trong hàng
+     * @returns {boolean} True nếu có 3 coin liên tục
+     */
+    isCoinRow(rowCards) {
+        return rowCards.every(card => 
+            card && 
+            card.type === 'coin' && 
+            card.nameId !== 'void'
+        );
+    }
+    
+    /**
+     * Kiểm tra xem cột có 3 thẻ coin liên tục không
+     * @param {Array} colCards - Mảng 3 thẻ trong cột
+     * @returns {boolean} True nếu có 3 coin liên tục
+     */
+    isCoinColumn(colCards) {
+        return colCards.every(card => 
+            card && 
+            card.type === 'coin' && 
+            card.nameId !== 'void'
+        );
+    }
+    
+    /**
+     * Xử lý hàng có 3 coin liên tục
+     * @param {number} row - Số hàng
+     * @param {Array} rowCards - Mảng 3 thẻ trong hàng
+     */
+    processCoinRow(row, rowCards) {
+        console.log(`🎯 Xử lý hàng ${row} có 3 coin liên tục`);
+        
+        for (let col = 0; col < 3; col++) {
+            const cardIndex = row * 3 + col;
+            const card = rowCards[col];
+            
+            if (card && typeof card.upCoinEffect === 'function') {
+                console.log(`🎯 Gọi upCoinEffect cho ${card.nameId} tại index ${cardIndex}`);
+                const result = card.upCoinEffect();
+                
+                if (result && result.type === 'coin_upgrade' && result.newCard) {
+                    // Thay thế thẻ hiện tại bằng thẻ mới
+                    result.newCard.id = cardIndex;
+                    result.newCard.position = { row: row, col: col };
+                    this.cardManager.updateCard(cardIndex, result.newCard);
+                    
+                    // Render thẻ mới với hiệu ứng
+                    this.animationManager.renderCardsWithAppearEffect(cardIndex);
+                    
+                    console.log(`🎯 Đã thay thế ${card.nameId} bằng ${result.newCard.nameId} tại index ${cardIndex}`);
+                }
+            }
+        }
+        
+        // Setup lại events sau khi thay thế
+        setTimeout(() => {
+            this.setupCardEvents();
+            
+            // Kiểm tra lại coin upgrade ngay lập tức sau khi tạo thẻ mới
+            this.checkCoinRowsAndColumns();
+        }, 100); // Giảm delay từ 300ms xuống 100ms
+    }
+    
+    /**
+     * Xử lý cột có 3 coin liên tục
+     * @param {number} col - Số cột
+     * @param {Array} colCards - Mảng 3 thẻ trong cột
+     */
+    processCoinColumn(col, colCards) {
+        console.log(`🎯 Xử lý cột ${col} có 3 coin liên tục`);
+        
+        for (let row = 0; row < 3; row++) {
+            const cardIndex = row * 3 + col;
+            const card = colCards[row];
+            
+            if (card && typeof card.upCoinEffect === 'function') {
+                console.log(`🎯 Gọi upCoinEffect cho ${card.nameId} tại index ${cardIndex}`);
+                const result = card.upCoinEffect();
+                
+                if (result && result.type === 'coin_upgrade' && result.newCard) {
+                    // Thay thế thẻ hiện tại bằng thẻ mới
+                    result.newCard.id = cardIndex;
+                    result.newCard.position = { row: row, col: col };
+                    this.cardManager.updateCard(cardIndex, result.newCard);
+                    
+                    // Render thẻ mới với hiệu ứng
+                    this.animationManager.renderCardsWithAppearEffect(cardIndex);
+                    
+                    console.log(`🎯 Đã thay thế ${card.nameId} bằng ${result.newCard.nameId} tại index ${cardIndex}`);
+                }
+            }
+        }
+        
+        // Setup lại events sau khi thay thế
+        setTimeout(() => {
+            this.setupCardEvents();
+            
+            // Kiểm tra lại coin upgrade ngay lập tức sau khi tạo thẻ mới
+            this.checkCoinRowsAndColumns();
+        }, 100); // Giảm delay từ 300ms xuống 100ms
+    }
+    
+    /**
+     * Xoay arrow của tất cả trap cards sau mỗi move
+     */
+    transformAllTrapArrows() {
+        const allCards = this.cardManager.getAllCards();
+        
+        allCards.forEach((card, index) => {
+            if (card && card.nameId === 'trap' && typeof card.transformationAgency === 'function') {
+                // Gọi hàm xoay arrow của trap card
+                card.transformationAgency();
+                
+                // Cập nhật hiển thị của trap card
+                const cardElement = document.querySelector(`[data-index="${index}"]`);
+                if (cardElement) {
+                    // Xóa tất cả arrow cũ
+                    const oldArrows = cardElement.querySelectorAll('.trap-arrow');
+                    oldArrows.forEach(arrow => arrow.remove());
+                    
+                    // Tạo lại arrow mới theo thuộc tính đã xoay
+                    const arrowConfigs = [
+                        { position: 'top-center', property: 'arrowTop' },
+                        { position: 'bottom-center', property: 'arrowBottom' },
+                        { position: 'left-center', property: 'arrowLeft' },
+                        { position: 'right-center', property: 'arrowRight' }
+                    ];
+                    
+                    arrowConfigs.forEach(({ position, property }) => {
+                        if (card[property] === 1) {
+                            const arrowElement = document.createElement('div');
+                            arrowElement.className = `trap-arrow ${position}`;
+                            arrowElement.innerHTML = '➤';
+                            cardElement.appendChild(arrowElement);
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
     /**
      * Thực hiện shuffle logic cho Quicksand với flip card effect
      */
@@ -708,7 +902,8 @@ class EventManager {
         // ===== TĂNG MOVES =====
         this.gameState.incrementMoves();
         
-        this.uiManager.updateUI();
+        // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
+        this.onMoveCompleted();
         
         if (interactResult) {
             console.log(`💎 Interact result:`, interactResult);
@@ -740,9 +935,6 @@ class EventManager {
             }
         }
 
-        // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS (SAU KHI MOVE HOÀN THÀNH) =====
-        this.decreaseBoomCountdown();
-        
         // ===== KẾT THÚC ANIMATION =====
         this.animationManager.endAnimation();
     }
@@ -777,7 +969,9 @@ class EventManager {
         
         // ===== TĂNG MOVES =====
         this.gameState.incrementMoves();
-        this.uiManager.updateUI();
+        
+        // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
+        this.onMoveCompleted();
         
         if (interactResult) {
             console.log(`💥 Interact result:`, interactResult);

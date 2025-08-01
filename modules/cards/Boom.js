@@ -9,7 +9,7 @@ class Boom extends Card {
             "resources/boom.webp", 
             "Bom nổ"
         );
-        this.damage = Math.floor(Math.random() * 9) + 10; // Sát thương của bom
+        this.damage = Math.floor(Math.random() * 9) + 1; // Sát thương của bom
         this.countdown = 5; // Đếm ngược
     }
 
@@ -318,6 +318,40 @@ class Boom extends Card {
                             damage: this.damage,
                             remainingDurability: card.durability,
                             wasKilled: originalDurability > 0 && card.durability === 0
+                        });
+                    }
+                    // Gây damage cho trap cards (không bao gồm Quicksand)
+                    else if (card.nameId === 'trap' && card.damage !== undefined && card.damage > 0) {
+                        const originalDamage = card.damage;
+                        console.log(`💥 Trap ${card.nameId} tại index ${cardIndex}: damage ban đầu = ${originalDamage}, boom damage = ${this.damage}`);
+                        card.damage -= this.damage;
+                        console.log(`💥 Trap ${card.nameId} sau damage: damage = ${card.damage}`);
+                        
+                        if (card.damage <= 0) {
+                            card.damage = 0; // Đảm bảo damage không âm
+                            console.log(`💥 Trap ${card.nameId} damage = 0, tạo thẻ void!`);
+                            
+                            // Tạo thẻ void thay thế
+                            const voidCard = cardManager.cardFactory.createVoid();
+                            voidCard.id = cardIndex;
+                            voidCard.position = { 
+                                row: Math.floor(cardIndex / 3), 
+                                col: cardIndex % 3 
+                            };
+                            console.log(`💥 Tạo void thay thế trap: ${voidCard.nameId} tại index ${cardIndex}`);
+                            cardManager.updateCard(cardIndex, voidCard);
+                        } else {
+                            // Cập nhật hiển thị damage trên trap
+                            console.log(`💥 Trap ${card.nameId} còn damage = ${card.damage}, cập nhật hiển thị`);
+                            // Có thể cần cập nhật UI hiển thị damage
+                        }
+                        
+                        affectedNonCharacterCards.push({
+                            index: cardIndex,
+                            type: 'trap',
+                            damage: this.damage,
+                            remainingDamage: card.damage,
+                            wasKilled: originalDamage > 0 && card.damage === 0
                         });
                     }
                     // Có thể thêm logic cho các loại thẻ khác ở đây

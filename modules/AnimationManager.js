@@ -137,6 +137,467 @@ class AnimationManager {
         console.log('💀 Game Over triggered');
         // Có thể thêm logic game over UI ở đây
     }
+    
+    /**
+     * Hiệu ứng khi trap được kích hoạt
+     * @param {number} trapIndex - Index của trap card
+     * @param {Card} trapCard - Trap card instance
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     */
+    startTrapActivationAnimation(trapIndex, trapCard, cardManager) {
+        console.log(`🎯 Bắt đầu trap activation animation tại index ${trapIndex}`);
+        
+        // Bắt đầu animation tracking
+        this.startAnimation();
+        
+        const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
+        if (!trapElement) {
+            this.endAnimation();
+            return;
+        }
+        
+        // Thêm class animation cho trap
+        trapElement.classList.add('trap-activating');
+        
+        // Tìm các thẻ liền kề bị chỉ bởi arrow
+        const adjacentTargets = this.findAdjacentTargets(trapIndex, trapCard, cardManager);
+        
+        // Thêm animation cho các thẻ bị chỉ
+        adjacentTargets.forEach(targetIndex => {
+            const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
+            if (targetElement) {
+                targetElement.classList.add('trap-targeted');
+                
+                // Xử lý damage cho thẻ bị chỉ (giống boom class)
+                const targetCard = cardManager.getCard(targetIndex);
+                if (targetCard) {
+                    setTimeout(() => {
+                        this.processTrapDamageToCard(targetCard, targetElement, trapCard.damage, cardManager, targetIndex);
+                    }, 300);
+                }
+            }
+        });
+        
+        // Xóa class animation và kết thúc animation tracking
+        setTimeout(() => {
+            trapElement.classList.remove('trap-activating');
+            adjacentTargets.forEach(targetIndex => {
+                const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
+                if (targetElement) {
+                    targetElement.classList.remove('trap-targeted');
+                }
+            });
+            
+            // Kết thúc animation tracking
+            this.endAnimation();
+            
+            // Setup lại events sau khi animation hoàn thành với delay nhỏ
+            setTimeout(() => {
+                if (this.eventManager) {
+                    console.log(`🎯 Setup lại events sau trap animation`);
+                    this.eventManager.setupCardEvents();
+                    
+                    // Force reset animation state nếu cần
+                    if (this.isCurrentlyAnimating()) {
+                        console.log(`🎯 Force reset animation state sau trap`);
+                        this.forceResetAnimationState();
+                    }
+                }
+            }, 100);
+            
+            console.log(`🎯 Trap activation animation hoàn thành`);
+        }, 600);
+    }
+    
+    /**
+     * Xử lý damage cho thẻ bị chỉ bởi trap (giống boom class)
+     * @param {Card} targetCard - Thẻ bị chỉ
+     * @param {HTMLElement} targetElement - Element của thẻ
+     * @param {number} damage - Lượng damage
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     * @param {number} targetIndex - Index của thẻ
+     */
+    processTrapDamageToCard(targetCard, targetElement, damage, cardManager, targetIndex) {
+        // Tạo damage popup
+        this.createDamagePopup(targetElement, damage);
+        
+        // Xử lý theo loại thẻ (giống boom class)
+        if (targetCard.type === 'character') {
+            // Character nhận damage
+            this.characterManager.updateCharacterHP(damage);
+            console.log(`🎯 Character nhận ${damage} damage từ trap`);
+            
+            // Kiểm tra game over
+            if (this.characterManager.getCharacterHP() <= 0) {
+                console.log(`💀 Character HP = 0 do trap, triggering game over!`);
+                this.triggerGameOver();
+            }
+        } else if (targetCard.type === 'enemy' && targetCard.hp !== undefined && targetCard.hp > 0) {
+            // Enemy nhận damage
+            const originalHP = targetCard.hp;
+            console.log(`🎯 Enemy ${targetCard.nameId} tại index ${targetIndex}: HP ban đầu = ${originalHP}, damage = ${damage}`);
+            targetCard.hp -= damage;
+            console.log(`🎯 Enemy ${targetCard.nameId} sau damage: HP = ${targetCard.hp}`);
+            
+            // Cập nhật hiển thị enemy
+            this.updateMonsterDisplay(targetIndex);
+            
+            if (targetCard.hp <= 0) {
+                targetCard.hp = 0;
+                console.log(`🎯 Enemy ${targetCard.nameId} HP = 0, sẽ chết!`);
+                this.handleEnemyDeathByTrap(targetIndex, targetCard, cardManager);
+            } else {
+                // HP chưa về 0, chạy attackByWeaponEffect nếu có
+                if (typeof targetCard.attackByWeaponEffect === 'function') {
+                    console.log(`🎯 Enemy ${targetCard.nameId} bị damage bởi trap, chạy attackByWeaponEffect`);
+                    targetCard.attackByWeaponEffect(this.characterManager, this.eventManager ? this.eventManager.gameState : null);
+                }
+            }
+        } else if (targetCard.type === 'food' && targetCard.heal !== undefined && targetCard.heal > 0) {
+            // Food nhận damage
+            const originalHeal = targetCard.heal;
+            console.log(`🎯 Food ${targetCard.nameId} tại index ${targetIndex}: heal ban đầu = ${originalHeal}, damage = ${damage}`);
+            targetCard.heal -= damage;
+            console.log(`🎯 Food ${targetCard.nameId} sau damage: heal = ${targetCard.heal}`);
+            
+            if (targetCard.heal <= 0) {
+                targetCard.heal = 0;
+                console.log(`🎯 Food ${targetCard.nameId} heal = 0, tạo thẻ void!`);
+                this.createVoidCard(targetIndex, cardManager);
+            }
+        } else if (targetCard.type === 'poison' && targetCard.poisonDuration !== undefined && targetCard.poisonDuration > 0) {
+            // Poison nhận damage
+            const originalPoisonDuration = targetCard.poisonDuration;
+            const originalHeal = targetCard.heal;
+            console.log(`🎯 Poison ${targetCard.nameId} tại index ${targetIndex}: poisonDuration ban đầu = ${originalPoisonDuration}, heal = ${originalHeal}, damage = ${damage}`);
+            
+            targetCard.poisonDuration -= damage;
+            targetCard.heal -= damage;
+            console.log(`🎯 Poison ${targetCard.nameId} sau damage: poisonDuration = ${targetCard.poisonDuration}, heal = ${targetCard.heal}`);
+            
+            if (targetCard.poisonDuration <= 0 || targetCard.heal <= 0) {
+                targetCard.poisonDuration = Math.max(0, targetCard.poisonDuration);
+                targetCard.heal = Math.max(0, targetCard.heal);
+                console.log(`🎯 Poison ${targetCard.nameId} poisonDuration hoặc heal = 0, tạo thẻ void!`);
+                this.createVoidCard(targetIndex, cardManager);
+            }
+        } else if (targetCard.type === 'coin' && targetCard.score !== undefined && targetCard.score > 0) {
+            // Coin nhận damage
+            const originalScore = targetCard.score;
+            console.log(`🎯 Coin ${targetCard.nameId} tại index ${targetIndex}: score ban đầu = ${originalScore}, damage = ${damage}`);
+            targetCard.score -= damage;
+            console.log(`🎯 Coin ${targetCard.nameId} sau damage: score = ${targetCard.score}`);
+            
+            if (targetCard.score <= 0) {
+                targetCard.score = 0;
+                console.log(`🎯 Coin ${targetCard.nameId} score = 0, tạo thẻ void!`);
+                this.createVoidCard(targetIndex, cardManager);
+            }
+        } else if ((targetCard.type === 'weapon' || targetCard.type === 'sword') && targetCard.durability !== undefined && targetCard.durability > 0) {
+            // Weapon nhận damage
+            const originalDurability = targetCard.durability;
+            console.log(`🎯 Weapon ${targetCard.nameId} tại index ${targetIndex}: durability ban đầu = ${originalDurability}, damage = ${damage}`);
+            targetCard.durability -= damage;
+            console.log(`🎯 Weapon ${targetCard.nameId} sau damage: durability = ${targetCard.durability}`);
+            
+            if (targetCard.durability <= 0) {
+                targetCard.durability = 0;
+                console.log(`🎯 Weapon ${targetCard.nameId} durability = 0, tạo thẻ void!`);
+                this.createVoidCard(targetIndex, cardManager);
+            }
+        } else if (targetCard.type === 'boom') {
+            // Boom nhận damage - kích hoạt ngay lập tức
+            console.log(`🎯 Boom nhận ${damage} damage từ trap, kích hoạt ngay lập tức`);
+            this.handleBoomExplosion(targetCard, targetIndex, cardManager);
+        } else if (targetCard.nameId === 'trap') {
+            // Trap nhận damage - giảm damage và tạo void khi damage = 0
+            console.log(`🎯 Trap nhận ${damage} damage từ trap, damage hiện tại: ${targetCard.damage}`);
+            targetCard.damage = Math.max(0, targetCard.damage - damage);
+            console.log(`🎯 Trap sau damage: damage = ${targetCard.damage}`);
+            
+            if (targetCard.damage <= 0) {
+                targetCard.damage = 0;
+                console.log(`🎯 Trap damage = 0, tạo void thay thế!`);
+                this.createVoidCard(targetIndex, cardManager);
+            } else {
+                // Cập nhật hiển thị damage của trap
+                this.updateTrapDamageDisplay(targetIndex);
+            }
+        } else {
+            // Các thẻ khác chỉ hiển thị damage popup
+            console.log(`🎯 Thẻ ${targetCard.type} nhận ${damage} damage từ trap`);
+        }
+    }
+    
+    /**
+     * Xử lý khi enemy chết do trap damage (giống boom class)
+     * @param {number} enemyIndex - Index của enemy
+     * @param {Card} enemyCard - Enemy card
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     */
+    handleEnemyDeathByTrap(enemyIndex, enemyCard, cardManager) {
+        // Thêm hiệu ứng chết cho enemy
+        const enemyElement = document.querySelector(`[data-index="${enemyIndex}"]`);
+        if (enemyElement) {
+            enemyElement.classList.add('monster-dying');
+        }
+        
+        // Chạy killByWeaponEffect nếu có (giống boom class)
+        if (typeof enemyCard.killByWeaponEffect === 'function') {
+            console.log(`🎯 Enemy ${enemyCard.nameId} bị giết bởi trap, chạy killByWeaponEffect`);
+            const killResult = enemyCard.killByWeaponEffect(this.characterManager, this.eventManager ? this.eventManager.gameState : null);
+            console.log(`🎯 Kill result:`, killResult);
+            
+            // Xử lý kết quả từ killByWeaponEffect
+            if (killResult && killResult.reward) {
+                setTimeout(() => {
+                    if (killResult.reward.type === 'coin') {
+                        // Tạo coin mặc định
+                        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+                        coinCard.id = enemyIndex;
+                        coinCard.position = { 
+                            row: Math.floor(enemyIndex / 3), 
+                            col: enemyIndex % 3 
+                        };
+                        console.log(`🎯 Tạo coin từ killByWeaponEffect: ${coinCard.nameId} tại index ${enemyIndex}`);
+                        cardManager.updateCard(enemyIndex, coinCard);
+                        this.renderCardsWithAppearEffect(enemyIndex);
+                        
+                        // Setup lại events cho thẻ mới với delay
+                        setTimeout(() => {
+                            if (this.eventManager) {
+                                console.log(`🎯 Setup events cho coin mới tại index ${enemyIndex}`);
+                                this.eventManager.setupCardEvents();
+                            }
+                        }, 200);
+                    } else if (killResult.reward.type === 'food3') {
+                        // Tạo Food3 card
+                        const foodCard = cardManager.cardFactory.createCard('Food3');
+                        foodCard.id = enemyIndex;
+                        foodCard.position = { 
+                            row: Math.floor(enemyIndex / 3), 
+                            col: enemyIndex % 3 
+                        };
+                        console.log(`🎯 Tạo Food3 từ killByWeaponEffect: ${foodCard.nameId} tại index ${enemyIndex}`);
+                        cardManager.updateCard(enemyIndex, foodCard);
+                        this.renderCardsWithAppearEffect(enemyIndex);
+                        
+                        // Setup lại events cho thẻ mới với delay
+                        setTimeout(() => {
+                            if (this.eventManager) {
+                                console.log(`🎯 Setup events cho food mới tại index ${enemyIndex}`);
+                                this.eventManager.setupCardEvents();
+                            }
+                        }, 200);
+                    } else if (killResult.reward.type === 'abysslector') {
+                        // Tạo AbyssLector card từ reward
+                        const abyssLectorCard = killResult.reward.card;
+                        abyssLectorCard.id = enemyIndex;
+                        abyssLectorCard.position = { 
+                            row: Math.floor(enemyIndex / 3), 
+                            col: enemyIndex % 3 
+                        };
+                        console.log(`🎯 Tạo AbyssLector từ killByWeaponEffect: ${abyssLectorCard.nameId} tại index ${enemyIndex}`);
+                        cardManager.updateCard(enemyIndex, abyssLectorCard);
+                        this.renderCardsWithAppearEffect(enemyIndex);
+                        
+                        // Setup lại events cho thẻ mới với delay
+                        setTimeout(() => {
+                            if (this.eventManager) {
+                                console.log(`🎯 Setup events cho abysslector mới tại index ${enemyIndex}`);
+                                this.eventManager.setupCardEvents();
+                            }
+                        }, 200);
+                    } else {
+                        // Xử lý các loại reward khác chưa được định nghĩa
+                        console.log(`🎯 Reward type chưa được xử lý: ${killResult.reward.type}`);
+                        // Tạo coin mặc định cho các loại reward chưa xử lý
+                        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+                        coinCard.id = enemyIndex;
+                        coinCard.position = { 
+                            row: Math.floor(enemyIndex / 3), 
+                            col: enemyIndex % 3 
+                        };
+                        console.log(`🎯 Tạo coin mặc định cho reward type chưa xử lý: ${coinCard.nameId} tại index ${enemyIndex}`);
+                        cardManager.updateCard(enemyIndex, coinCard);
+                        this.renderCardsWithAppearEffect(enemyIndex);
+                        
+                        // Setup lại events cho thẻ mới với delay
+                        setTimeout(() => {
+                            if (this.eventManager) {
+                                console.log(`🎯 Setup events cho coin mặc định tại index ${enemyIndex}`);
+                                this.eventManager.setupCardEvents();
+                            }
+                        }, 200);
+                    }
+                }, 600);
+            } else {
+                // Tạo coin mặc định nếu không có reward
+                setTimeout(() => {
+                    const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+                    coinCard.id = enemyIndex;
+                    coinCard.position = { 
+                        row: Math.floor(enemyIndex / 3), 
+                        col: enemyIndex % 3 
+                    };
+                    console.log(`🎯 Tạo coin mặc định: ${coinCard.nameId} tại index ${enemyIndex}`);
+                    cardManager.updateCard(enemyIndex, coinCard);
+                    this.renderCardsWithAppearEffect(enemyIndex);
+                    
+                    // Setup lại events cho thẻ mới với delay
+                    setTimeout(() => {
+                        if (this.eventManager) {
+                            console.log(`🎯 Setup events cho coin mặc định tại index ${enemyIndex}`);
+                            this.eventManager.setupCardEvents();
+                        }
+                    }, 200);
+                }, 600);
+            }
+        } else {
+            // Tạo coin theo mặc định nếu không có killByWeaponEffect
+            console.log(`🎯 Enemy ${enemyCard.nameId} bị giết bởi trap, tạo coin mặc định`);
+            setTimeout(() => {
+                const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+                coinCard.id = enemyIndex;
+                coinCard.position = { 
+                    row: Math.floor(enemyIndex / 3), 
+                    col: enemyIndex % 3 
+                };
+                console.log(`🎯 Tạo coin mới: ${coinCard.nameId} tại index ${enemyIndex}`);
+                cardManager.updateCard(enemyIndex, coinCard);
+                this.renderCardsWithAppearEffect(enemyIndex);
+                
+                // Setup lại events cho thẻ mới với delay
+                setTimeout(() => {
+                    if (this.eventManager) {
+                        console.log(`🎯 Setup events cho coin mới tại index ${enemyIndex}`);
+                        this.eventManager.setupCardEvents();
+                    }
+                }, 200);
+            }, 600);
+        }
+    }
+    
+    /**
+     * Tạo thẻ void thay thế thẻ bị hủy
+     * @param {number} cardIndex - Index của thẻ
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     */
+    createVoidCard(cardIndex, cardManager) {
+        const voidCard = cardManager.cardFactory.createVoid();
+        voidCard.id = cardIndex;
+        voidCard.position = { 
+            row: Math.floor(cardIndex / 3), 
+            col: cardIndex % 3 
+        };
+        console.log(`🎯 Tạo void thay thế: ${voidCard.nameId} tại index ${cardIndex}`);
+        cardManager.updateCard(cardIndex, voidCard);
+        this.renderCardsWithAppearEffect(cardIndex);
+        
+        // Setup lại events cho thẻ mới với delay
+        setTimeout(() => {
+            if (this.eventManager) {
+                console.log(`🎯 Setup events cho void mới tại index ${cardIndex}`);
+                this.eventManager.setupCardEvents();
+            }
+        }, 200);
+    }
+    
+    /**
+     * Tạo coin từ trap khi damage = 0
+     * @param {number} trapIndex - Index của trap
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     */
+    createCoinFromTrap(trapIndex, cardManager) {
+        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+        coinCard.id = trapIndex;
+        coinCard.position = { 
+            row: Math.floor(trapIndex / 3), 
+            col: trapIndex % 3 
+        };
+        console.log(`🎯 Tạo coin từ trap: ${coinCard.nameId} tại index ${trapIndex}`);
+        cardManager.updateCard(trapIndex, coinCard);
+        this.renderCardsWithAppearEffect(trapIndex);
+        
+        // Setup lại events cho thẻ mới với delay
+        setTimeout(() => {
+            if (this.eventManager) {
+                console.log(`🎯 Setup events cho coin từ trap tại index ${trapIndex}`);
+                this.eventManager.setupCardEvents();
+            }
+        }, 200);
+    }
+    
+    /**
+     * Cập nhật hiển thị damage của trap
+     * @param {number} trapIndex - Index của trap
+     */
+    updateTrapDamageDisplay(trapIndex) {
+        const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
+        if (trapElement) {
+            const damageDisplay = trapElement.querySelector('.damage-display');
+            if (damageDisplay) {
+                const trapCard = this.cardManager.getCard(trapIndex);
+                if (trapCard && trapCard.damage !== undefined) {
+                    damageDisplay.textContent = trapCard.damage;
+                    console.log(`🎯 Cập nhật trap damage display: ${trapCard.damage}`);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Xử lý boom explosion do trap damage
+     * @param {Card} boomCard - Boom card
+     * @param {number} boomIndex - Index của boom
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     */
+    handleBoomExplosion(boomCard, boomIndex, cardManager) {
+        // Gọi eventManager để xử lý boom explosion
+        if (this.eventManager) {
+            this.eventManager.handleBoomExplosion(boomCard, boomIndex);
+        }
+    }
+    
+    /**
+     * Tìm các thẻ liền kề bị chỉ bởi arrow của trap
+     * @param {number} trapIndex - Index của trap
+     * @param {Card} trapCard - Trap card instance
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     * @returns {Array} Mảng index của các thẻ bị chỉ
+     */
+    findAdjacentTargets(trapIndex, trapCard, cardManager) {
+        const targets = [];
+        const trapPos = { row: Math.floor(trapIndex / 3), col: trapIndex % 3 };
+        
+        // Kiểm tra từng hướng arrow
+        if (trapCard.arrowTop && trapPos.row > 0) {
+            const targetIndex = (trapPos.row - 1) * 3 + trapPos.col;
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (trapCard.arrowBottom && trapPos.row < 2) {
+            const targetIndex = (trapPos.row + 1) * 3 + trapPos.col;
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (trapCard.arrowLeft && trapPos.col > 0) {
+            const targetIndex = trapPos.row * 3 + (trapPos.col - 1);
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (trapCard.arrowRight && trapPos.col < 2) {
+            const targetIndex = trapPos.row * 3 + (trapPos.col + 1);
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        
+        return targets;
+    }
 
     /**
      * Render thẻ với hiệu ứng appear
@@ -330,6 +791,32 @@ class AnimationManager {
                     cardElement.classList.remove('shield-active-blue');
                 }
             }
+        }
+        // Trap card - hiển thị damage và mũi tên theo thuộc tính
+        else if (card.nameId === 'trap') {
+            // Hiển thị damage ở góc dưới bên phải
+            const damageDisplay = document.createElement('div');
+            damageDisplay.className = 'damage-display';
+            damageDisplay.textContent = card.damage || 0;
+            cardElement.appendChild(damageDisplay);
+            
+            // Tạo mũi tên theo thuộc tính arrow của card
+            const arrowConfigs = [
+                { position: 'top-center', property: 'arrowTop' },
+                { position: 'bottom-center', property: 'arrowBottom' },
+                { position: 'left-center', property: 'arrowLeft' },
+                { position: 'right-center', property: 'arrowRight' }
+            ];
+            
+            arrowConfigs.forEach(({ position, property }) => {
+                // Chỉ tạo arrow nếu thuộc tính = 1
+                if (card[property] === 1) {
+                    const arrowElement = document.createElement('div');
+                    arrowElement.className = `trap-arrow ${position}`;
+                    arrowElement.innerHTML = '➤'; // Unicode arrow symbol
+                    cardElement.appendChild(arrowElement);
+                }
+            });
         }
 
         return cardElement;
