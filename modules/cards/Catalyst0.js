@@ -9,8 +9,8 @@ class Catalyst0 extends Card {
             "resources/catalyst0.webp", 
             "Catalyst loại 0"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // �?ộ b�?n 1-16
-        this.score = 2; // �?iểm số nhận được
+        this.durability = Math.floor(Math.random() * 16) + 1; // độ bền 1-16
+        this.score = 2; // điểm số nhận được
     }
 
     /**
@@ -40,7 +40,7 @@ class Catalyst0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Catalyst cơ bản - Độ bền: ${this.durability}`,
+            description: `Pháp khí này có được Chúc Phúc Của Rừng. Độ bền: ${this.durability}`,
             durability: this.durability
         };
     }

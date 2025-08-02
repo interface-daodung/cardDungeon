@@ -4,7 +4,7 @@
 class Sword6 extends Card {
     constructor() {
         super(
-            "Sword6", 
+            "Kiếm Tế Lễ", 
             "weapon", 
             "resources/sword6.webp", 
             "Vũ khí loại 6"
@@ -39,7 +39,7 @@ class Sword6 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí cấp 6 - Độ bền ${this.durability}`,
+            description: `Vũ khí này có được Chúc Phúc Của Huyền Thiên. Độ bền ${this.durability}`,
             durability: this.durability
         };
     }
