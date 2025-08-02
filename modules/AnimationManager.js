@@ -19,6 +19,8 @@ class AnimationManager {
         this.animationCount = 0; // Số lượng animation đang chạy
     }
 
+    // ===== CÁC HÀM QUẢN LÝ ANIMATION STATE =====
+
     /**
      * Thiết lập EventManager để có thể setup events sau combat
      * @param {EventManager} eventManager - Manager quản lý events
@@ -63,6 +65,8 @@ class AnimationManager {
         console.log(`🎬 Force reset animation state`);
     }
 
+    // ===== CÁC HÀM ANIMATION CƠ BẢN =====
+
     /**
      * Thêm hiệu ứng flip cho 2 thẻ khi đổi vị trí
      * @param {number} index1 - Index của thẻ thứ nhất
@@ -100,15 +104,6 @@ class AnimationManager {
     }
 
     /**
-     * Hiển thị thông báo cho người chơi
-     * @param {string} message - Nội dung thông báo
-     */
-    showMessage(message) {
-        console.log(`📢 ${message}`);
-        // Có thể thêm logic hiển thị UI message ở đây nếu cần
-    }
-
-    /**
      * Tạo damage popup khi character bị damage
      * @param {HTMLElement} element - Element để hiển thị popup
      * @param {number} damage - Lượng damage
@@ -131,12 +126,15 @@ class AnimationManager {
     }
 
     /**
-     * Trigger game over
+     * Hiển thị thông báo cho người chơi
+     * @param {string} message - Nội dung thông báo
      */
-    triggerGameOver() {
-        console.log('💀 Game Over triggered');
-        // Có thể thêm logic game over UI ở đây
+    showMessage(message) {
+        console.log(`📢 ${message}`);
+        // Có thể thêm logic hiển thị UI message ở đây nếu cần
     }
+
+    // ===== CÁC HÀM ANIMATION ĐẶC BIỆT =====
     
     /**
      * Hiệu ứng khi trap được kích hoạt

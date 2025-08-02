@@ -4,7 +4,7 @@
 class Catalyst1 extends Card {
     constructor() {
         super(
-            "Catalyst1", 
+            "Mảnh Chương Tế Lễ", 
             "weapon", 
             "resources/catalyst1.webp", 
             "Catalyst loại 1"
@@ -22,7 +22,7 @@ class Catalyst1 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm
@@ -40,7 +40,7 @@ class Catalyst1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Catalyst nâng cao - Độ bền: ${this.durability}`,
+            description: `Pháp khí ghi chép lại lời Chúc Phúc Của Huyền Thiên. Độ bền: ${this.durability}`,
             durability: this.durability
         };
     }

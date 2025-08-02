@@ -4,7 +4,7 @@
 class Catalyst2 extends Card {
     constructor() {
         super(
-            "Catalyst2", 
+            "Quản Đốc Vàng Ròng", 
             "weapon", 
             "resources/catalyst2.webp", 
             "Catalyst loại 2"
@@ -22,7 +22,7 @@ class Catalyst2 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm
@@ -40,7 +40,7 @@ class Catalyst2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Catalyst cao cấp - Độ bền: ${this.durability}`,
+            description: `Thiết bị lơ lửng, có thể giám sát các dòng hải lưu, mang theo chúc phúc của Biển. Độ bền: ${this.durability}`,
             durability: this.durability
         };
     }

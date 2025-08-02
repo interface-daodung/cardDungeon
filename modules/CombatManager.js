@@ -15,79 +15,53 @@ class CombatManager {
         this.animationManager = animationManager; // Quản lý animation (hiệu ứng combat, render)
     }
 
+    // ===== CÁC HÀM CHÍNH - XỬ LÝ COMBAT =====
+
     /**
-     * Tấn công monster từ xa bằng vũ khí (không cần di chuyển)
-     * @param {number} monsterIndex - Index của monster cần tấn công
-     * @returns {boolean} True nếu tấn công thành công
+     * Xử lý khi character ăn thẻ
+     * @param {number} fromIndex - Vị trí character
+     * @param {number} toIndex - Vị trí thẻ bị ăn
+     * @returns {Object|boolean} Thông tin thẻ bị ăn hoặc false nếu không hợp lệ
      */
-    attackMonsterFromDistance(monsterIndex) {
-        // ===== KIỂM TRA ĐIỀU KIỆN TẤN CÔNG =====
-        if (!this.characterManager.hasWeapon()) return false; // Phải có vũ khí
+    processCardEating(fromIndex, toIndex) {
+        // ===== LẤY THÔNG TIN THẺ BỊ ĂN =====
+        const targetCard = this.cardManager.getCard(toIndex);
+        if (!targetCard) {
+            console.log(`❌ processCardEating: Không tìm thấy thẻ tại index ${toIndex}`);
+            return false;
+        }
+
+        console.log(`🎯 processCardEating: Thẻ tại index ${toIndex} có type: ${targetCard.type}`);
+
+        // ===== XỬ LÝ TẤN CÔNG MONSTER =====
+        // Nếu có vũ khí và ăn enemy -> tấn công thay vì ăn
+        if (this.characterManager.hasWeapon() && targetCard.type === 'enemy') {
+            console.log(`⚔️ Tấn công enemy với vũ khí`);
+            this.attackMonsterWithWeapon(fromIndex, toIndex);
+            return true;
+        }
+
+        // ===== XỬ LÝ ĂN THẺ SỬ DỤNG cardEffect =====
+        // Lấy gameState từ EventManager
+        const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
         
-        // ===== LẤY THÔNG TIN MONSTER =====
-        const monster = this.cardManager.getCard(monsterIndex);
-        if (!monster || monster.type !== 'enemy') return false; // Chỉ tấn công được quái vật
+        console.log(`🍽️ Gọi cardEffect cho thẻ type: ${targetCard.type}`);
+        console.log(`🍽️ characterManager:`, this.characterManager);
+        console.log(`🍽️ gameState:`, gameState);
         
-        const monsterHP = monster.hp || 0; // HP hiện tại của monster
-        const weaponDamage = this.characterManager.getCharacterWeapon(); // Độ bền vũ khí = sát thương
+        // Gọi cardEffect của thẻ
+        const result = targetCard.cardEffect(this.characterManager, gameState, this.cardManager);
         
-        // ===== TÍNH TOÁN SÁT THƯƠNG =====
-        // Sát thương thực tế không vượt quá HP monster
-        const actualDamage = Math.min(weaponDamage, monsterHP);
+        console.log(`✅ cardEffect result:`, result);
         
-        // ===== ÁP DỤNG SÁT THƯƠNG =====
-        monster.hp = monsterHP - actualDamage; // Giảm HP monster
-        this.characterManager.characterWeapon -= actualDamage; // Giảm độ bền vũ khí
-        
-        // ===== CẬP NHẬT HIỂN THỊ =====
-        this.animationManager.updateCharacterDisplay(); // Cập nhật hiển thị độ bền vũ khí
-        
-        // ===== CẬP NHẬT NÚT SELL WEAPON =====
-        if (this.animationManager.eventManager && this.animationManager.eventManager.uiManager) {
-            this.animationManager.eventManager.uiManager.updateSellButtonVisibility();
+        // ===== XỬ LÝ TRAP ANIMATION NẾU CẦN =====
+        if (targetCard.nameId === 'trap' && result && result.shouldTriggerAnimation) {
+            console.log(`🎯 Trap được kích hoạt, bắt đầu animation`);
+            this.animationManager.startTrapActivationAnimation(toIndex, targetCard, this.cardManager);
         }
         
-                    // ===== XỬ LÝ KHI MONSTER CHẾT =====
-            if (monster.hp <= 0) {
-                // Thêm hiệu ứng chết cho monster
-                const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
-                if (monsterElement) {
-                    monsterElement.classList.add('monster-dying');
-                }
-                
-                // ===== GỌI killByWeaponEffect NẾU CÓ =====
-                const killEffect = monster.killByWeaponEffect ? monster.killByWeaponEffect(this.characterManager, this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null) : null;
-                
-                // ===== TẠO THẺ MỚI SAU 600ms =====
-                setTimeout(() => {
-                    let newCard;
-                    
-                    if (killEffect && killEffect.type === 'enemy_killed_by_weapon') {
-                        // Sử dụng hiệu ứng đặc biệt của monster
-                        if (killEffect.reward.type === 'food3') {
-                            // Tạo thẻ Food3
-                            newCard = this.cardManager.cardFactory.createCard(killEffect.reward.cardName);
-                        } else if (killEffect.reward.type === 'coin') {
-                            // Tạo coin mặc định
-                            newCard = this.cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                        }
-                    } else {
-                        // Tạo coin mặc định cho các enemy không có killByWeaponEffect
-                        newCard = this.cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                    }
-                    
-                    if (newCard) {
-                        newCard.id = monsterIndex;
-                        newCard.position = { row: Math.floor(monsterIndex / 3), col: monsterIndex % 3 };
-                        this.cardManager.updateCard(monsterIndex, newCard);
-                        this.animationManager.renderCardsWithAppearEffect(monsterIndex);
-                    }
-                }, 600);
-                
-                return true; // Tấn công thành công
-            }
-        
-        return true; // Tấn công thành công (monster còn sống)
+        // ===== TRẢ VỀ THÔNG TIN THẺ BỊ ĂN =====
+        return result;
     }
 
     /**
@@ -112,7 +86,19 @@ class CombatManager {
         setTimeout(() => {
             // ===== ÁP DỤNG SÁT THƯƠNG =====
             monster.hp = monsterHP - actualDamage; // Giảm HP monster
-            this.characterManager.characterWeapon -= actualDamage; // Giảm độ bền vũ khí
+            
+            // Giảm độ bền vũ khí
+            const weaponObject = this.characterManager.getCharacterWeaponObject();
+            if (weaponObject) {
+                weaponObject.durability -= actualDamage;
+            }
+            
+            // ===== GỌI attackWeaponEffect NẾU CÓ =====
+            if (weaponObject && weaponObject.attackWeaponEffect) {
+                const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
+                const weaponEffect = weaponObject.attackWeaponEffect(this.characterManager, gameState, actualDamage);
+                console.log(`⚔️ Weapon attack effect:`, weaponEffect);
+            }
             
             // ===== CẬP NHẬT HIỂN THỊ =====
             this.animationManager.updateCharacterDisplay(); // Cập nhật hiển thị độ bền vũ khí
@@ -133,11 +119,26 @@ class CombatManager {
                 // ===== GỌI killByWeaponEffect NẾU CÓ =====
                 const killEffect = monster.killByWeaponEffect ? monster.killByWeaponEffect(this.characterManager, this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null) : null;
                 
+                // ===== KIỂM TRA HIỆU ỨNG VŨ KHÍ KHI GIẾT QUÁI =====
+                const weaponObject = this.characterManager.getCharacterWeaponObject();
+                let weaponKillEffect = null;
+                
+                if (weaponObject && weaponObject.attackWeaponEffect) {
+                    const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
+                    weaponKillEffect = weaponObject.attackWeaponEffect(this.characterManager, gameState, actualDamage);
+                    console.log(`⚔️ Weapon kill effect:`, weaponKillEffect);
+                }
+                
                 // ===== TẠO THẺ MỚI SAU 600ms =====
                 setTimeout(() => {
                     let newCard;
                     
-                    if (killEffect && killEffect.type === 'enemy_killed_by_weapon') {
+                    // Ưu tiên hiệu ứng vũ khí nếu có
+                    if (weaponKillEffect && weaponKillEffect.shouldCreateCoinUp) {
+                        // Tạo CoinUp với điểm từ hiệu ứng vũ khí
+                        newCard = this.createCoinUpWithScore(weaponKillEffect.coinUpScore);
+                        console.log(`⚔️ Tạo CoinUp với ${weaponKillEffect.coinUpScore} điểm từ hiệu ứng vũ khí`);
+                    } else if (killEffect && killEffect.type === 'enemy_killed_by_weapon') {
                         // Sử dụng hiệu ứng đặc biệt của monster
                         if (killEffect.reward.type === 'food3') {
                             // Tạo thẻ Food3
@@ -224,11 +225,44 @@ class CombatManager {
         return true;
     }
 
+    // ===== CÁC HÀM HỖ TRỢ - TẠO THẺ VÀ SETUP =====
+
     /**
-     * Di chuyển character sau khi combat (có animation)
-     * @param {number} fromIndex - Vị trí bắt đầu
-     * @param {number} toIndex - Vị trí đích
+     * Tạo CoinUp với điểm động
+     * @param {number} score - Điểm cho CoinUp
+     * @returns {Card} CoinUp card với điểm đã set
      */
+    createCoinUpWithScore(score) {
+        const coinUp = this.cardManager.cardFactory.createDynamicCoinUp(this.characterManager, score);
+        console.log(`💰 Tạo CoinUp động với ${score} điểm`);
+        return coinUp;
+    }
+
+    /**
+     * Setup events lại cho các thẻ sau combat
+     * Được gọi sau khi tạo thẻ mới để đảm bảo events hoạt động
+     */
+    setupCardEventsAfterCombat() {
+        // Gọi setupCardEvents từ EventManager thông qua AnimationManager
+        if (this.animationManager.eventManager) {
+            this.animationManager.eventManager.setupCardEvents();
+        }
+    }
+
+    // ===== CÁC HÀM KIỂM TRA TRẠNG THÁI =====
+
+    /**
+     * Kiểm tra game over
+     * @returns {boolean} True nếu character chết
+     */
+    checkGameOver() {
+        return !this.characterManager.isAlive();
+    }
+
+    // ===== CÁC HÀM KHÔNG ĐƯỢC SỬ DỤNG (COMMENT LẠI) =====
+
+    /*
+    // Hàm này không được sử dụng ở đâu cả - có thể xóa trong tương lai
     moveCharacterAfterCombat(fromIndex, toIndex) {
         // ===== TÍNH TOÁN VỊ TRÍ DI CHUYỂN =====
         const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
@@ -278,70 +312,5 @@ class CombatManager {
             this.setupCardEventsAfterCombat();
         }, 400);
     }
-
-    /**
-     * Setup events lại cho các thẻ sau combat
-     * Được gọi sau khi tạo thẻ mới để đảm bảo events hoạt động
-     */
-    setupCardEventsAfterCombat() {
-        // Gọi setupCardEvents từ EventManager thông qua AnimationManager
-        if (this.animationManager.eventManager) {
-            this.animationManager.eventManager.setupCardEvents();
-        }
-    }
-
-    /**
-     * Kiểm tra game over
-     * @returns {boolean} True nếu character chết
-     */
-    checkGameOver() {
-        return !this.characterManager.isAlive();
-    }
-
-    /**
-     * Xử lý khi character ăn thẻ
-     * @param {number} fromIndex - Vị trí character
-     * @param {number} toIndex - Vị trí thẻ bị ăn
-     * @returns {Object|boolean} Thông tin thẻ bị ăn hoặc false nếu không hợp lệ
-     */
-    processCardEating(fromIndex, toIndex) {
-        // ===== LẤY THÔNG TIN THẺ BỊ ĂN =====
-        const targetCard = this.cardManager.getCard(toIndex);
-        if (!targetCard) {
-            console.log(`❌ processCardEating: Không tìm thấy thẻ tại index ${toIndex}`);
-            return false;
-        }
-
-        console.log(`🎯 processCardEating: Thẻ tại index ${toIndex} có type: ${targetCard.type}`);
-
-        // ===== XỬ LÝ TẤN CÔNG MONSTER =====
-        // Nếu có vũ khí và ăn enemy -> tấn công thay vì ăn
-        if (this.characterManager.hasWeapon() && targetCard.type === 'enemy') {
-            console.log(`⚔️ Tấn công enemy với vũ khí`);
-            this.attackMonsterWithWeapon(fromIndex, toIndex);
-            return true;
-        }
-
-        // ===== XỬ LÝ ĂN THẺ SỬ DỤNG cardEffect =====
-        // Lấy gameState từ EventManager
-        const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
-        
-        console.log(`🍽️ Gọi cardEffect cho thẻ type: ${targetCard.type}`);
-        console.log(`🍽️ characterManager:`, this.characterManager);
-        console.log(`🍽️ gameState:`, gameState);
-        
-        // Gọi cardEffect của thẻ
-        const result = targetCard.cardEffect(this.characterManager, gameState, this.cardManager);
-        
-        console.log(`✅ cardEffect result:`, result);
-        
-        // ===== XỬ LÝ TRAP ANIMATION NẾU CẦN =====
-        if (targetCard.nameId === 'trap' && result && result.shouldTriggerAnimation) {
-            console.log(`🎯 Trap được kích hoạt, bắt đầu animation`);
-            this.animationManager.startTrapActivationAnimation(toIndex, targetCard, this.cardManager);
-        }
-        
-        // ===== TRẢ VỀ THÔNG TIN THẺ BỊ ĂN =====
-        return result;
-    }
+    */
 } 

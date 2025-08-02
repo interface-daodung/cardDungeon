@@ -10,7 +10,6 @@ class Sword6 extends Card {
             "Vũ khí loại 6"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
-        this.score = 7; // Điểm khi thu thập
     }
 
     /**
@@ -22,7 +21,7 @@ class Sword6 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm

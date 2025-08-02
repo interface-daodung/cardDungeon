@@ -13,6 +13,8 @@ class UIManager {
         this.characterManager = characterManager; // Quản lý HP, weapon của character
     }
 
+    // ===== CẬP NHẬT UI =====
+
     /**
      * Cập nhật toàn bộ giao diện
      * Được gọi khi có thay đổi trong game state
@@ -63,28 +65,49 @@ class UIManager {
                 hpDisplay.textContent = this.characterManager.getCharacterHP();
             }
             
-                    // ===== CẬP NHẬT WEAPON DISPLAY =====
-        let weaponDisplay = characterElement.querySelector('.weapon-display');
-        const weaponDurability = this.characterManager.getCharacterWeapon();
-        console.log(`🛡️ updateCharacterDisplay: Độ bền vũ khí hiện tại: ${weaponDurability}`);
-        
-        if (weaponDurability > 0) {
-            // Tạo weapon display nếu chưa có
-            if (!weaponDisplay) {
-                console.log(`🛡️ Tạo weapon display mới`);
-                weaponDisplay = document.createElement('div');
-                weaponDisplay.className = 'weapon-display';
-                characterElement.appendChild(weaponDisplay);
+            // ===== CẬP NHẬT WEAPON DISPLAY =====
+            let weaponDisplay = characterElement.querySelector('.weapon-display');
+            const weaponDurability = this.characterManager.getCharacterWeapon();
+            console.log(`🛡️ updateCharacterDisplay: Độ bền vũ khí hiện tại: ${weaponDurability}`);
+            
+            if (weaponDurability > 0) {
+                // Tạo weapon display nếu chưa có
+                if (!weaponDisplay) {
+                    console.log(`🛡️ Tạo weapon display mới`);
+                    weaponDisplay = document.createElement('div');
+                    weaponDisplay.className = 'weapon-display';
+                    characterElement.appendChild(weaponDisplay);
+                }
+                weaponDisplay.textContent = weaponDurability;
+                console.log(`🛡️ Cập nhật weapon display: ${weaponDurability}`);
+            } else if (weaponDisplay) {
+                // Xóa weapon display nếu không có weapon
+                console.log(`🛡️ Xóa weapon display`);
+                weaponDisplay.remove();
             }
-            weaponDisplay.textContent = weaponDurability;
-            console.log(`🛡️ Cập nhật weapon display: ${weaponDurability}`);
-        } else if (weaponDisplay) {
-            // Xóa weapon display nếu không có weapon
-            console.log(`🛡️ Xóa weapon display`);
-            weaponDisplay.remove();
-        }
         }
     }
+
+    /**
+     * Cập nhật hiển thị nút Sell Weapon
+     * Chỉ hiển thị khi có vũ khí
+     */
+    updateSellButtonVisibility() {
+        const sellButton = document.getElementById('sell-weapon');
+        const weaponDurability = this.characterManager.getCharacterWeapon();
+        
+        console.log(`💰 updateSellButtonVisibility: Độ bền vũ khí: ${weaponDurability}`);
+        
+        if (weaponDurability > 0) {
+            sellButton.style.display = 'block'; // Hiển thị nút
+            console.log(`💰 Hiển thị nút Sell Weapon`);
+        } else {
+            sellButton.style.display = 'none'; // Ẩn nút
+            console.log(`💰 Ẩn nút Sell Weapon`);
+        }
+    }
+
+    // ===== DIALOG QUẢN LÝ =====
 
     /**
      * Hiển thị dialog thông tin thẻ
@@ -95,13 +118,6 @@ class UIManager {
         const card = cardManager.getCard(cardIndex);
         if (!card) return; // Thoát nếu không tìm thấy thẻ
 
-        // ===== LẤY CÁC ELEMENT CỦA DIALOG =====
-        const dialog = document.getElementById('card-info-dialog');
-        const title = document.getElementById('card-info-title');
-        const image = document.getElementById('card-info-img');
-        const name = document.getElementById('card-info-name');
-        const effect = document.getElementById('card-info-effect');
-
         // ===== CẬP NHẬT THÔNG TIN CHARACTER NẾU CẦN =====
         if (card.type === 'character') {
             card.updateFromCharacter(this.characterManager);
@@ -110,13 +126,21 @@ class UIManager {
         // ===== LẤY THÔNG TIN HIỂN THỊ TỪ CARD =====
         const displayInfo = card.getDisplayInfo();
 
-        // ===== HIỂN THỊ THÔNG TIN =====
+        // ===== LẤY CÁC ELEMENT CỦA DIALOG =====
+        const dialog = document.getElementById('card-info-dialog');
+        const title = document.getElementById('card-info-title');
+        const name = document.getElementById('card-info-name');
+        const effect = document.getElementById('card-info-effect');
+        const image = document.getElementById('card-info-img');
+
+        // ===== CẬP NHẬT NỘI DUNG DIALOG =====
         title.textContent = 'Thông tin thẻ';
-        name.textContent = displayInfo.name;
-        effect.innerHTML = displayInfo.description; // Sử dụng innerHTML để render HTML tags
+        name.textContent = displayInfo.name || 'Unknown Card';
+        effect.innerHTML = displayInfo.description || 'No description available'; // Sử dụng innerHTML để render HTML tags
         image.src = displayInfo.image;
-        image.alt = displayInfo.type;
-        
+        image.alt = displayInfo.name || 'Card';
+
+        // ===== HIỂN THỊ DIALOG =====
         dialog.classList.add('show');
     }
 
@@ -128,97 +152,71 @@ class UIManager {
         dialog.classList.remove('show');
     }
 
-    /**
-     * Cập nhật hiển thị nút Sell dựa trên độ bền vũ khí
-     */
-    updateSellButtonVisibility() {
-        const sellButton = document.getElementById('sell-weapon');
-        const weaponDurability = this.characterManager.getWeaponDurability();
-        
-        console.log(`💰 updateSellButtonVisibility: Độ bền vũ khí: ${weaponDurability}`);
-        
-        if (weaponDurability > 0) {
-            sellButton.style.display = 'inline-block';
-            sellButton.textContent = `Sell Weapon (${weaponDurability})`;
-            console.log(`💰 Hiển thị nút Sell Weapon với độ bền: ${weaponDurability}`);
-        } else {
-            sellButton.style.display = 'none';
-            console.log(`💰 Ẩn nút Sell Weapon`);
-        }
-    }
+    // ===== DRAG & DROP HỖ TRỢ =====
 
     /**
-     * Hiển thị các ô hợp lệ khi kéo character
-     * @param {number} draggedCardIndex - Index của thẻ đang kéo
+     * Hiển thị các ô có thể di chuyển đến khi drag character
+     * @param {number} draggedCardIndex - Index của thẻ đang được kéo
      * @param {CardManager} cardManager - Manager quản lý cards
      */
     showValidTargets(draggedCardIndex, cardManager) {
-        if (draggedCardIndex === null) return; // Thoát nếu không có thẻ đang kéo
-        
-        const draggedCard = cardManager.getCard(draggedCardIndex);
-        if (!draggedCard || draggedCard.type !== 'character') return; // Chỉ character mới có thể kéo
-        
-        // ===== TÌM VÀ HIGHLIGHT CÁC Ô HỢP LỆ =====
         cardManager.getAllCards().forEach((card, index) => {
-            if (this.isValidMove(draggedCardIndex, index, cardManager)) {
+            if (card && index !== draggedCardIndex) {
                 const cardElement = document.querySelector(`[data-index="${index}"]`);
-                if (cardElement) {
-                    cardElement.classList.add('valid-target'); // Thêm class highlight
+                if (cardElement && this.isValidMove(draggedCardIndex, index, cardManager)) {
+                    cardElement.classList.add('valid-target');
                 }
             }
         });
     }
 
     /**
-     * Xóa highlight các ô hợp lệ
+     * Xóa highlight của các ô có thể di chuyển
      */
     clearValidTargets() {
-        document.querySelectorAll('.valid-target').forEach(element => {
-            element.classList.remove('valid-target'); // Xóa class highlight
+        const validTargets = document.querySelectorAll('.valid-target');
+        validTargets.forEach(target => {
+            target.classList.remove('valid-target');
         });
     }
 
     /**
-     * Kiểm tra xem việc di chuyển từ fromIndex đến toIndex có hợp lệ không
+     * Kiểm tra xem có thể di chuyển từ vị trí này đến vị trí kia không
      * @param {number} fromIndex - Vị trí bắt đầu
      * @param {number} toIndex - Vị trí đích
      * @param {CardManager} cardManager - Manager quản lý cards
-     * @returns {boolean} True nếu di chuyển hợp lệ
+     * @returns {boolean} True nếu có thể di chuyển
      */
     isValidMove(fromIndex, toIndex, cardManager) {
-        if (fromIndex === null || toIndex === null) return false; // Kiểm tra index hợp lệ
+        // ===== KIỂM TRA VỊ TRÍ HỢP LỆ =====
+        if (fromIndex === toIndex) return false; // Không thể di chuyển đến chính mình
         
-        const targetCard = cardManager.getCard(toIndex);
-        if (targetCard && targetCard.type === 'character') {
-            return false; // Không thể di chuyển vào ô có character khác
-        }
-        
-        // ===== TÍNH TOÁN VỊ TRÍ =====
         const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
         const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
-        
-        // ===== KIỂM TRA LOẠI THẺ ĐÍCH =====
-        if (targetCard && !['enemy', 'coin', 'food', 'weapon', 'trap', 'treasure', 'boom'].includes(targetCard.type)) {
-            return false; // Chỉ có thể di chuyển vào các loại thẻ này (bao gồm treasure và boom)
-        }
         
         // ===== KIỂM TRA KHOẢNG CÁCH =====
         const rowDiff = Math.abs(fromPos.row - toPos.row);
         const colDiff = Math.abs(fromPos.col - toPos.col);
         
         // Chỉ cho phép di chuyển 1 ô theo chiều ngang hoặc dọc
-        const isValid = (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+            return true;
+        }
         
-        return isValid;
+        return false;
     }
+
+    // ===== TIỆN ÍCH =====
 
     /**
      * Lấy index của thẻ từ DOM element
      * @param {HTMLElement} element - DOM element của thẻ
-     * @returns {number|null} Index của thẻ hoặc null
+     * @returns {number|null} Index của thẻ hoặc null nếu không tìm thấy
      */
     getCardIndexFromElement(element) {
-        if (!element || !element.dataset.index) return null;
-        return parseInt(element.dataset.index);
+        if (element && element.dataset && element.dataset.index) {
+            return parseInt(element.dataset.index);
+        }
+        return null;
     }
 } 

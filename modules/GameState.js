@@ -29,6 +29,8 @@ class GameState {
         this.touchStartPos = null; // Vị trí bắt đầu touch
     }
 
+    // ===== KHỞI TẠO VÀ RESET =====
+
     /**
      * Reset tất cả trạng thái và ban đầu
      * Được gọi khi restart game hoặc new game
@@ -52,7 +54,8 @@ class GameState {
         // Lưu ý: Không reset high score - giữ lại thành tích cao nhất
     }
 
-    // ===== SCORE & MOVES MANAGEMENT =====
+    // ===== QUẢN LÝ SCORE & MOVES =====
+
     /**
      * Thêm điểm vào tổng điểm
      * @param {number} points - Số điểm cần thêm
@@ -95,16 +98,9 @@ class GameState {
     getMoves() { 
         return this.moves; 
     }
-    
-    /**
-     * Lấy high score
-     * @returns {number} High score cao nhất
-     */
-    getHighScore() {
-        return this.highScore;
-    }
-    
-    // ===== DRAG & DROP STATE MANAGEMENT =====
+
+    // ===== QUẢN LÝ DRAG STATE =====
+
     /**
      * Set thẻ đang được kéo
      * @param {number} index - Index của thẻ đang kéo
@@ -130,7 +126,7 @@ class GameState {
     
     /**
      * Set vị trí bắt đầu kéo
-     * @param {Object} pos - Vị trí {x, y}
+     * @param {Object} pos - Vị trí bắt đầu (x, y)
      */
     setDragStartPos(pos) { 
         this.dragStartPos = pos; 
@@ -150,8 +146,57 @@ class GameState {
     clearDragStartPos() { 
         this.dragStartPos = null; 
     }
+
+    // ===== QUẢN LÝ TOUCH STATE =====
+
+    /**
+     * Set thời điểm bắt đầu touch
+     * @param {number} time - Thời điểm bắt đầu touch
+     */
+    setTouchStartTime(time) {
+        this.touchStartTime = time;
+    }
     
-    // ===== LONG PRESS STATE MANAGEMENT =====
+    /**
+     * Lấy thời điểm bắt đầu touch
+     * @returns {number|null} Thời điểm bắt đầu touch hoặc null
+     */
+    getTouchStartTime() {
+        return this.touchStartTime;
+    }
+    
+    /**
+     * Xóa thời điểm bắt đầu touch
+     */
+    clearTouchStartTime() {
+        this.touchStartTime = null;
+    }
+    
+    /**
+     * Set vị trí bắt đầu touch
+     * @param {Object} pos - Vị trí bắt đầu touch (x, y)
+     */
+    setTouchStartPos(pos) {
+        this.touchStartPos = pos;
+    }
+    
+    /**
+     * Lấy vị trí bắt đầu touch
+     * @returns {Object|null} Vị trí bắt đầu touch hoặc null
+     */
+    getTouchStartPos() {
+        return this.touchStartPos;
+    }
+    
+    /**
+     * Xóa vị trí bắt đầu touch
+     */
+    clearTouchStartPos() {
+        this.touchStartPos = null;
+    }
+
+    // ===== QUẢN LÝ LONG PRESS =====
+
     /**
      * Set timer cho long press
      * @param {number} timer - Timer ID
@@ -161,7 +206,7 @@ class GameState {
     }
     
     /**
-     * Lấy timer hiện tại
+     * Lấy timer cho long press
      * @returns {number|null} Timer ID hoặc null
      */
     getLongPressTimer() { 
@@ -169,8 +214,7 @@ class GameState {
     }
     
     /**
-     * Xóa timer và dừng long press
-     * Clear timeout để tránh memory leak
+     * Xóa timer cho long press
      */
     clearLongPressTimer() {
         if (this.longPressTimer) {
@@ -186,81 +230,41 @@ class GameState {
     getLongPressDelay() { 
         return this.longPressDelay; 
     }
-    
-    // ===== TOUCH STATE MANAGEMENT =====
-    /**
-     * Set thời điểm bắt đầu touch
-     * @param {number} time - Timestamp
-     */
-    setTouchStartTime(time) {
-        this.touchStartTime = time;
-    }
-    
-    /**
-     * Lấy thời điểm bắt đầu touch
-     * @returns {number|null} Timestamp hoặc null
-     */
-    getTouchStartTime() {
-        return this.touchStartTime;
-    }
-    
-    /**
-     * Xóa thời điểm bắt đầu touch
-     */
-    clearTouchStartTime() {
-        this.touchStartTime = null;
-    }
-    
-    /**
-     * Set vị trí bắt đầu touch
-     * @param {Object} pos - Vị trí {x, y}
-     */
-    setTouchStartPos(pos) {
-        this.touchStartPos = pos;
-    }
-    
-    /**
-     * Lấy vị trí bắt đầu touch
-     * @returns {Object|null} Vị trí hoặc null
-     */
-    getTouchStartPos() {
-        return this.touchStartPos;
-    }
-    
-    /**
-     * Xóa vị trí bắt đầu touch
-     */
-    clearTouchStartPos() {
-        this.touchStartPos = null;
-    }
-    
-    // ===== HIGH SCORE PERSISTENCE =====
+
+    // ===== QUẢN LÝ HIGH SCORE =====
+
     /**
      * Load high score từ localStorage
-     * @returns {number} High score đã lưu hoặc 0
+     * @returns {number} High score hoặc 0 nếu chưa có
      */
     loadHighScore() {
         const saved = localStorage.getItem('cardDungeonHighScore');
         return saved ? parseInt(saved) : 0;
     }
-    
+
     /**
      * Save high score vào localStorage
-     * Chỉ lưu nếu score mới cao hơn high score hiện tại
-     * @param {number} score - Score cần lưu
+     * @param {number} score - Điểm số cần lưu
      */
     saveHighScore(score) {
-        if (score > this.highScore) {
-            this.highScore = score;
-            localStorage.setItem('cardDungeonHighScore', score.toString());
-        }
+        localStorage.setItem('cardDungeonHighScore', score.toString());
     }
-    
+
     /**
-     * Update high score nếu score hiện tại cao hơn
-     * Được gọi tự động khi score thay đổi
+     * Cập nhật high score nếu điểm hiện tại cao hơn
      */
     updateHighScore() {
-        this.saveHighScore(this.score);
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            this.saveHighScore(this.highScore);
+        }
+    }
+
+    /**
+     * Lấy high score
+     * @returns {number} High score
+     */
+    getHighScore() {
+        return this.highScore;
     }
 } 

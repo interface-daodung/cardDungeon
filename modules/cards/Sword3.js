@@ -4,13 +4,12 @@
 class Sword3 extends Card {
     constructor() {
         super(
-            "Sword3", 
+            "Dao rọc giấy có lưỡi gãy", 
             "weapon", 
             "resources/sword3.webp", 
             "Vũ khí loại 3"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
-        this.score = 4; // Điểm khi thu thập
     }
 
     /**
@@ -22,7 +21,7 @@ class Sword3 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm
@@ -40,7 +39,7 @@ class Sword3 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí cấp 3 - Độ bền ${this.durability}`,
+            description: `Vũ khí này có được Chúc Phúc Của Biển. Độ bền ${this.durability}`,
             durability: this.durability
         };
     }

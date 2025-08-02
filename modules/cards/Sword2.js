@@ -4,13 +4,12 @@
 class Sword2 extends Card {
     constructor() {
         super(
-            "Sword2", 
+            "Kiếm Gỗ", 
             "weapon", 
             "resources/sword2.webp", 
             "Vũ khí loại 2"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
-        this.score = 3; // Điểm khi thu thập
     }
 
     /**
@@ -22,7 +21,7 @@ class Sword2 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm
@@ -40,7 +39,7 @@ class Sword2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí cấp 2 - Độ bền ${this.durability}`,
+            description: `Vũ khí này có được Chúc Phúc Của Rừng. Độ bền ${this.durability}`,
             durability: this.durability
         };
     }

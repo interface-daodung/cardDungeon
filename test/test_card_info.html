@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Card Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-card {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            margin: 10px;
+            display: inline-block;
+            cursor: pointer;
+            background: #f0f0f0;
+            text-align: center;
+            line-height: 100px;
+        }
+        .test-card:hover {
+            background: #e0e0e0;
+        }
+        .card-info-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .card-info-dialog.show {
+            display: flex;
+        }
+        .card-info-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+        }
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Card Info Feature</h1>
+    <p>Click on any card to test the info dialog:</p>
+    
+    <div class="test-card" onclick="showCardInfo('Warrior', 'Character', 'resources/warrior.webp', 'Nhân vật chính')">Warrior</div>
+    <div class="test-card" onclick="showCardInfo('Fatui', 'Enemy', 'resources/fatui0.webp', 'Kẻ địch')">Fatui</div>
+    <div class="test-card" onclick="showCardInfo('Sword', 'Weapon', 'resources/sword0.webp', 'Vũ khí')">Sword</div>
+    
+    <!-- Card Info Dialog -->
+    <div id="card-info-dialog" class="card-info-dialog">
+        <div class="card-info-content">
+            <div class="card-info-header">
+                <h3 id="card-info-title">Thông tin thẻ</h3>
+                <button class="close-btn" id="close-card-info">&times;</button>
+            </div>
+            <div class="card-info-body">
+                <div class="card-info-image">
+                    <img id="card-info-img" src="" alt="Card">
+                </div>
+                <div class="card-info-details">
+                    <h4 id="card-info-name">Card Name</h4>
+                    <p id="card-info-effect">Card Effect</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCardInfo(name, type, image, description) {
+            const dialog = document.getElementById('card-info-dialog');
+            const title = document.getElementById('card-info-title');
+            const nameElement = document.getElementById('card-info-name');
+            const effect = document.getElementById('card-info-effect');
+            const imageElement = document.getElementById('card-info-img');
+
+            title.textContent = 'Thông tin thẻ';
+            nameElement.textContent = name;
+            effect.textContent = description;
+            imageElement.src = image;
+            imageElement.alt = name;
+
+            dialog.classList.add('show');
+        }
+
+        // Close dialog events
+        document.getElementById('close-card-info').addEventListener('click', () => {
+            document.getElementById('card-info-dialog').classList.remove('show');
+        });
+
+        document.getElementById('card-info-dialog').addEventListener('click', (e) => {
+            if (e.target.id === 'card-info-dialog') {
+                document.getElementById('card-info-dialog').classList.remove('show');
+            }
+        });
+
+        // ESC key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('card-info-dialog').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html> 

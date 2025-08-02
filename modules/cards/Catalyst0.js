@@ -4,7 +4,7 @@
 class Catalyst0 extends Card {
     constructor() {
         super(
-            "Catalyst0", 
+            "Quả Ước Nguyện", 
             "weapon", 
             "resources/catalyst0.webp", 
             "Catalyst loại 0"
@@ -22,7 +22,7 @@ class Catalyst0 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm

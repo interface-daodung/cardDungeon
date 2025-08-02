@@ -13,6 +13,8 @@ class CardManager {
         this.characterManager = null; // Reference đến CharacterManager
     }
 
+    // ===== KHỞI TẠO VÀ TẠO THẺ =====
+
     /**
      * Tạo bộ thẻ ban đầu cho game (9 thẻ cho grid 3x3)
      * Character ở giữa, các thẻ khác random xung quanh
@@ -42,6 +44,74 @@ class CardManager {
         }
         return this.cards;
     }
+
+    /**
+     * Tạo thẻ ngẫu nhiên mới tại vị trí chỉ định
+     * @param {number} index - Vị trí cần tạo thẻ mới
+     * @returns {Card} Thẻ mới được tạo
+     */
+    createRandomCard(index) {
+        const card = this.cardFactory.createRandomCard(this.characterManager);
+        card.id = index;
+        card.position = { row: Math.floor(index / 3), col: index % 3 };
+        return card;
+    }
+
+    /**
+     * Tạo thẻ theo loại cụ thể
+     * @param {string} cardType - Loại thẻ cần tạo
+     * @param {number} index - Vị trí cần tạo thẻ
+     * @returns {Card} Thẻ mới được tạo
+     */
+    createCard(cardType, index) {
+        const card = this.cardFactory.createCard(cardType);
+        card.id = index;
+        card.position = { row: Math.floor(index / 3), col: index % 3 };
+        return card;
+    }
+
+    // ===== QUẢN LÝ THẺ =====
+
+    /**
+     * Cập nhật thẻ tại vị trí chỉ định
+     * @param {number} index - Vị trí cần cập nhật
+     * @param {Card} card - Thẻ mới
+     */
+    updateCard(index, card) {
+        if (index >= 0 && index < this.cards.length) {
+            this.cards[index] = card;
+        }
+    }
+
+    /**
+     * Lấy thẻ tại vị trí chỉ định
+     * @param {number} index - Vị trí cần lấy thẻ
+     * @returns {Card|null} Thẻ tại vị trí hoặc null nếu không tìm thấy
+     */
+    getCard(index) {
+        if (index >= 0 && index < this.cards.length) {
+            return this.cards[index];
+        }
+        return null;
+    }
+
+    /**
+     * Lấy tất cả thẻ trong game
+     * @returns {Array} Mảng chứa tất cả thẻ
+     */
+    getAllCards() {
+        return this.cards;
+    }
+
+    /**
+     * Cập nhật toàn bộ bộ thẻ
+     * @param {Array} cards - Mảng thẻ mới
+     */
+    setAllCards(cards) {
+        this.cards = cards;
+    }
+
+    // ===== TÌM KIẾM THẺ =====
 
     /**
      * Tìm vị trí của thẻ Character trong mảng thẻ
@@ -94,86 +164,35 @@ class CardManager {
         return null;
     }
 
-    /**
-     * Tạo thẻ ngẫu nhiên mới tại vị trí chỉ định
-     * @param {number} index - Vị trí cần tạo thẻ mới
-     * @returns {Card} Thẻ mới được tạo
-     */
-    createRandomCard(index) {
-        const card = this.cardFactory.createRandomCard(this.characterManager);
-        card.id = index;
-        card.position = { row: Math.floor(index / 3), col: index % 3 };
-        return card;
-    }
+    // ===== TIỆN ÍCH =====
 
     /**
-     * Tạo thẻ theo loại tại vị trí chỉ định
-     * @param {string} cardType - Loại thẻ cần tạo
-     * @param {number} index - Vị trí cần tạo thẻ mới
-     * @returns {Card} Thẻ mới được tạo
-     */
-    createCard(cardType, index) {
-        const card = this.cardFactory.createCard(cardType);
-        card.id = index;
-        card.position = { row: Math.floor(index / 3), col: index % 3 };
-        return card;
-    }
-
-    /**
-     * Cập nhật thẻ tại vị trí chỉ định
-     * @param {number} index - Vị trí cần cập nhật
-     * @param {Card} card - Thẻ mới
-     */
-    updateCard(index, card) {
-        this.cards[index] = card;
-    }
-
-    /**
-     * Lấy thẻ tại vị trí chỉ định
-     * @param {number} index - Vị trí cần lấy thẻ
-     * @returns {Card|null} Thẻ tại vị trí đó hoặc null
-     */
-    getCard(index) {
-        return this.cards[index] || null;
-    }
-
-    /**
-     * Lấy tất cả thẻ trong game
-     * @returns {Array} Mảng chứa tất cả thẻ
-     */
-    getAllCards() {
-        return this.cards;
-    }
-
-    /**
-     * Kiểm tra xem game đã hoàn thành chưa (tất cả thẻ đều là Character)
-     * @returns {boolean} True nếu tất cả thẻ đều là Character
+     * Kiểm tra xem game đã hoàn thành chưa
+     * @returns {boolean} True nếu game hoàn thành
      */
     isGameComplete() {
-        return this.cards.every(card => card && card.type === 'character');
+        // Kiểm tra xem có còn thẻ nào không phải Character không
+        for (let i = 0; i < this.cards.length; i++) {
+            if (this.cards[i] && this.cards[i].type !== 'character') {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
-     * Lấy thông tin tất cả loại thẻ có sẵn
-     * @returns {Object} Thông tin tất cả loại thẻ
+     * Lấy danh sách tất cả loại thẻ có sẵn
+     * @returns {Array} Mảng chứa tên các loại thẻ
      */
     getAllCardTypes() {
         return this.cardFactory.getAllCardTypes();
     }
 
     /**
-     * Lấy thông tin hiển thị cho tất cả loại thẻ
-     * @returns {Object} Thông tin hiển thị tất cả loại thẻ
+     * Lấy thông tin chi tiết của tất cả loại thẻ
+     * @returns {Array} Mảng chứa thông tin chi tiết các loại thẻ
      */
     getAllCardInfo() {
         return this.cardFactory.getAllCardInfo();
-    }
-
-    /**
-     * Cập nhật tất cả thẻ trong game
-     * @param {Array} cards - Mảng chứa tất cả thẻ mới
-     */
-    setAllCards(cards) {
-        this.cards = cards;
     }
 } 

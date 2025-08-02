@@ -211,6 +211,50 @@ class CardFactory {
     }
 
     /**
+     * Tạo CoinUp động dựa trên elementCoin của Warrior
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {number} score - Điểm cho CoinUp (optional)
+     * @returns {Card} Thẻ CoinUp động
+     */
+    createDynamicCoinUp(characterManager, score = null) {
+        // Lấy elementCoin từ Warrior
+        const elementCoin = characterManager.getCharacterElementCoin();
+        
+        // Tạo CoinUp class tương ứng với elementCoin
+        const coinUpClassName = `CoinUp${elementCoin}`;
+        
+        console.log(`🎯 [DEBUG] Creating dynamic coinUp: elementCoin=${elementCoin}, className=${coinUpClassName}, score=${score}`);
+        console.log(`🎯 [DEBUG] Available coinUp classes:`, Object.keys(this.cardClasses).filter(key => key.startsWith('CoinUp')));
+        
+        if (this.cardClasses[coinUpClassName]) {
+            console.log(`✅ [DEBUG] Successfully created ${coinUpClassName}`);
+            const coinUp = new this.cardClasses[coinUpClassName]();
+            
+            // Set điểm nếu được truyền vào
+            if (score !== null) {
+                coinUp.score = score;
+                console.log(`💰 [DEBUG] Set custom score for CoinUp: ${score}`);
+            }
+            
+            console.log(`🖼️ [DEBUG] Created coinUp: image=${coinUp.image}, score=${coinUp.score}, type=${coinUp.type}`);
+            return coinUp;
+        }
+        
+        // Fallback về CoinUp0 nếu không tìm thấy class tương ứng
+        console.log(`⚠️ [DEBUG] Fallback to CoinUp0 - ${coinUpClassName} not found`);
+        const fallbackCoinUp = new CoinUp0();
+        
+        // Set điểm nếu được truyền vào
+        if (score !== null) {
+            fallbackCoinUp.score = score;
+            console.log(`💰 [DEBUG] Set custom score for fallback CoinUp: ${score}`);
+        }
+        
+        console.log(`🖼️ [DEBUG] Fallback coinUp: image=${fallbackCoinUp.image}, score=${fallbackCoinUp.score}, type=${fallbackCoinUp.type}`);
+        return fallbackCoinUp;
+    }
+
+    /**
      * Lấy thông tin hiển thị cho tất cả thẻ
      * @returns {Object} Thông tin tất cả thẻ
      */

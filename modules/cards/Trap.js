@@ -9,7 +9,7 @@ class Trap extends Card {
             "resources/trap.webp", 
             "Cơ Quan Phun Lửa"
         );
-        this.damage = Math.floor(Math.random() * 7) + 10; // Sát thương của bẫy từ 1-7
+        this.damage = Math.floor(Math.random() * 7) + 1; // Sát thương của bẫy từ 1-7
         
         // Khởi tạo thuộc tính arrow với logic ngẫu nhiên
         this.initializeArrows();
@@ -27,10 +27,10 @@ class Trap extends Card {
             arrowCount = 2; // 50% có 2 arrow
         } else if (random < 75) {
             arrowCount = 3; // 25% có 3 arrow
-        } else if (random < 95) {
-            arrowCount = 1; // 20% có 1 arrow
+        } else if (random < 99) {
+            arrowCount = 1; // 24% có 1 arrow
         } else {
-            arrowCount = 4; // 5% có 4 arrow
+            arrowCount = 4; // 1% có 4 arrow
         }
         
         // Tạo mảng các hướng có thể

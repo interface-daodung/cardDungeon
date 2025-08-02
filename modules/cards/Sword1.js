@@ -4,13 +4,13 @@
 class Sword1 extends Card {
     constructor() {
         super(
-            "Sword1", 
+            "Tây Phong Kiếm", 
             "weapon", 
             "resources/sword1.webp", 
             "Vũ khí mạnh"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
-        this.score = 2; // Điểm khi thu thập
+        this.durability = Math.floor(Math.random() * 8) + 10; // Độ bền 10-18
+
     }
 
     /**
@@ -22,7 +22,7 @@ class Sword1 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm vũ khí cho character
-        characterManager.addWeaponToCharacter(this.durability, this.name);
+        characterManager.addWeaponToCharacter(this);
         
         return {
             score: 0, // Vũ khí không tăng điểm
@@ -40,7 +40,7 @@ class Sword1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Thẻ vũ khí mạnh - Độ bền: ${this.durability}`,
+            description: `Kiếm nghi thức của Đội Kỵ Sĩ Tây Phong. Sắc bén nhẹ nhàng - Độ bền: ${this.durability}`,
             durability: this.durability
         };
     }
