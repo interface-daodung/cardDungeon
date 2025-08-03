@@ -7,7 +7,8 @@ class Sword1 extends Card {
             "Tây Phong Kiếm", 
             "weapon", 
             "resources/sword1.webp", 
-            "Vũ khí mạnh"
+            "Vũ khí mạnh",
+            "sword1"
         );
         this.durability = Math.floor(Math.random() * 8) + 10; // Độ bền 10-18
 
@@ -40,7 +41,7 @@ class Sword1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Kiếm nghi thức của Đội Kỵ Sĩ Tây Phong. Sắc bén nhẹ nhàng - Độ bền: ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Tây Phong Kiếm là vũ khí nghi thức của Đội Kỵ Sĩ Tây Phong. Sắc bén và nhẹ nhàng, nó là biểu tượng của sự dũng cảm và danh dự.</i>`,
             durability: this.durability
         };
     }

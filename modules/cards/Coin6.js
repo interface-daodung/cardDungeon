@@ -7,7 +7,8 @@ class Coin6 extends Card {
             "Mảnh Vỡ Nguyên Tố Thảo", 
             "coin", 
             "resources/coin6.webp", 
-            "Coin loại 6"
+            "Coin loại 6",
+            "coin6"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin6 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Thảo Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố thảo chứa đựng sức mạnh của thiên nhiên xanh tươi. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }
@@ -48,12 +49,10 @@ class Coin6 extends Card {
      * Tạo thẻ CoinUp6 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin6 upCoinEffect được gọi, score hiện tại: ${this.score}`);
         
         // Tạo thẻ CoinUp6 với score gấp đôi
         const coinUp6 = new CoinUp6();
         coinUp6.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp6 với score: ${coinUp6.score}`);
         
         return {
             type: 'coin_upgrade',

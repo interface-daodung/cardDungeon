@@ -7,7 +7,8 @@ class Catalyst1 extends Card {
             "Mảnh Chương Tế Lễ", 
             "weapon", 
             "resources/catalyst1.webp", 
-            "Catalyst loại 1"
+            "Catalyst loại 1",
+            "catalyst1"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
         this.score = 3; // Điểm số nhận được
@@ -40,7 +41,7 @@ class Catalyst1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Pháp khí ghi chép lại lời Chúc Phúc Của Huyền Thiên. Độ bền: ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Mảnh Chương Tế Lễ là pháp khí cổ xưa ghi chép lại những lời chúc phúc của Huyền Thiên. Có khả năng khuếch đại ma thuật và bảo vệ.</i>`,
             durability: this.durability
         };
     }

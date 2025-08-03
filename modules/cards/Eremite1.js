@@ -7,7 +7,8 @@ class Eremite1 extends Card {
             "Eremite - Người Kể Chuyện Cát Nóng", 
             "enemy", 
             "resources/eremite1.webp", 
-            "Eremite loại 1"
+            "Eremite loại 1",
+            "eremite1"
         );
         this.hp = Math.floor(Math.random() * 13) + 4; // HP của quái vật
         this.score = Math.floor(Math.random() * 8) + 3; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Eremite1 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Eremite1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Eremite mạnh - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Người Kể Chuyện Cát Nóng là chiến binh tinh nhuệ của bộ tộc Eremite. Sử dụng ma thuật cát nóng để tạo ra những cơn bão cát và tấn công kẻ địch.</i>`,
             hp: this.hp
         };
     }

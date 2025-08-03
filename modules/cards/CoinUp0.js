@@ -7,7 +7,8 @@ class CoinUp0 extends Card {
             "Cộng Hưởng Nguyên Tố: Băng Vụn Vỡ", 
             "coinUp", 
             "resources/coinUp0.webp", 
-            "Coin tăng điểm loại 0"
+            "Coin nâng cấp loại 0",
+            "coinUp0"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm nhỏ - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Băng Vụn Vỡ là mảnh vỡ nguyên tố băng đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.</i>`,
             score: this.score
         };
     }

@@ -7,7 +7,8 @@ class Sword6 extends Card {
             "Kiếm Tế Lễ", 
             "weapon", 
             "resources/sword6.webp", 
-            "Vũ khí loại 6"
+            "Vũ khí loại 6",
+            "sword6"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
     }
@@ -39,7 +40,7 @@ class Sword6 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí này có được Chúc Phúc Của Huyền Thiên. Độ bền ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Kiếm Tế Lễ là vũ khí thiêng liêng được sử dụng trong các nghi lễ cổ xưa. Nó mang theo chúc phúc của Huyền Thiên và sức mạnh bảo vệ.</i>`,
             durability: this.durability
         };
     }

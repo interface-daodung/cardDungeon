@@ -7,7 +7,8 @@ class Operative extends Card {
             "Fatui - Đặc Vụ Băng", 
             "enemy", 
             "resources/operative.webp", 
-            "Operative"
+            "thẻ tinh anh Operative",
+            "operative"
         );
         this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Operative extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Operative extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Operative - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Đặc Vụ Băng là thành viên tinh nhuệ của tổ chức Fatui. Chuyên về các nhiệm vụ bí mật và sử dụng ma thuật băng để tấn công.</i>`,
             hp: this.hp
         };
     }

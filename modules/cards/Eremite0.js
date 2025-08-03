@@ -7,7 +7,8 @@ class Eremite0 extends Card {
             "Eremite - Diệp Luân Vũ Giả", 
             "enemy", 
             "resources/eremite0.webp", 
-            "Eremite loại 0"
+            "Eremite loại 0",
+            "eremite0"
         );
         this.hp = Math.floor(Math.random() * 13) + 4; // HP của quái vật
         this.score = Math.floor(Math.random() * 8) + 3; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Eremite0 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Eremite0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Eremite - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Diệp Luân Vũ Giả là chiến binh sa mạc của bộ tộc Eremite. Sử dụng vũ khí cánh quạt để tấn công với tốc độ cao và sự linh hoạt.</i>`,
             hp: this.hp
         };
     }

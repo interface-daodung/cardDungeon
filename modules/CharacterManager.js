@@ -11,15 +11,23 @@ class CharacterManager {
         // ===== KHỞI TẠO TRẠNG THÁI BAN ĐẦU =====
         // Lấy giá trị mặc định từ Warrior class
         this.characterHP = Warrior.DEFAULT_HP; // HP ban đầu của Character từ Warrior
-        this.recovery = 0; // Số lượt hồi phục còn lại từ thức ăn đặc biệt
-        this.characterWeaponObject = null; // Object vũ khí hiện tại
         this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Element coin mặc định từ Warrior
+        this.characterWeaponObject = null; // Object vũ khí hiện tại
+        this.recovery = 0; // Số lượt hồi phục còn lại từ thức ăn đặc biệt
         this.poisoned = 0; // Số lượt độc còn lại (0 = không bị độc)
+        this.animationManager = null; // Sẽ được set sau khi AnimationManager được tạo
         
-        console.log(`CharacterManager constructor: elementCoin=${this.elementCoin}, Warrior.DEFAULT_ELEMENT_COIN=${Warrior.DEFAULT_ELEMENT_COIN}`);
     }
 
     // ===== KHỞI TẠO VÀ RESET =====
+
+    /**
+     * Set AnimationManager để có thể gọi triggerGameOver
+     * @param {AnimationManager} animationManager - AnimationManager instance
+     */
+    setAnimationManager(animationManager) {
+        this.animationManager = animationManager;
+    }
 
     /**
      * Reset trạng thái Character về ban đầu
@@ -27,27 +35,36 @@ class CharacterManager {
      */
     reset() {
         this.characterHP = Warrior.DEFAULT_HP; // Reset HP về giá trị mặc định từ Warrior
-        this.recovery = 0; // Reset hồi phục về 0
-        this.characterWeaponObject = null; // Reset object vũ khí về null
         this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Reset elementCoin về giá trị mặc định từ Warrior
+        this.characterWeaponObject = null; // Reset object vũ khí về null
+        this.recovery = 0; // Reset hồi phục về 0
         this.poisoned = 0; // Reset độc về 0
+
     }
 
     // ===== QUẢN LÝ HP =====
 
     /**
-     * Cập nhật HP của Character (giảm do bị tấn công)
+     * Giảm HP của Character (do bị tấn công)
      * @param {number} damage - Lượng damage nhận vào
      * @returns {number} HP còn lại sau khi bị damage
      */
-    updateCharacterHP(damage) {
+    damageCharacterHP(damage,delay) {
         const oldHP = this.characterHP;
         // Giới hạn HP từ 0 đến giá trị mặc định từ Warrior, không cho phép âm hoặc vượt quá
         this.characterHP = Math.max(0, Math.min(Warrior.DEFAULT_HP, this.characterHP - damage));
         
         // Hiển thị popup damage
         if (damage > 0) {
-            this.showHpChangePopup(-damage, 0);
+            this.showHpChangePopup(-damage,delay);
+        }
+        
+        // Kiểm tra game over nếu HP = 0
+        if (this.characterHP === 0) {
+            // Gọi triggerGameOver thông qua animationManager
+            if (this.animationManager) {
+                this.animationManager.triggerGameOver();
+            }
         }
         
         return this.characterHP;
@@ -58,12 +75,12 @@ class CharacterManager {
      * @param {number} amount - Lượng HP hồi phục
      * @returns {number} HP sau khi hồi phục
      */
-    healCharacterHP(amount) {
+    healCharacterHP(amount,delay) {
         // Giới hạn tối đa HP từ Warrior, không cho phép vượt quá
         this.characterHP = Math.min(Warrior.DEFAULT_HP, this.characterHP + amount);
         
         // Hiển thị heal popup
-        this.showHpChangePopup(amount);
+        this.showHpChangePopup(amount,delay);
         
         return this.characterHP;
     }
@@ -83,31 +100,19 @@ class CharacterManager {
      * @param {Object} weaponObject - Object vũ khí cần thêm
      */
     addWeaponToCharacter(weaponObject) {
-        console.log(`⚔ addWeaponToCharacter: Thêm vũ khí với độ bền ${weaponObject.durability}, tên: ${weaponObject.name}`);
         this.characterWeaponObject = weaponObject; // Gán vũ khí mới
-        console.log(`⚔ addWeaponToCharacter: độ bền vũ khí hiện tại: ${weaponObject.durability}, tên: ${weaponObject.name}`);
     }
 
-    /**
-     * Sử dụng vũ khí (giảm độ bền)
-     * @returns {number} Độ bền còn lại của vũ khí
-     */
-    useWeapon() {
-        if (this.characterWeaponObject && this.characterWeaponObject.durability > 0) {
-            this.characterWeaponObject.durability--;
-            return this.characterWeaponObject.durability;
-        }
-        return 0;
-    }
+
+
 
     /**
-     * Lấy độ bền vũ khí hiện tại
-     * @returns {number} Độ bền vũ khí (0 nếu không có vũ khí)
+     * Lấy độ bền vũ khí (alias cho getCharacterWeapon)
+     * @returns {number} Độ bền vũ khí
      */
-    getCharacterWeapon() { 
+    getCharacterWeaponDurability() {
         return this.characterWeaponObject ? this.characterWeaponObject.durability : 0; 
     }
-
     /**
      * Lấy tên vũ khí hiện tại
      * @returns {string} Tên vũ khí hoặc "None" nếu không có
@@ -124,26 +129,18 @@ class CharacterManager {
         return this.characterWeaponObject; 
     }
 
-    /**
-     * Lấy độ bền vũ khí (alias cho getCharacterWeapon)
-     * @returns {number} Độ bền vũ khí
-     */
-    getWeaponDurability() {
-        return this.getCharacterWeapon();
-    }
+
 
     /**
      * Bán vũ khí (reset độ bền vũ khí về 0)
      * @returns {number} Giá trị vũ khí đã bán
      */
     sellWeapon() {
-        const durability = this.getCharacterWeapon();
+        const durability = this.getCharacterWeaponDurability();
         
         // Gọi sellWeaponEffect nếu có
         if (this.characterWeaponObject && this.characterWeaponObject.sellWeaponEffect) {
-            const gameState = null; // Có thể cần truyền gameState từ bên ngoài
-            const sellEffect = this.characterWeaponObject.sellWeaponEffect(this, gameState);
-            console.log(`💰 sellWeapon: sellEffect =`, sellEffect);
+            const sellEffect = this.characterWeaponObject.sellWeaponEffect();
             
             if (sellEffect && sellEffect.sellValue !== undefined) {
                 this.characterWeaponObject = null; // Reset object vũ khí
@@ -161,7 +158,7 @@ class CharacterManager {
      * @returns {boolean} True nếu có vũ khí
      */
     hasWeapon() {
-        return this.getCharacterWeapon() > 0;
+        return this.getCharacterWeaponDurability() > 0;
     }
 
     // ===== QUẢN LÝ TRẠNG THÁI =====
@@ -172,9 +169,9 @@ class CharacterManager {
      */
     processRecovery() {
         if (this.recovery > 0) {
-            this.healCharacterHP(1); // Hồi phục 1 HP
+            this.healCharacterHP(1,100); // Hồi phục 1 HP
             this.recovery--; // Giảm số lượt hồi phục
-            this.showHpChangePopup(1, 100); // Hiển thị heal ngay lập tức
+            //this.showHpChangePopup(1, 100); // Hiển thị heal ngay lập tức
         }
     }
 
@@ -184,9 +181,14 @@ class CharacterManager {
      */
     processPoison() {
         if (this.poisoned > 0) {
-            this.updateCharacterHP(1); // Nhận 1 damage
+            // Nếu HP = 1 thì không bị độc, để tránh HP = 0
+            if (this.characterHP === 1) {
+                this.poisoned = 0;
+                return;
+            }
+            this.damageCharacterHP(1,200); // Nhận 1 damage
             this.poisoned--; // Giảm số lượt độc
-            this.showHpChangePopup(-1, 200); // Hiển thị damage sau 200ms
+            //this.showHpChangePopup(-1, 200); // Hiển thị damage sau 200ms
         }
     }
 
@@ -230,13 +232,7 @@ class CharacterManager {
         return this.elementCoin;
     }
 
-    /**
-     * Set element coin
-     * @param {number} elementCoin - Element coin mới
-     */
-    setCharacterElementCoin(elementCoin) {
-        this.elementCoin = elementCoin;
-    }
+
 
     // ===== HIỂN THỊ =====
 

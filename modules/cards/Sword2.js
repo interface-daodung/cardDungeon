@@ -7,7 +7,8 @@ class Sword2 extends Card {
             "Kiếm Gỗ", 
             "weapon", 
             "resources/sword2.webp", 
-            "Vũ khí loại 2"
+            "Vũ khí loại 2",
+            "sword2"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
     }
@@ -39,7 +40,7 @@ class Sword2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí này có được Chúc Phúc Của Rừng. Độ bền ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Kiếm Gỗ được chế tạo từ gỗ thiêng của rừng già. Mặc dù đơn giản nhưng nó mang theo chúc phúc của thiên nhiên và sức mạnh bảo vệ.</i>`,
             durability: this.durability
         };
     }

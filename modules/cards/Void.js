@@ -7,7 +7,8 @@ class Void extends Card {
             "Trống", 
             "coin", // Phân loại là coin nhưng không cộng điểm
             "resources/void.webp", 
-            "Thẻ trống không có tác dụng"
+            "Thẻ trống không có tác dụng",
+            "void"
         );
         this.score = 0; // Không cộng điểm
     }
@@ -20,16 +21,13 @@ class Void extends Card {
      * @returns {Object} Thông tin kết quả
      */
     cardEffect(characterManager, gameState, cardManager) {
-        console.log(`🕳️ Void.cardEffect: Thẻ trống không có tác dụng`);
         
-        const result = {
+        return {
             score: 0, // Không cộng điểm
             type: this.type,
             effect: `Thẻ trống không có tác dụng`
         };
         
-        console.log(`🕳️ Void.cardEffect: Kết quả:`, result);
-        return result;
     }
 
     /**
@@ -40,7 +38,7 @@ class Void extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Thẻ trống không có tác dụng - Không cộng điểm`,
+            description: `<i>Thẻ Trống là một thẻ đặc biệt không có bất kỳ tác dụng nào. Được tạo ra để lấp đầy không gian trống trên bàn chơi.</i>`,
             score: 0
         };
     }

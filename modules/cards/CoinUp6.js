@@ -7,7 +7,8 @@ class CoinUp6 extends Card {
             "Cộng Hưởng Nguyên Tố: Thảo Sinh Sôi", 
             "coinUp", 
             "resources/coinUp6.webp", 
-            "Coin tăng điểm loại 6"
+            "Coin tăng điểm loại 6",
+            "coinUp6"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp6 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Thảo Sinh Sôi là mảnh vỡ nguyên tố thảo đã được nâng cấp. Chứa đựng sức mạnh sinh sôi và phát triển.</i>`,
             score: this.score
         };
     }

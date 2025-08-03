@@ -7,7 +7,8 @@ class CoinUp4 extends Card {
             "Cộng Hưởng Nguyên Tố: Nham Kiên Cố", 
             "coinUp", 
             "resources/coinUp4.webp", 
-            "Coin tăng điểm loại 4"
+            "Coin tăng điểm loại 4",
+            "coinUp4"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp4 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Nham Kiên Cố là mảnh vỡ nguyên tố nham đã được nâng cấp. Chứa đựng sức mạnh kiên cố và bền vững.</i>`,
             score: this.score
         };
     }

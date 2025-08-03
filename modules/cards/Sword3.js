@@ -7,7 +7,8 @@ class Sword3 extends Card {
             "Dao rọc giấy có lưỡi gãy", 
             "weapon", 
             "resources/sword3.webp", 
-            "Vũ khí loại 3"
+            "Vũ khí loại 3",
+            "sword3"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
     }
@@ -39,7 +40,7 @@ class Sword3 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí này có được Chúc Phúc Của Biển. Độ bền ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Dao rọc giấy với lưỡi gãy, nhưng được ban phước bởi sức mạnh của biển cả. Mặc dù hư hỏng nhưng vẫn có thể sử dụng trong tình huống nguy cấp.</i>`,
             durability: this.durability
         };
     }

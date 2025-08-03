@@ -71,9 +71,9 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 4px;
+    gap: 2px;
     width: 100%;
-    max-width: 300px; /* Giảm max-width để phù hợp với game-main 340px */
+    max-width: 280px; /* Giảm max-width để phù hợp với game-main 340px */
     /* Remove aspect-ratio: 1 to allow rectangular cards */
     perspective: 1000px;
 }
@@ -263,7 +263,7 @@ body {
 }
 
 .card.shrinking {
-    animation: shrinkAndFade 1s ease-in-out forwards;
+    animation: shrinkAndFade 2s ease-in-out forwards;
     pointer-events: none;
 }
 
@@ -1242,18 +1242,38 @@ body {
     font-weight: bold;
 }
 
+.damage-text {
+    color: #e74c3c !important;
+    font-weight: bold;
+}
+
+.score-text {
+    color: #f39c12 !important;
+    font-weight: bold;
+}
+
 .durability-text {
     color: #ffaa00 !important;
     font-weight: bold;
 }
 
-.recovery-text {
+.heal-text {
     color: #27ae60 !important;
     font-weight: bold;
 }
 
 .poison-text {
     color: #8e44ad !important;
+    font-weight: bold;
+}
+
+.effect-text {
+    color: #3498db !important;
+    font-weight: bold;
+}
+
+.recovery-text {
+    color: #27ae60 !important;
     font-weight: bold;
 }
 
@@ -1286,4 +1306,12 @@ body {
     }
 }
 
- 
+/* Force shrinking animation to work on all screen sizes */
+/* .card.shrinking {
+    animation: shrinkAndFade 1s ease-in-out forwards !important;
+    pointer-events: none !important;
+    transform: scale(1) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+} */
+

@@ -1,4 +1,4 @@
-﻿// UIManager.js - Quản lý giao diện người dùng
+// UIManager.js - Quản lý giao diện người dùng
 // Chức năng: Cập nhật hiển thị, quản lý dialog, hiển thị thông tin thẻ
 // Kết nối với GameState và CharacterManager để lấy dữ liệu hiển thị
 
@@ -20,13 +20,13 @@ class UIManager {
      * Được gọi khi có thay đổi trong game state
      */
     updateUI() {
-        console.log(`🔄 updateUI: Bắt đầu cập nhật UI`);
+        // console.log(`🔄 updateUI: Bắt đầu cập nhật UI`);
         this.updateScore(); // Cập nhật điểm số
         this.updateMoves(); // Cập nhật số lượt di chuyển
         this.updateHighScore(); // Cập nhật high score
         this.updateCharacterDisplay(); // Cập nhật hiển thị character
         this.updateSellButtonVisibility(); // Cập nhật hiển thị nút Sell
-        console.log(`🔄 updateUI: Hoàn thành cập nhật UI`);
+        // console.log(`🔄 updateUI: Hoàn thành cập nhật UI`);
     }
 
     /**
@@ -34,7 +34,7 @@ class UIManager {
      */
     updateScore() {
         const score = this.gameState.getScore();
-        console.log(`📊 Updating score display: ${score}`);
+        // console.log(`📊 Updating score display: ${score}`);
         document.getElementById('score').textContent = score;
     }
 
@@ -67,22 +67,22 @@ class UIManager {
             
             // ===== CẬP NHẬT WEAPON DISPLAY =====
             let weaponDisplay = characterElement.querySelector('.weapon-display');
-            const weaponDurability = this.characterManager.getCharacterWeapon();
-            console.log(`🛡️ updateCharacterDisplay: Độ bền vũ khí hiện tại: ${weaponDurability}`);
+            const weaponDurability = this.characterManager.getCharacterWeaponDurability();
+            // console.log(`🛡️ updateCharacterDisplay: Độ bền vũ khí hiện tại: ${weaponDurability}`);
             
             if (weaponDurability > 0) {
                 // Tạo weapon display nếu chưa có
                 if (!weaponDisplay) {
-                    console.log(`🛡️ Tạo weapon display mới`);
+                    // console.log(`🛡️ Tạo weapon display mới`);
                     weaponDisplay = document.createElement('div');
                     weaponDisplay.className = 'weapon-display';
                     characterElement.appendChild(weaponDisplay);
                 }
                 weaponDisplay.textContent = weaponDurability;
-                console.log(`🛡️ Cập nhật weapon display: ${weaponDurability}`);
+                // console.log(`🛡️ Cập nhật weapon display: ${weaponDurability}`);
             } else if (weaponDisplay) {
                 // Xóa weapon display nếu không có weapon
-                console.log(`🛡️ Xóa weapon display`);
+                // console.log(`🛡️ Xóa weapon display`);
                 weaponDisplay.remove();
             }
         }
@@ -94,16 +94,16 @@ class UIManager {
      */
     updateSellButtonVisibility() {
         const sellButton = document.getElementById('sell-weapon');
-        const weaponDurability = this.characterManager.getCharacterWeapon();
+        const weaponDurability = this.characterManager.getCharacterWeaponDurability();
         
-        console.log(`💰 updateSellButtonVisibility: Độ bền vũ khí: ${weaponDurability}`);
+        // console.log(`💰 updateSellButtonVisibility: Độ bền vũ khí: ${weaponDurability}`);
         
         if (weaponDurability > 0) {
             sellButton.style.display = 'block'; // Hiển thị nút
-            console.log(`💰 Hiển thị nút Sell Weapon`);
+            // console.log(`💰 Hiển thị nút Sell Weapon`);
         } else {
             sellButton.style.display = 'none'; // Ẩn nút
-            console.log(`💰 Ẩn nút Sell Weapon`);
+            // console.log(`💰 Ẩn nút Sell Weapon`);
         }
     }
 
@@ -154,21 +154,7 @@ class UIManager {
 
     // ===== DRAG & DROP HỖ TRỢ =====
 
-    /**
-     * Hiển thị các ô có thể di chuyển đến khi drag character
-     * @param {number} draggedCardIndex - Index của thẻ đang được kéo
-     * @param {CardManager} cardManager - Manager quản lý cards
-     */
-    showValidTargets(draggedCardIndex, cardManager) {
-        cardManager.getAllCards().forEach((card, index) => {
-            if (card && index !== draggedCardIndex) {
-                const cardElement = document.querySelector(`[data-index="${index}"]`);
-                if (cardElement && this.isValidMove(draggedCardIndex, index, cardManager)) {
-                    cardElement.classList.add('valid-target');
-                }
-            }
-        });
-    }
+
 
     /**
      * Xóa highlight của các ô có thể di chuyển

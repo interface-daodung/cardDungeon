@@ -7,7 +7,8 @@ class CoinUp5 extends Card {
             "Cộng Hưởng Nguyên Tố: Phong Tự Do", 
             "coinUp", 
             "resources/coinUp5.webp", 
-            "Coin tăng điểm loại 5"
+            "Coin tăng điểm loại 5",
+            "coinUp5"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp5 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Phong Tự Do là mảnh vỡ nguyên tố phong đã được nâng cấp. Chứa đựng sức mạnh tự do và linh hoạt.</i>`,
             score: this.score
         };
     }

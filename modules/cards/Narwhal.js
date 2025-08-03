@@ -7,7 +7,8 @@ class Narwhal extends Card {
             "Thôn Tinh Kình Ngư", 
             "enemy", 
             "resources/narwhal.webp", 
-            "Narwhal"
+            "boss Narwhal",
+            "narwhal"
         );
         this.hp = Math.floor(Math.random() * 8) + 8; // HP từ 1-9
         this.score = Math.floor(Math.random() * 11) + 6; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Narwhal extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Narwhal extends Card {
      * @param {number} currentIndex - Vị trí hiện tại của thẻ
      * @returns {Object} Thông tin kết quả
      */
-    attackByWeaponEffect(characterManager, gameState, cards, currentIndex) {
+    attackByWeaponEffect(cards, currentIndex) {
         // Tìm vị trí khác không phải character để đổi chỗ
         const availablePositions = [];
         for (let i = 0; i < cards.length; i++) {
@@ -80,7 +81,7 @@ class Narwhal extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Narwhal - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Thôn Tinh Kình Ngư là quái vật biển khổng lồ với sừng dài. Khi bị tấn công, nó có thể đổi vị trí với các thẻ khác để tránh sát thương.</i>`,
             hp: this.hp
         };
     }

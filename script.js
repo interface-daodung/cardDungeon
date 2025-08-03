@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== DEBUG & DEVELOPMENT =====
     // Lưu game vào window để có thể truy cập từ console (debug)
     // Cho phép developer inspect game state trong browser console
-    window.dungeonCardGame = game;
+    //window.dungeonCardGame = game;
     
     // ===== LOG SUCCESS =====
     // Thông báo game đã khởi tạo thành công
-    console.log('🎮 CardDungeon Game đã được khởi tạo thành công!');
-    console.log('💡 Tip: Gõ "dungeonCardGame" trong console để inspect game state');
+    // console.log('🎮 CardDungeon Game đã được khởi tạo thành công!');
+// console.log('💡 Tip: Gõ "dungeonCardGame" trong console để inspect game state');
 }); 

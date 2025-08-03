@@ -11,12 +11,13 @@ class Warrior extends Card {
             "Kamisato Ayato", 
             "character", 
             "resources/warrior.webp", 
-            "Nhân vật chính"
+            "Nhân vật chính",
+            "warrior"
         );
         this.hp = Warrior.DEFAULT_HP; // HP ban đầu từ Warrior
+        this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Element coin từ Warrior
         this.weapon = 0; // Độ bền vũ khí
         this.weaponName = null; // Tên vũ khí
-        this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Element coin từ Warrior
     }
 
     /**
@@ -37,11 +38,11 @@ class Warrior extends Card {
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();
-        let description = `<strong>Warrior</strong> - HP: <span class="hp-text">${this.hp}/10</span>`;
+        let description = `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}/10</span>`;
         
         // Thêm thông tin vũ khí nếu có
         if (this.weapon > 0 && this.weaponName) {
-            description += `<br><strong>${this.weaponName}</strong> - Độ bền: <span class="durability-text">${this.weapon}</span>`;
+            description += `<br><strong>${this.weaponName}</strong> - Durability: <span class="durability-text">${this.weapon}</span>`;
         }
         
         // Thêm thông tin recovery nếu có
@@ -71,7 +72,7 @@ class Warrior extends Card {
      */
     updateFromCharacter(characterManager) {
         this.hp = characterManager.getCharacterHP();
-        this.weapon = characterManager.getCharacterWeapon();
+        this.weapon = characterManager.getCharacterWeaponDurability();
         this.weaponName = characterManager.getCharacterWeaponName();
         this.elementCoin = characterManager.getCharacterElementCoin();
         this.recovery = characterManager.getRecovery();

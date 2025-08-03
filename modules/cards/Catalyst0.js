@@ -7,7 +7,8 @@ class Catalyst0 extends Card {
             "Quả Ước Nguyện", 
             "weapon", 
             "resources/catalyst0.webp", 
-            "Catalyst loại 0"
+            "Catalyst loại 0",
+            "catalyst0"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // độ bền 1-16
         this.score = 2; // điểm số nhận được
@@ -40,7 +41,7 @@ class Catalyst0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Pháp khí này có được Chúc Phúc Của Rừng. Độ bền: ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Quả Ước Nguyện là pháp khí thiêng liêng được ban phước bởi sức mạnh của rừng già. Có khả năng khuếch đại ma thuật và bảo vệ người sử dụng.</i>`,
             durability: this.durability
         };
     }

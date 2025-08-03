@@ -7,7 +7,8 @@ class CoinUp2 extends Card {
             "Cộng Hưởng Nguyên Tố: Hỏa Nhiệt Tình", 
             "coinUp", 
             "resources/coinUp2.webp", 
-            "Coin tăng điểm loại 2"
+            "Coin tăng điểm loại 2",
+            "coinUp2"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Hỏa Nhiệt Tình là mảnh vỡ nguyên tố hỏa đã được nâng cấp. Chứa đựng sức mạnh nhiệt tình và đam mê mãnh liệt.</i>`,
             score: this.score
         };
     }

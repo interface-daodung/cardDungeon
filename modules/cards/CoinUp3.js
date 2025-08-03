@@ -7,7 +7,8 @@ class CoinUp3 extends Card {
             "Cộng Hưởng Nguyên Tố: Lôi Sấm Sét", 
             "coinUp", 
             "resources/coinUp3.webp", 
-            "Coin tăng điểm loại 3"
+            "Coin tăng điểm loại 3",
+            "coinUp3"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp3 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm lớn - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Lôi Sấm Sét là mảnh vỡ nguyên tố lôi đã được nâng cấp. Chứa đựng sức mạnh sấm sét và tốc độ kinh hoàng.</i>`,
             score: this.score
         };
     }

@@ -7,7 +7,8 @@ class Coin0 extends Card {
             "Mảnh Vỡ Nguyên Tố Băng", 
             "coin", 
             "resources/coin0.webp", 
-            "Coin loại 0"
+            "Coin loại 0",
+            "coin0"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Băng Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố băng chứa đựng sức mạnh của vùng đất lạnh giá. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }
@@ -48,12 +49,12 @@ class Coin0 extends Card {
      * Tạo thẻ CoinUp0 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin0 upCoinEffect được gọi, score hiện tại: ${this.score}`);
+        // console.log(`🎯 Coin0 upCoinEffect được gọi, score hiện tại: ${this.score}`);
         
         // Tạo thẻ CoinUp0 với score gấp đôi
         const coinUp0 = new CoinUp0();
         coinUp0.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp0 với score: ${coinUp0.score}`);
+        // console.log(`🎯 Tạo CoinUp0 với score: ${coinUp0.score}`);
         
         return {
             type: 'coin_upgrade',

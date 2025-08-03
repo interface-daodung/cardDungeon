@@ -7,7 +7,8 @@ class Coin4 extends Card {
             "Mảnh Vỡ Nguyên Tố Nham", 
             "coin", 
             "resources/coin4.webp", 
-            "Coin loại 4"
+            "Coin loại 4",
+            "coin4"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin4 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Nham Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố nham chứa đựng sức mạnh của đất đá vững chắc. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }
@@ -48,12 +49,10 @@ class Coin4 extends Card {
      * Tạo thẻ CoinUp4 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin4 upCoinEffect được gọi, score hiện tại: ${this.score}`);
         
         // Tạo thẻ CoinUp4 với score gấp đôi
         const coinUp4 = new CoinUp4();
         coinUp4.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp4 với score: ${coinUp4.score}`);
         
         return {
             type: 'coin_upgrade',

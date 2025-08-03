@@ -22,7 +22,7 @@ class GameState {
         
         // ===== LONG PRESS STATE =====
         this.longPressTimer = null; // Timer cho long press
-        this.longPressDelay = 2000; // Thời gian delay cho long press (2.0 giây)
+        this.longPressDelay = 1000; // Thời gian delay cho long press (2.0 giây)
         
         // ===== TOUCH STATE =====
         this.touchStartTime = null; // Thời điểm bắt đầu touch
@@ -63,9 +63,9 @@ class GameState {
     addScore(points) { 
         // Đảm bảo points là số hợp lệ
         const validPoints = points || 0;
-        console.log(`💰 Adding score: points=${points}, validPoints=${validPoints}, currentScore=${this.score}`);
+        // console.log(`💰 Adding score: points=${points}, validPoints=${validPoints}, currentScore=${this.score}`);
         this.score += validPoints; 
-        console.log(`💰 New score: ${this.score}`);
+        // console.log(`💰 New score: ${this.score}`);
         this.updateHighScore(); // Cập nhật high score khi score thay đổi
     }
     
@@ -77,7 +77,7 @@ class GameState {
         
         // ===== XỬ LÝ ĐỘC VÀ HỒI PHỤC KHI TĂNG MOVE =====
         if (this.characterManager) {
-            this.characterManager.processRecovery(); // Xử lý trước 
+            this.characterManager.processRecovery(); // Xử lý hồi phục trước 
             this.characterManager.processPoison(); // Xử lý độc sau 
             
         }

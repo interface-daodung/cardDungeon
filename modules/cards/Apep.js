@@ -7,7 +7,8 @@ class Apep extends Card {
             "Kẻ Thủ Hộ Của Ốc Đảo Apep", 
             "enemy", 
             "resources/apep.webp", 
-            "Apep"
+            "Boss quái vật Apep",
+            "apep"
         );
         this.hp = Math.floor(Math.random() * 7) + 3; // HP từ 3-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
@@ -22,7 +23,7 @@ class Apep extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Boss gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -37,12 +38,10 @@ class Apep extends Card {
 
     /**
      * Hiệu ứng khi thẻ bị giết bởi vũ khí
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @returns
-     * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
+     * @param {CharacterManager} characterManager - Manager quản lý character (optional)
+     * @returns {Object} Thông tin kết quả
      */
-    killByWeaponEffect(characterManager, gameState) {
+    killByWeaponEffect(characterManager = null) {
         // Apep khi bị giết bởi vũ khí sẽ tạo ra thẻ Food3 cố định
         return {
             type: 'enemy_killed_by_weapon',
@@ -64,7 +63,7 @@ class Apep extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `${this.name} - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Kẻ Thủ Hộ Của Ốc Đảo Apep là boss quái vật mạnh mẽ. Khi bị tiêu diệt bằng vũ khí, nó sẽ để lại một món ăn quý hiếm.</i>`,
             hp: this.hp
         };
     }

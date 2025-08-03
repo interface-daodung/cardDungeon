@@ -4,7 +4,7 @@
 class Boom extends Card {
     constructor() {
         super(
-            "Bom nổ", 
+            "Nổ Định Hướng Có Kiểm Soát", 
             "boom", 
             "resources/boom.webp", 
             "Bom nổ"
@@ -85,27 +85,15 @@ class Boom extends Card {
             }
         }
         
-        console.log(`💥 Character thực tế tại index: ${characterIndex}`);
         
         // Tìm các thẻ liền kề (trên, dưới, trái, phải)
         const adjacentCards = this.getAdjacentCards(cardManager, boomIndex);
-        console.log(`💥 Boom tại index ${boomIndex}: adjacentCards =`, adjacentCards);
         
         // Gây damage cho character nếu character ở gần
         if (characterIndex !== null && adjacentCards.includes(characterIndex)) {
-            console.log(`💥 Character ở gần boom! Gây ${this.damage} damage`);
-            characterManager.updateCharacterHP(this.damage);
-            
-            // Kiểm tra game over sau khi gây damage
-            if (characterManager.getCharacterHP() <= 0) {
-                console.log(`💀 Character HP = 0 do boom, triggering game over!`);
-                // Trigger game over thông qua animationManager nếu có
-                if (animationManager) {
-                    animationManager.triggerGameOver();
-                }
-            }
+            characterManager.damageCharacterHP(this.damage);
+            // Game over được xử lý trong damageCharacterHP khi HP = 0
         } else {
-            console.log(`💥 Character không ở gần boom hoặc không tồn tại`);
         }
         
         // Gây damage cho các thẻ khác (không phải character)
@@ -117,19 +105,14 @@ class Boom extends Card {
                     // Gây damage cho enemy cards
                     if (card.type === 'enemy' && card.hp !== undefined && card.hp > 0) {
                         const originalHP = card.hp;
-                        console.log(`💥 Enemy ${card.nameId} tại index ${cardIndex}: HP ban đầu = ${originalHP}, damage = ${this.damage}`);
                         card.hp -= this.damage;
-                        console.log(`💥 Enemy ${card.nameId} sau damage: HP = ${card.hp}`);
                         
                         if (card.hp <= 0) {
                             card.hp = 0; // Đảm bảo HP không âm
-                            console.log(`💥 Enemy ${card.nameId} HP = 0, sẽ chết!`);
                             
                             // Chạy killByWeaponEffect nếu có
                             if (typeof card.killByWeaponEffect === 'function') {
-                                console.log(`💥 Enemy ${card.nameId} bị giết bởi boom, chạy killByWeaponEffect`);
                                 const killResult = card.killByWeaponEffect(characterManager, gameState);
-                                console.log(`💥 Kill result:`, killResult);
                                 
                                 // Xử lý kết quả từ killByWeaponEffect
                                 if (killResult && killResult.reward) {
@@ -141,7 +124,6 @@ class Boom extends Card {
                                             row: Math.floor(cardIndex / 3), 
                                             col: cardIndex % 3 
                                         };
-                                        console.log(`💥 Tạo coin từ killByWeaponEffect: ${coinCard.nameId} tại index ${cardIndex}`);
                                         cardManager.updateCard(cardIndex, coinCard);
                                     } else if (killResult.reward.type === 'food3') {
                                         // Tạo Food3 card
@@ -151,7 +133,6 @@ class Boom extends Card {
                                             row: Math.floor(cardIndex / 3), 
                                             col: cardIndex % 3 
                                         };
-                                        console.log(`💥 Tạo Food3 từ killByWeaponEffect: ${foodCard.nameId} tại index ${cardIndex}`);
                                         cardManager.updateCard(cardIndex, foodCard);
                                     }
                                 } else {
@@ -162,12 +143,10 @@ class Boom extends Card {
                                         row: Math.floor(cardIndex / 3), 
                                         col: cardIndex % 3 
                                     };
-                                    console.log(`💥 Tạo coin mặc định: ${coinCard.nameId} tại index ${cardIndex}`);
                                     cardManager.updateCard(cardIndex, coinCard);
                                 }
                             } else {
                                 // Tạo coin theo mặc định nếu không có killByWeaponEffect
-                                console.log(`💥 Enemy ${card.nameId} bị giết bởi boom, tạo coin mặc định`);
                                 // Tạo coin ngay tại đây và thay thế thẻ
                                 const coinCard = cardManager.cardFactory.createDynamicCoin(characterManager);
                                 coinCard.id = cardIndex;
@@ -175,14 +154,11 @@ class Boom extends Card {
                                     row: Math.floor(cardIndex / 3), 
                                     col: cardIndex % 3 
                                 };
-                                console.log(`💥 Tạo coin mới: ${coinCard.nameId} tại index ${cardIndex}`);
                                 cardManager.updateCard(cardIndex, coinCard);
-                                console.log(`💥 Đã thay thế enemy bằng coin trong cardManager`);
                             }
                         } else {
                             // HP chưa về 0, chạy attackByWeaponEffect nếu có
                             if (typeof card.attackByWeaponEffect === 'function') {
-                                console.log(`💥 Enemy ${card.nameId} bị damage bởi boom, chạy attackByWeaponEffect`);
                                 card.attackByWeaponEffect(characterManager, gameState);
                             }
                         }
@@ -198,13 +174,10 @@ class Boom extends Card {
                     // Gây damage cho food cards (Food0-3)
                     else if (card.type === 'food' && card.heal !== undefined && card.heal > 0) {
                         const originalHeal = card.heal;
-                        console.log(`💥 Food ${card.nameId} tại index ${cardIndex}: heal ban đầu = ${originalHeal}, damage = ${this.damage}`);
                         card.heal -= this.damage;
-                        console.log(`💥 Food ${card.nameId} sau damage: heal = ${card.heal}`);
                         
                         if (card.heal <= 0) {
                             card.heal = 0; // Đảm bảo heal không âm
-                            console.log(`💥 Food ${card.nameId} heal = 0, tạo thẻ void!`);
                             
                             // Tạo thẻ void thay thế
                             const voidCard = cardManager.cardFactory.createVoid();
@@ -213,7 +186,6 @@ class Boom extends Card {
                                 row: Math.floor(cardIndex / 3), 
                                 col: cardIndex % 3 
                             };
-                            console.log(`💥 Tạo void thay thế food: ${voidCard.nameId} tại index ${cardIndex}`);
                             cardManager.updateCard(cardIndex, voidCard);
                         }
                         
@@ -229,16 +201,13 @@ class Boom extends Card {
                     else if (card.type === 'poison' && card.poisonDuration !== undefined && card.poisonDuration > 0) {
                         const originalPoisonDuration = card.poisonDuration;
                         const originalHeal = card.heal;
-                        console.log(`💥 Poison ${card.nameId} tại index ${cardIndex}: poisonDuration ban đầu = ${originalPoisonDuration}, heal = ${originalHeal}, damage = ${this.damage}`);
                         
                         card.poisonDuration -= this.damage;
                         card.heal -= this.damage;
-                        console.log(`💥 Poison ${card.nameId} sau damage: poisonDuration = ${card.poisonDuration}, heal = ${card.heal}`);
                         
                         if (card.poisonDuration <= 0 || card.heal <= 0) {
                             card.poisonDuration = Math.max(0, card.poisonDuration);
                             card.heal = Math.max(0, card.heal);
-                            console.log(`💥 Poison ${card.nameId} poisonDuration hoặc heal = 0, tạo thẻ void!`);
                             
                             // Tạo thẻ void thay thế
                             const voidCard = cardManager.cardFactory.createVoid();
@@ -247,7 +216,6 @@ class Boom extends Card {
                                 row: Math.floor(cardIndex / 3), 
                                 col: cardIndex % 3 
                             };
-                            console.log(`💥 Tạo void thay thế poison: ${voidCard.nameId} tại index ${cardIndex}`);
                             cardManager.updateCard(cardIndex, voidCard);
                         }
                         
@@ -263,13 +231,10 @@ class Boom extends Card {
                     // Gây damage cho coin cards
                     else if (card.type === 'coin' && card.score !== undefined && card.score > 0) {
                         const originalScore = card.score;
-                        console.log(`💥 Coin ${card.nameId} tại index ${cardIndex}: score ban đầu = ${originalScore}, damage = ${this.damage}`);
                         card.score -= this.damage;
-                        console.log(`💥 Coin ${card.nameId} sau damage: score = ${card.score}`);
                         
                         if (card.score <= 0) {
                             card.score = 0; // Đảm bảo score không âm
-                            console.log(`💥 Coin ${card.nameId} score = 0, tạo thẻ void!`);
                             
                             // Tạo thẻ void thay thế
                             const voidCard = cardManager.cardFactory.createVoid();
@@ -278,7 +243,6 @@ class Boom extends Card {
                                 row: Math.floor(cardIndex / 3), 
                                 col: cardIndex % 3 
                             };
-                            console.log(`💥 Tạo void thay thế coin: ${voidCard.nameId} tại index ${cardIndex}`);
                             cardManager.updateCard(cardIndex, voidCard);
                         }
                         
@@ -293,13 +257,10 @@ class Boom extends Card {
                     // Gây damage cho weapon cards (Sword, Catalyst)
                     else if ((card.type === 'weapon' || card.type === 'sword') && card.durability !== undefined && card.durability > 0) {
                         const originalDurability = card.durability;
-                        console.log(`💥 Weapon ${card.nameId} tại index ${cardIndex}: durability ban đầu = ${originalDurability}, damage = ${this.damage}`);
                         card.durability -= this.damage;
-                        console.log(`💥 Weapon ${card.nameId} sau damage: durability = ${card.durability}`);
                         
                         if (card.durability <= 0) {
                             card.durability = 0; // Đảm bảo durability không âm
-                            console.log(`💥 Weapon ${card.nameId} durability = 0, tạo thẻ void!`);
                             
                             // Tạo thẻ void thay thế
                             const voidCard = cardManager.cardFactory.createVoid();
@@ -308,7 +269,6 @@ class Boom extends Card {
                                 row: Math.floor(cardIndex / 3), 
                                 col: cardIndex % 3 
                             };
-                            console.log(`💥 Tạo void thay thế weapon: ${voidCard.nameId} tại index ${cardIndex}`);
                             cardManager.updateCard(cardIndex, voidCard);
                         }
                         
@@ -323,13 +283,10 @@ class Boom extends Card {
                     // Gây damage cho trap cards (không bao gồm Quicksand)
                     else if (card.nameId === 'trap' && card.damage !== undefined && card.damage > 0) {
                         const originalDamage = card.damage;
-                        console.log(`💥 Trap ${card.nameId} tại index ${cardIndex}: damage ban đầu = ${originalDamage}, boom damage = ${this.damage}`);
                         card.damage -= this.damage;
-                        console.log(`💥 Trap ${card.nameId} sau damage: damage = ${card.damage}`);
                         
                         if (card.damage <= 0) {
                             card.damage = 0; // Đảm bảo damage không âm
-                            console.log(`💥 Trap ${card.nameId} damage = 0, tạo thẻ void!`);
                             
                             // Tạo thẻ void thay thế
                             const voidCard = cardManager.cardFactory.createVoid();
@@ -338,11 +295,9 @@ class Boom extends Card {
                                 row: Math.floor(cardIndex / 3), 
                                 col: cardIndex % 3 
                             };
-                            console.log(`💥 Tạo void thay thế trap: ${voidCard.nameId} tại index ${cardIndex}`);
                             cardManager.updateCard(cardIndex, voidCard);
                         } else {
                             // Cập nhật hiển thị damage trên trap
-                            console.log(`💥 Trap ${card.nameId} còn damage = ${card.damage}, cập nhật hiển thị`);
                             // Có thể cần cập nhật UI hiển thị damage
                         }
                         
@@ -386,7 +341,6 @@ class Boom extends Card {
         const boomRow = Math.floor(boomIndex / 3);
         const boomCol = boomIndex % 3;
         
-        console.log(`💥 Boom position: row=${boomRow}, col=${boomCol}`);
         
         // Kiểm tra các vị trí liền kề
         const adjacentPositions = [
@@ -401,17 +355,13 @@ class Boom extends Card {
             if (pos.row >= 0 && pos.row < 3 && pos.col >= 0 && pos.col < 3) {
                 const index = pos.row * 3 + pos.col;
                 const card = cardManager.getCard(index);
-                console.log(`💥 Checking position (${pos.row}, ${pos.col}) = index ${index}, card type: ${card ? card.type : 'null'}`);
                 if (card && card.type !== 'boom') { // Không bao gồm boom khác
                     adjacentCards.push(index);
-                    console.log(`💥 Added ${card.type} at index ${index} to adjacent cards`);
                 }
             } else {
-                console.log(`💥 Position (${pos.row}, ${pos.col}) is out of bounds`);
             }
         }
         
-        console.log(`💥 Final adjacent cards:`, adjacentCards);
         return adjacentCards;
     }
 
@@ -423,7 +373,7 @@ class Boom extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Nổ Định Hướng Có Kiểm Soát - Gây ${this.damage} sát thương`,
+            description: `<strong>${this.type}</strong> - Damage: <span class="damage-text">${this.damage}</span><br><i>Bom nổ là vũ khí nguy hiểm được chế tạo từ thuốc nổ mạnh. Khi nổ, nó sẽ gây sát thương cho tất cả các thẻ liền kề và tạo ra thẻ mới.</i>`,
             damage: this.damage
         };
     }

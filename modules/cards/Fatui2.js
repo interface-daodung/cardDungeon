@@ -7,7 +7,8 @@ class Fatui2 extends Card {
             "Fatui - Thiếu Nữ Kính", 
             "enemy", 
             "resources/fatui2.webp", 
-            "Fatui loại 2"
+            "Fatui loại 2",
+            "fatui2"
         );
         this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Fatui2 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Fatui2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Fatui mạnh - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Thiếu Nữ Kính là thành viên cao cấp của Fatui. Sử dụng kính ma thuật để tạo ra ảo ảnh và tấn công kẻ địch một cách tinh vi.</i>`,
             hp: this.hp
         };
     }

@@ -7,7 +7,8 @@ class Fatui3 extends Card {
             "Fatui - Thuật Sĩ Cicin Băng", 
             "enemy", 
             "resources/fatui3.webp", 
-            "Fatui loại 3"
+            "Fatui loại 3",
+            "fatui3"
         );
         this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Fatui3 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Fatui3 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Fatui rất mạnh - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Thuật Sĩ Cicin Băng là thành viên tinh nhuệ của Fatui. Sử dụng ma thuật băng để đóng băng kẻ địch và tạo ra những cơn bão tuyết khủng khiếp.</i>`,
             hp: this.hp
         };
     }

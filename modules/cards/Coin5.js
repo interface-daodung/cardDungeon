@@ -7,7 +7,8 @@ class Coin5 extends Card {
             "Mảnh Vỡ Nguyên Tố Phong", 
             "coin", 
             "resources/coin5.webp", 
-            "Coin loại 5"
+            "Coin loại 5",
+            "coin5"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin5 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Phong Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố phong chứa đựng sức mạnh của gió tự do. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }

@@ -7,7 +7,8 @@ class Sword5 extends Card {
             "Kiếm Hút Máu", 
             "weapon", 
             "resources/sword5.webp", 
-            "Vũ khí loại 5"
+            "Vũ khí loại 5",
+            "sword5"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
     }
@@ -39,14 +40,12 @@ class Sword5 extends Card {
      * @returns {Object} Thông tin kết quả
      */
     attackWeaponEffect(characterManager, gameState, damageDealt) {
-        console.log(`⚔️ Sword5 attackWeaponEffect: Kích hoạt hiệu ứng hút máu với damage ${damageDealt}`);
         
         // Hồi phục HP bằng lượng damage gây ra
         const oldHP = characterManager.getCharacterHP();
         characterManager.healCharacterHP(damageDealt);
         const newHP = characterManager.getCharacterHP();
         
-        console.log(`⚔️ Sword5 attackWeaponEffect: HP ${oldHP} -> ${newHP} (hồi ${damageDealt} HP)`);
         
         return {
             type: 'weapon_attack_effect',
@@ -64,7 +63,7 @@ class Sword5 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí cấp 5 - Độ bền ${this.durability} - Hồi phục HP bằng lượng damage gây ra`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Kiếm Hút Máu là vũ khí ma thuật có khả năng hấp thụ sinh lực từ kẻ địch. Mỗi khi gây sát thương, nó sẽ hồi phục HP cho người sử dụng.</i>`,
             durability: this.durability
         };
     }

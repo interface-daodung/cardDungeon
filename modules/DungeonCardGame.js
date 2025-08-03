@@ -17,6 +17,9 @@ class DungeonCardGame {
 
         // Set eventManager cho AnimationManager để có thể setup events sau combat
         this.animationManager.setEventManager(this.eventManager);
+        
+        // Set animationManager cho CharacterManager để có thể gọi triggerGameOver
+        this.characterManager.setAnimationManager(this.animationManager);
 
         // Khởi tạo game
         this.initializeGame();
@@ -29,5 +32,8 @@ class DungeonCardGame {
         this.uiManager.updateUI(); // Cập nhật giao diện
         this.eventManager.setupEventListeners(); // Setup các event listener
         this.eventManager.setupCardEvents(); // Setup events cho từng thẻ
+        
+        // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
+        this.checkCoinRowsAndColumns();
     }
 } 

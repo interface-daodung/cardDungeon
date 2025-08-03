@@ -7,7 +7,8 @@ class AbyssLector2 extends Card {
             "Sứ Đồ Vực Sâu - Lưu Kích",
             "enemy", 
             "resources/abyssLector2.webp", 
-            "Abyss Lector loại 2"
+            "Abyss Lector loại 2",
+            "abyssLector2"
         );
         this.hp = Math.floor(Math.random() * 9) + 5; // HP từ 1-9
         this.shield = 1; // Shield của quái vật 
@@ -23,7 +24,7 @@ class AbyssLector2 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -38,12 +39,10 @@ class AbyssLector2 extends Card {
 
     /**
      * Hiệu ứng khi thẻ bị giết bởi vũ khí
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @returns
-     * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
+     * @param {CharacterManager} characterManager - Manager quản lý character (optional)
+     * @returns {Object|null} Thông tin kết quả hoặc null
      */
-    killByWeaponEffect(characterManager, gameState) {
+    killByWeaponEffect(characterManager = null) {
         // Chỉ có hiệu ứng khi shield = 1
         if (this.shield === 1) {
             // Tạo thẻ AbyssLector2 mới với HP ngẫu nhiên và shield = 0
@@ -73,7 +72,7 @@ class AbyssLector2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Abyss Lector rất mạnh - HP: ${this.hp} - Shield: ${this.shield}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Bậc thầy vực sâu với khả năng điều khiển lưu kích. Khi bị tiêu diệt, hắn sẽ tái sinh với sức mạnh giảm sút nhưng vẫn đáng sợ.</i>`,
             hp: this.hp
         };
     }

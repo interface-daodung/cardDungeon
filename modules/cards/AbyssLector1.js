@@ -7,7 +7,8 @@ class AbyssLector1 extends Card {
             "Học Sĩ Vực Sâu - Tử Lôi", 
             "enemy", 
             "resources/abyssLector1.webp", 
-            "Abyss Lector loại 1"
+            "Abyss Lector loại 1",
+            "abyssLector1"
         );
         this.hp = Math.floor(Math.random() * 9) + 5; // HP từ 1-9        
         this.shield = 1; // Shield của quái vật
@@ -23,7 +24,7 @@ class AbyssLector1 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Quái vật gây sát thương cho character
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -73,7 +74,7 @@ class AbyssLector1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật Abyss Lector mạnh - HP: ${this.hp} - Shield: ${this.shield}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Sứ giả của vực sâu với sức mạnh sấm sét. Khi bị đánh bại, hắn sẽ hồi sinh với hình dạng yếu hơn nhưng vẫn mang theo hiểm họa.</i>`,
             hp: this.hp
         };
     }

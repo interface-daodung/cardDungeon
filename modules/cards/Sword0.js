@@ -7,7 +7,8 @@ class Sword0 extends Card {
             "Thiên Không Kiếm", 
             "weapon", 
             "resources/sword0.webp", 
-            "Vũ khí cơ bản"
+            "Vũ khí cơ bản",
+            "sword0"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
     }
@@ -20,7 +21,6 @@ class Sword0 extends Card {
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
     cardEffect(characterManager, gameState, cardManager) {
-        console.log(`⚔ Sword0.cardEffect: Bắt đầu với độ bền ${this.durability}`);
         
         // Thêm vũ khí cho character
         characterManager.addWeaponToCharacter(this);
@@ -32,7 +32,6 @@ class Sword0 extends Card {
             effect: `Character nhận vũ khí với độ bền ${this.durability}`
         };
         
-        console.log(`⚔ Sword0.cardEffect: Kết quả:`, result);
         return result;
     }
 
@@ -44,21 +43,14 @@ class Sword0 extends Card {
      * @returns {Object} Thông tin kết quả
      */
     attackWeaponEffect(characterManager, gameState, damageDealt) {
-        console.log(`⚔️ Sword0 attackWeaponEffect: Kích hoạt hiệu ứng tạo CoinUp khi giết quái`);
-        
-        // Lấy elementCoin từ CharacterManager
-        
-        // Tính điểm cho CoinUp: (Math.floor(Math.random() * 9) + 1) * 2
-        const randomScore = Math.floor(Math.random() * 9) + 1;
-        const finalScore = randomScore * 2;
-        
-        console.log(`⚔️ Sword0 attackWeaponEffect: Tạo CoinUp${elementCoin} với điểm ${finalScore} (random: ${randomScore} * 2)`);
+        // ⚔️ Sword0 attackWeaponEffect: Kích hoạt hiệu ứng tạo CoinUp khi giết quái
+        // Tạo CoinUp với điểm ngẫu nhiên từ 1-9, nhân 2
+        const coinUpScore = (Math.floor(Math.random() * 9) + 1) * 2;
         
         return {
             type: 'weapon_attack_effect',
-            effect: `Tạo CoinUp${elementCoin} với ${finalScore} điểm khi giết quái`,
             shouldCreateCoinUp: true,
-            coinUpScore: finalScore,
+            coinUpScore: coinUpScore,
         };
     }
 
@@ -70,7 +62,7 @@ class Sword0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Lưỡi kiếm toát ra lời chúc phúc của thần gió, chứa đựng sức mạnh của bầu trời và ngàn ngọn gió. - Độ bền: ${this.durability} - Tạo CoinUp khi giết quái`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.</i>`,
             durability: this.durability
         };
     }

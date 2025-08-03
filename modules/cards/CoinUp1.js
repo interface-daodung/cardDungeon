@@ -7,7 +7,8 @@ class CoinUp1 extends Card {
             "Cộng Hưởng Nguyên Tố: Thủy Trị Liệu", 
             "coin", 
             "resources/coinUp1.webp", 
-            "Coin tăng điểm loại 1"
+            "Coin nâng cấp loại 1",
+            "coinUp1"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
     }
@@ -38,7 +39,7 @@ class CoinUp1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Coin tăng điểm vừa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Cộng Hưởng Nguyên Tố: Thủy Trị Liệu là mảnh vỡ nguyên tố thủy đã được nâng cấp. Có khả năng hồi phục và trị liệu vượt trội.</i>`,
             score: this.score
         };
     }

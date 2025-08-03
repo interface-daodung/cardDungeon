@@ -7,7 +7,8 @@ class Sword4 extends Card {
             "Quyền Trượng Thủy Thần", 
             "weapon", 
             "resources/sword4.webp", 
-            "Quyền Trượng Thủy Thần"
+            "Quyền Trượng Thủy Thần",
+            "sword4"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
 
@@ -38,20 +39,11 @@ class Sword4 extends Card {
      * @param {GameState} gameState - Manager quản lý game state
      * @returns {Object} Thông tin kết quả
      */
-    sellWeaponEffect(characterManager, gameState) {
-        console.log(`💰 Sword4 sellWeaponEffect: Kích hoạt hiệu ứng bán gấp đôi`);
-        
-        // Lấy độ bền còn lại
-        const currentDurability = this.durability;
-        const doubleDurability = currentDurability * 2;
-        
-        console.log(`💰 Sword4 sellWeaponEffect: Độ bền ${currentDurability} -> Nhận ${doubleDurability} coin`);
-        
+    sellWeaponEffect() {
+
         return {
             type: 'weapon_sell_effect',
-            effect: `Bán vũ khí với giá gấp đôi (${currentDurability} -> ${doubleDurability})`,
-            originalDurability: currentDurability,
-            sellValue: doubleDurability
+            sellValue: this.durability * 2
         };
     }
 
@@ -63,7 +55,7 @@ class Sword4 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Vũ khí này có vẻ rất đáng tiền - Độ bền ${this.durability} - Bán với giá gấp đôi`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Quyền Trượng Thủy Thần là vũ khí quý hiếm được chế tạo từ kim loại quý. Có thể bán với giá cao gấp đôi độ bền hiện tại.</i>`,
             durability: this.durability
         };
     }

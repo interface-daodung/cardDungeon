@@ -7,7 +7,8 @@ class Coin2 extends Card {
             "Mảnh Vỡ Nguyên Tố Hỏa", 
             "coin", 
             "resources/coin2.webp", 
-            "Coin loại 2"
+            "Coin loại 2",
+            "coin2"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Hỏa Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố hỏa chứa đựng sức mạnh của ngọn lửa bất diệt. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }
@@ -48,12 +49,10 @@ class Coin2 extends Card {
      * Tạo thẻ CoinUp2 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin2 upCoinEffect được gọi, score hiện tại: ${this.score}`);
         
         // Tạo thẻ CoinUp2 với score gấp đôi
         const coinUp2 = new CoinUp2();
         coinUp2.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp2 với score: ${coinUp2.score}`);
         
         return {
             type: 'coin_upgrade',

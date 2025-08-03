@@ -1,5 +1,5 @@
-﻿// Quicksand.js - Thẻ cát lún
-// Chức năng: Thẻ cát lún gây hại cho người chơi
+// Quicksand.js - Th? c�t l�n
+// Ch?c nang: Th? c�t l�n g�y h?i cho ngu?i choi
 
 class Quicksand extends Card {
     constructor() {
@@ -7,35 +7,36 @@ class Quicksand extends Card {
             "Quicksand", 
             "trap", 
             "resources/quicksand.webp", 
-            "Cát lún"
+            "Cát Lún",
+            "quicksand"
         );
-        this.damage = 2; // Sát thương của cát lún
+        this.damage = 2; // S�t thuong c?a c�t l�n
     }
 
     /**
-     * Hiệu ứng khi thẻ bị ăn
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     * @returns {Object} Thông tin kết quả
+     * Hi?u ?ng khi th? b? an
+     * @param {CharacterManager} characterManager - Manager qu?n l� character
+     * @param {GameState} gameState - Manager qu?n l� game state
+     * @param {CardManager} cardManager - Manager qu?n l� th?
+     * @returns {Object} Th�ng tin k?t qu?
      */
     cardEffect(characterManager, gameState, cardManager) {
         return {
             type: 'trap',
-            message: `Cát lún! Tất cả thẻ bị đổi chỗ!`,
+            message: `Cát lún! Tất cả thể bị dịch chuyển!`,
             shuffleEffect: true
         };
     }
 
     /**
-     * Lấy thông tin hiển thị cho dialog
-     * @returns {Object} Thông tin để hiển thị
+     * L?y th�ng tin hi?n th? cho dialog
+     * @returns {Object} Th�ng tin d? hi?n th?
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cát lún - Đổi chỗ tất cả thẻ`,
+            description: `<strong>${this.type}</strong> - Effect: <span class="effect-text">Shuffle</span><br><i>Cát Lún là bẫy nguy hiểm ẩn dưới bề mặt sa mạc. Khi kích hoạt, nó sẽ làm xáo trộn tất cả các thẻ trên bàn chơi.</i>`,
             effect: "Shuffle"
         };
     }

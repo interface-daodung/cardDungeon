@@ -164,35 +164,4 @@ class CardManager {
         return null;
     }
 
-    // ===== TIỆN ÍCH =====
-
-    /**
-     * Kiểm tra xem game đã hoàn thành chưa
-     * @returns {boolean} True nếu game hoàn thành
-     */
-    isGameComplete() {
-        // Kiểm tra xem có còn thẻ nào không phải Character không
-        for (let i = 0; i < this.cards.length; i++) {
-            if (this.cards[i] && this.cards[i].type !== 'character') {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Lấy danh sách tất cả loại thẻ có sẵn
-     * @returns {Array} Mảng chứa tên các loại thẻ
-     */
-    getAllCardTypes() {
-        return this.cardFactory.getAllCardTypes();
-    }
-
-    /**
-     * Lấy thông tin chi tiết của tất cả loại thẻ
-     * @returns {Array} Mảng chứa thông tin chi tiết các loại thẻ
-     */
-    getAllCardInfo() {
-        return this.cardFactory.getAllCardInfo();
-    }
 } 

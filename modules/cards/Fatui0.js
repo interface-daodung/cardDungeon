@@ -7,7 +7,8 @@ class Fatui0 extends Card {
             "Fatui - Thuật Sĩ Cicin Lôi", 
             "enemy", 
             "resources/fatui0.webp", 
-            "Quái vật Fatui cơ bản"
+            "Quái vật Fatui cơ bản",
+            "fatui0"
         );
         this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
@@ -21,10 +22,9 @@ class Fatui0 extends Card {
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
     cardEffect(characterManager, gameState, cardManager) {
-        console.log(`👹 Fatui0.cardEffect: HP của quái vật = ${this.hp}`);
         
         // Character bị mất HP bằng với HP của quái vật
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -36,18 +36,15 @@ class Fatui0 extends Card {
             effect: `Character bị mất ${this.hp} HP, nhận ${this.score} điểm`
         };
         
-        console.log(`👹 Fatui0.cardEffect: Kết quả =`, result);
         return result;
     }
 
     /**
      * Hiệu ứng khi thẻ bị giết bởi vũ khí
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @returns
-     * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
+     * @param {CharacterManager} characterManager - Manager quản lý character (optional)
+     * @returns {Object} Thông tin kết quả
      */
-    killByWeaponEffect(characterManager, gameState) {
+    killByWeaponEffect(characterManager = null) {
         // Fatui0 khi bị giết bởi vũ khí sẽ tạo ra coin (mặc định)
         return {
             type: 'enemy_killed_by_weapon',
@@ -66,7 +63,7 @@ class Fatui0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật thông thường - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.</i>`,
             hp: this.hp
         };
     }

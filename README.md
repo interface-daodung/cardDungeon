@@ -186,7 +186,7 @@ CardDungeon/
 - createRandomCard()      # Tạo thẻ ngẫu nhiên
 - createCard(type)        # Tạo thẻ theo loại
 - createVoid()           # Tạo thẻ Void
-- getAllCardTypes()       # Lấy danh sách tất cả loại thẻ
+
 ```
 
 ### 🎯 **CardManager.js** - Quản Lý Thẻ
@@ -219,9 +219,9 @@ CardDungeon/
 - recovery              # Số lượt hồi phục từ thức ăn đặc biệt
 - poisoned              # Số lượt độc còn lại
 - sellWeapon()          # Bán vũ khí để lấy điểm
-- updateCharacterHP()    # Cập nhật HP character
+- damageCharacterHP()    # Giảm HP character
 - getCharacterHP()       # Lấy HP hiện tại
-- getCharacterWeapon()   # Lấy weapon hiện tại
+- getCharacterWeaponDurability()   # Lấy độ bền weapon hiện tại
 ```
 
 ### 🎨 **AnimationManager.js** - Quản Lý Animation
@@ -244,7 +244,7 @@ CardDungeon/
 // Chức năng chính:
 - updateUI()             # Cập nhật giao diện
 - showCardInfo()         # Hiển thị thông tin thẻ
-- showValidTargets()     # Hiển thị ô có thể di chuyển
+
 - isValidMove()          # Kiểm tra nước đi hợp lệ
 - updateSellButtonVisibility() # Cập nhật hiển thị nút bán vũ khí
 ```
@@ -523,7 +523,21 @@ MIT License - Tự do sử dụng và phát triển.
 
 ## 👨‍💻 Tác Giả
 
+**Đào Mạnh Dũng**
+
 CardDungeon được phát triển với ❤️ bằng HTML, CSS và JavaScript thuần, sử dụng kiến trúc modular để dễ bảo trì và mở rộng.
+
+### 🛠️ Công Cụ Hỗ Trợ
+
+- **IDE**: [Cursor](https://cursor.sh/) - AI-powered code editor
+- **Version Control**: Git
+- **Browser Testing**: Chrome DevTools
+- **Image Format**: WebP cho tối ưu performance
+- **Code Architecture**: Modular JavaScript với ES6 Classes
+
+### 🎯 Phát Triển
+
+Dự án được phát triển với sự hỗ trợ của Cursor IDE, một công cụ AI-powered giúp tăng tốc độ coding và debugging. Kiến trúc modular cho phép dễ dàng mở rộng tính năng và bảo trì code.
 
 ---
 

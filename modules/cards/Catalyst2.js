@@ -7,7 +7,8 @@ class Catalyst2 extends Card {
             "Quản Đốc Vàng Ròng", 
             "weapon", 
             "resources/catalyst2.webp", 
-            "Catalyst loại 2"
+            "Catalyst loại 2",
+            "catalyst2"
         );
         this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
         this.score = 4; // Điểm số nhận được
@@ -40,7 +41,7 @@ class Catalyst2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Thiết bị lơ lửng, có thể giám sát các dòng hải lưu, mang theo chúc phúc của Biển. Độ bền: ${this.durability}`,
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Quản Đốc Vàng Ròng là thiết bị ma thuật lơ lửng có khả năng giám sát các dòng hải lưu. Được ban phước bởi sức mạnh của biển cả.</i>`,
             durability: this.durability
         };
     }

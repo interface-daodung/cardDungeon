@@ -7,7 +7,8 @@ class Coin3 extends Card {
             "Mảnh Vỡ Nguyên Tố Lôi", 
             "coin", 
             "resources/coin3.webp", 
-            "Coin loại 3"
+            "Coin loại 3",
+            "coin3"
         );
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
     }
@@ -38,7 +39,7 @@ class Coin3 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Cộng Hưởng Nguyên Tố: Lôi Giao Thoa - Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mảnh vỡ nguyên tố lôi chứa đựng sức mạnh của sấm sét thiên nhiên. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.</i>`,
             score: this.score
         };
     }
@@ -48,12 +49,10 @@ class Coin3 extends Card {
      * Tạo thẻ CoinUp3 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin3 upCoinEffect được gọi, score hiện tại: ${this.score}`);
         
         // Tạo thẻ CoinUp3 với score gấp đôi
         const coinUp3 = new CoinUp3();
         coinUp3.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp3 với score: ${coinUp3.score}`);
         
         return {
             type: 'coin_upgrade',

@@ -7,7 +7,8 @@ class Food2 extends Card {
             "Pizza Nấm Rơm Nướng", 
             "food", 
             "resources/food2.webp", 
-            "Thức ăn hồi phục đặc biệt"
+            "Thức ăn hồi phục đặc biệt",
+            "food2"
         );
         this.heal = Math.floor(Math.random() * 9) + 2; // Tổng hồi phục 2-10 HP
     }
@@ -45,7 +46,7 @@ class Food2 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `${this.name} - HP: +${this.heal} (1 HP/move), loại bỏ độc`,
+            description: `<strong>${this.type}</strong> - Heal: <span class="heal-text">+${this.heal}</span><br><i>Pizza Nấm Rơm Nướng là món ăn đặc biệt được chế biến từ nấm rơm tươi. Có khả năng hồi phục HP dần dần và loại bỏ độc tố.</i>`,
             heal: this.heal
         };
     }

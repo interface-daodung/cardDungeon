@@ -1,50 +1,50 @@
-﻿// Card.js - Class cơ bản cho tất cả các thẻ
-// Chức năng: Định nghĩa interface và thuộc tính chung cho tất cả thẻ
+// Card.js - Class co b?n cho t?t c? c�c th?
+// Ch?c nang: �?nh nghia interface v� thu?c t�nh chung cho t?t c? th?
 
 class Card {
     /**
-     * Khởi tạo thẻ cơ bản
-     * @param {string} name - Tên thẻ
-     * @param {string} type - Loại thẻ (enemy, food, sword, coin, character)
-     * @param {string} image - Đường dẫn hình ảnh
-     * @param {string} description - Mô tả thẻ
+     * Kh?i t?o th? co b?n
+     * @param {string} name - T�n th?
+     * @param {string} type - Lo?i th? (enemy, food, sword, coin, character)
+     * @param {string} image - �u?ng d?n h�nh ?nh
+     * @param {string} description - M� t? th?
+     * @param {string} nameId - T�n c?a image file (kh�ng c� extension)
      */
-    constructor(name, type, image, description) {
+    constructor(name, type, image, description, nameId) {
         this.name = name;
         this.type = type;
         this.image = image;
         this.description = description;
-        this.nameId = this.extractNameId(image); // Tên của image file
-        this.id = null; // Sẽ được set bởi CardManager
-        this.position = null; // Sẽ được set bởi CardManager
+        this.nameId = nameId; // Fix c?ng nameId thay v� t�nh to�n
+        this.id = null; // S? du?c set b?i CardManager
+        this.position = null; // S? du?c set b?i CardManager
     }
 
     /**
-     * Hiệu ứng khi thẻ bị ăn
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @param {CardManager} cardManager - Manager quản lý thẻ (optional)
-     * @returns {Object|null} Thông tin kết quả hoặc null
+     * Hi?u ?ng khi th? b? an
+     * @param {CharacterManager} characterManager - Manager qu?n l� character
+     * @param {GameState} gameState - Manager qu?n l� game state
+     * @param {CardManager} cardManager - Manager qu?n l� th? (optional)
+     * @returns {Object|null} Th�ng tin k?t qu? ho?c null
      */
     cardEffect(characterManager, gameState, cardManager = null) {
-        // Override trong các class con
+        // Override trong c�c class con
         return null;
     }
 
     /**
-     * Hiệu ứng khi thẻ bị giết bởi vũ khí
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {GameState} gameState - Manager quản lý game state
-     * @returns {Object|null} Thông tin kết quả hoặc null
+     * Hi?u ?ng khi th? b? gi?t b?i vu kh�
+     * @param {CharacterManager} characterManager - Manager qu?n l� character (optional)
+     * @returns {Object|null} Th�ng tin k?t qu? ho?c null
      */
-    killByWeaponEffect(characterManager, gameState) {
-        // Override trong các class enemy
+    killByWeaponEffect(characterManager = null) {
+        // Override trong c�c class enemy
         return null;
     }
 
     /**
-     * Lấy thông tin hiển thị cho dialog
-     * @returns {Object} Thông tin để hiển thị
+     * L?y th�ng tin hi?n th? cho dialog
+     * @returns {Object} Th�ng tin d? hi?n th?
      */
     getDisplayInfo() {
         return {
@@ -55,26 +55,5 @@ class Card {
             nameId: this.nameId
         };
     }
-
-    /**
-     * Trích xuất nameId từ đường dẫn image
-     * @param {string} image - Đường dẫn image
-     * @returns {string} Tên của image file (không có extension)
-     */
-    extractNameId(image) {
-        // Lấy tên file từ đường dẫn
-        const fileName = image.split('/').pop();
-        // Loại bỏ extension (.webp, .png, etc.)
-        return fileName.split('.')[0];
-    }
-
-    /**
-     * Clone thẻ này
-     * @returns {Card} Bản sao của thẻ
-     */
-    clone() {
-        const cloned = new this.constructor();
-        Object.assign(cloned, this);
-        return cloned;
-    }
+    
 } 

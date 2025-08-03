@@ -7,7 +7,8 @@ class Treasure0 extends Card {
             "Mỏ Vàng", 
             "treasure", 
             "resources/treasure0.webp", 
-            "Mỏ Vàng"
+            "Mỏ Vàng",
+            "treasure0"
         );
         this.score =  Math.floor(Math.random() * 9) + 1; // Điểm số nhận được từ 1-9
         this.durability = 5; // Độ bền của kho báu
@@ -49,7 +50,7 @@ class Treasure0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Mỏ Vàng tương tác Nhận ${this.score} điểm`,
+            description: `<strong>${this.type}</strong> - Score: <span class="score-text">${this.score}</span><br><i>Mỏ Vàng là kho báu quý giá chứa đựng vàng và đá quý. Có thể tương tác để thu thập điểm, nhưng sẽ bị hủy hoại sau nhiều lần sử dụng.</i>`,
             score: 0
         };
     }

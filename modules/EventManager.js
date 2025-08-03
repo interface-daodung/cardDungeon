@@ -21,6 +21,10 @@ class EventManager {
         this.uiManager = uiManager; // Quản lý UI updates
     }
 
+
+
+
+
     /**
      * Setup các event listener chính cho game
      * Bao gồm buttons, dialogs, keyboard events
@@ -68,60 +72,71 @@ class EventManager {
             if (cardElement) {
                 if (card.type === 'character') {
                     // ===== CHARACTER CARD EVENTS =====
-                    this.setupDragEvents(cardElement, index); // Chỉ character có thể drag
                     this.setupClickEvents(cardElement, index); // Click events riêng cho character
                 } else {
                     // ===== OTHER CARDS EVENTS =====
                     this.setupClickEventsForAll(cardElement, index); // Click events cho tất cả cards
                 }
-                this.setupDropEvents(cardElement, index); // Drop events cho tất cả cards
                 this.setupLongPressEvents(cardElement, index); // Long press cho thông tin thẻ
             }
         });
     }
 
     /**
-     * Setup drag events cho character
+     * Xóa tất cả events cũ của card element
      * @param {HTMLElement} cardElement - DOM element của card
+     */
+    removeCardEvents(cardElement) {
+        // Xóa click handler
+        if (cardElement._clickHandler) {
+            cardElement.removeEventListener('click', cardElement._clickHandler);
+            delete cardElement._clickHandler;
+        }
+        
+        // Xóa touch handlers
+        if (cardElement._touchStartHandler) {
+            cardElement.removeEventListener('touchstart', cardElement._touchStartHandler);
+            delete cardElement._touchStartHandler;
+        }
+        
+        if (cardElement._touchEndHandler) {
+            cardElement.removeEventListener('touchend', cardElement._touchEndHandler);
+            delete cardElement._touchEndHandler;
+        }
+        
+        // Xóa mouse handlers
+        if (cardElement._mouseDownHandler) {
+            cardElement.removeEventListener('mousedown', cardElement._mouseDownHandler);
+            delete cardElement._mouseDownHandler;
+        }
+        
+        if (cardElement._mouseUpHandler) {
+            cardElement.removeEventListener('mouseup', cardElement._mouseUpHandler);
+            delete cardElement._mouseUpHandler;
+        }
+        
+        if (cardElement._mouseLeaveHandler) {
+            cardElement.removeEventListener('mouseleave', cardElement._mouseLeaveHandler);
+            delete cardElement._mouseLeaveHandler;
+        }
+    }
+
+    /**
+     * Setup events cho một card cụ thể
      * @param {number} index - Index của card
      */
-    setupDragEvents(cardElement, index) {
-        // ===== DRAG EVENTS =====
-        cardElement.addEventListener('dragstart', (e) => {
-            this.handleDragStart(e, index);
-        });
-
-        cardElement.addEventListener('dragend', (e) => {
-            this.handleDragEnd(e);
-        });
-
-        // ===== TOUCH EVENTS =====
-        cardElement.addEventListener('touchstart', (e) => {
-            this.handleTouchStart(e, index);
-        });
-
-        cardElement.addEventListener('touchmove', (e) => {
-            this.handleTouchMove(e);
-        });
-
-        cardElement.addEventListener('touchend', (e) => {
-            this.handleTouchEnd(e, index);
-        });
-
-        // ===== MOUSE EVENTS CHO CHARACTER (CHỈ DRAG, KHÔNG LONG PRESS) =====
-        if (cardElement.dataset.type === 'character') {
-            cardElement.addEventListener('mousedown', (e) => {
-                // Chỉ xử lý drag cho character, không long press
-                this.handleDragStart(e, index);
-            });
-
-            cardElement.addEventListener('mouseup', (e) => {
-                this.handleDragEnd(e);
-            });
-
-            cardElement.addEventListener('mouseleave', (e) => {
-                this.handleDragEnd(e);
-            });
+    setupCardEventsForIndex(index) {
+        const cardElement = document.querySelector(`[data-index="${index}"]`);
+        if (cardElement) {
+            const card = this.cardManager.getCard(index);
+            if (card) {
+                if (card.type === 'character') {
+                    this.setupClickEvents(cardElement, index);
+                } else {
+                    this.setupClickEventsForAll(cardElement, index);
+                }
+                this.setupLongPressEvents(cardElement, index);
+            }
         }
     }
 
@@ -131,9 +146,30 @@ class EventManager {
      * @param {number} index - Index của card
      */
     setupClickEvents(cardElement, index) {
-        cardElement.addEventListener('click', (e) => {
+        // Xóa events cũ trước khi thêm mới
+        this.removeCardEvents(cardElement);
+        
+        // Mouse click events
+        const clickHandler = (e) => {
             this.handleCharacterClick(e, index);
-        });
+        };
+        cardElement.addEventListener('click', clickHandler);
+        cardElement._clickHandler = clickHandler;
+        
+        // Touch events cho mobile
+        const touchStartHandler = (e) => {
+            e.preventDefault();
+            this.handleTouchStart(e, index);
+        };
+        cardElement.addEventListener('touchstart', touchStartHandler);
+        cardElement._touchStartHandler = touchStartHandler;
+        
+        const touchEndHandler = (e) => {
+            e.preventDefault();
+            this.handleTouchEnd(e, index);
+        };
+        cardElement.addEventListener('touchend', touchEndHandler);
+        cardElement._touchEndHandler = touchEndHandler;
     }
 
     /**
@@ -142,25 +178,33 @@ class EventManager {
      * @param {number} index - Index của card
      */
     setupClickEventsForAll(cardElement, index) {
-        cardElement.addEventListener('click', (e) => {
+        // Xóa events cũ trước khi thêm mới
+        this.removeCardEvents(cardElement);
+        
+        // Mouse click events
+        const clickHandler = (e) => {
             this.handleCardClick(e, index);
-        });
+        };
+        cardElement.addEventListener('click', clickHandler);
+        cardElement._clickHandler = clickHandler;
+        
+        // Touch events cho mobile
+        const touchStartHandler = (e) => {
+            e.preventDefault();
+            this.handleTouchStart(e, index);
+        };
+        cardElement.addEventListener('touchstart', touchStartHandler);
+        cardElement._touchStartHandler = touchStartHandler;
+        
+        const touchEndHandler = (e) => {
+            e.preventDefault();
+            this.handleTouchEnd(e, index);
+        };
+        cardElement.addEventListener('touchend', touchEndHandler);
+        cardElement._touchEndHandler = touchEndHandler;
     }
 
-    /**
-     * Setup drop events cho tất cả cards
-     * @param {HTMLElement} cardElement - DOM element của card
-     * @param {number} index - Index của card
-     */
-    setupDropEvents(cardElement, index) {
-        cardElement.addEventListener('dragover', (e) => {
-            this.handleDragOver(e);
-        });
 
-        cardElement.addEventListener('drop', (e) => {
-            this.handleDrop(e);
-        });
-    }
 
     /**
      * Setup long press events cho cards
@@ -170,30 +214,26 @@ class EventManager {
     setupLongPressEvents(cardElement, index) {
         // ===== SETUP LONG PRESS CHO TẤT CẢ CARDS (BAO GỒM CHARACTER) =====
         // Mouse events cho long press
-        cardElement.addEventListener('mousedown', (e) => {
+        const mouseDownHandler = (e) => {
             this.handleLongPressStart(e, index);
-        });
+        };
+        cardElement.addEventListener('mousedown', mouseDownHandler);
+        cardElement._mouseDownHandler = mouseDownHandler;
 
-        cardElement.addEventListener('mouseup', (e) => {
+        const mouseUpHandler = (e) => {
             this.handleLongPressEnd(e);
-        });
+        };
+        cardElement.addEventListener('mouseup', mouseUpHandler);
+        cardElement._mouseUpHandler = mouseUpHandler;
 
-        cardElement.addEventListener('mouseleave', (e) => {
+        const mouseLeaveHandler = (e) => {
             this.handleLongPressCancel(e);
-        });
+        };
+        cardElement.addEventListener('mouseleave', mouseLeaveHandler);
+        cardElement._mouseLeaveHandler = mouseLeaveHandler;
 
-        // Touch events cho long press
-        cardElement.addEventListener('touchstart', (e) => {
-            this.handleLongPressStart(e, index);
-        });
-
-        cardElement.addEventListener('touchend', (e) => {
-            this.handleLongPressEnd(e);
-        });
-
-        cardElement.addEventListener('touchcancel', (e) => {
-            this.handleLongPressCancel(e);
-        });
+        // Touch events cho long press (sử dụng cùng touch handler với click)
+        // Long press sẽ được xử lý trong handleTouchEnd
     }
 
     /**
@@ -202,7 +242,7 @@ class EventManager {
      * @param {number} index - Index của character
      */
     handleCharacterClick(e, index) {
-        // Removed hint functionality - có thể thêm hint sau này
+        // TODO: Có thể thêm hint functionality sau này
     }
 
     /**
@@ -211,9 +251,9 @@ class EventManager {
      * @param {number} index - Index của card
      */
     handleCardClick(e, index) {
+        console.log('CardClick thanh cong', e, index);
         // ===== KIỂM TRA ANIMATION STATE =====
         if (this.animationManager.isCurrentlyAnimating()) {
-            console.log(`🎬 Bỏ qua click vì đang có animation`);
             return;
         }
 
@@ -240,7 +280,7 @@ class EventManager {
             if (characterIndex !== null && this.uiManager.isValidMove(characterIndex, index, this.cardManager)) {
                 this.interactWithTreasure(index);
             } else {
-                console.log(`💎 Không thể tương tác với treasure từ xa. Cần di chuyển đến vị trí bên cạnh.`);
+                // Không thể tương tác với treasure từ xa
             }
         }
         // ===== XỬ LÝ CLICK VÀO BOOM (CHỈ TƯƠNG TÁC KHI Ở BÊN CẠNH) =====
@@ -249,11 +289,12 @@ class EventManager {
             if (characterIndex !== null && this.uiManager.isValidMove(characterIndex, index, this.cardManager)) {
                 this.interactWithBoom(index);
             } else {
-                console.log(`💥 Không thể tương tác với boom từ xa. Cần di chuyển đến vị trí bên cạnh.`);
+                // Không thể tương tác với boom từ xa
             }
         }
         else if (cardElement.classList.contains('valid-target')) {
             // ===== XỬ LÝ CLICK VÀO TARGET HỢP LỆ =====
+            // nghi ngờ code cũ có thể có xóa đoạn này
             const characterIndex = this.cardManager.findCharacterIndex();
             if (characterIndex !== null && this.uiManager.isValidMove(characterIndex, index, this.cardManager)) {
                 this.moveCharacter(characterIndex, index);
@@ -262,73 +303,22 @@ class EventManager {
         }
     }
 
-    /**
-     * Xử lý bắt đầu drag
-     * @param {Event} e - Drag event
-     * @param {number} index - Index của card đang drag
-     */
-    handleDragStart(e, index) {
-        if (this.cardManager.getCard(index).type !== 'character') {
-            e.preventDefault(); // Chỉ character mới có thể drag
-            return;
-        }
-        
-        // ===== THIẾT LẬP DRAG STATE =====
-        this.gameState.setDraggedCard(index);
-        this.gameState.setDragStartPos({ row: Math.floor(index / 3), col: index % 3 });
-        e.target.closest('.card').classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', e.target.outerHTML);
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
-     * Xử lý kết thúc drag
-     * @param {Event} e - Drag event
-     */
-    handleDragEnd(e) {
-        e.target.closest('.card').classList.remove('dragging');
-        this.uiManager.clearValidTargets(); // Xóa highlight
-        this.gameState.clearDraggedCard(); // Reset drag state
-        this.gameState.clearDragStartPos();
-    }
-
-    /**
-     * Xử lý drag over
-     * @param {Event} e - Drag event
-     */
-    handleDragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    /**
-     * Xử lý drop
-     * @param {Event} e - Drop event
-     */
-    handleDrop(e) {
-        e.preventDefault();
-        
-        // ===== KIỂM TRA ANIMATION STATE =====
-        if (this.animationManager.isCurrentlyAnimating()) {
-            console.log(`🎬 Bỏ qua drop vì đang có animation`);
-            return;
-        }
-        
-        const targetCard = e.target.closest('.card');
-        if (!targetCard) return;
-        
-        const targetIndex = this.uiManager.getCardIndexFromElement(targetCard);
-        
-        const draggedCardIndex = this.gameState.getDraggedCard();
-        if (draggedCardIndex !== null && this.cardManager.getCard(draggedCardIndex).type === 'character') {
-            if (targetIndex !== null && this.uiManager.isValidMove(draggedCardIndex, targetIndex, this.cardManager)) {
-                this.moveCharacter(draggedCardIndex, targetIndex); // Di chuyển character
-            }
-        }
-    }
-
-    /**
-     * Xử lý touch start
+     * Xử lý touch start cho mobile
      * @param {Event} e - Touch event
      * @param {number} index - Index của card
      */
@@ -338,22 +328,10 @@ class EventManager {
         // ===== LƯU THÔNG TIN TOUCH =====
         this.gameState.setTouchStartTime(Date.now());
         this.gameState.setTouchStartPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-        
-        // ===== KHÔNG GỌI LONG PRESS Ở ĐÂY NỮA =====
-        // Long press sẽ được xử lý bởi setupLongPressEvents riêng biệt
     }
 
     /**
-     * Xử lý touch move
-     * @param {Event} e - Touch event
-     */
-    handleTouchMove(e) {
-        e.preventDefault();
-        // Không làm gì - chỉ để ngăn scroll
-    }
-
-    /**
-     * Xử lý touch end
+     * Xử lý touch end cho mobile
      * @param {Event} e - Touch event
      * @param {number} index - Index của card
      */
@@ -366,21 +344,32 @@ class EventManager {
         const touchStartPos = this.gameState.getTouchStartPos();
         const touchEndPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
         
+        // ===== KIỂM TRA NULL SAFETY =====
+        if (!touchStartTime || !touchStartPos) {
+            // Nếu không có thông tin touch start, bỏ qua
+            this.gameState.clearTouchStartTime();
+            this.gameState.clearTouchStartPos();
+            return;
+        }
+        
         // ===== TÍNH KHOẢNG CÁCH DI CHUYỂN =====
         const distance = Math.sqrt(
             Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
             Math.pow(touchEndPos.y - touchStartPos.y, 2)
         );
         
-        // ===== KHÔNG GỌI LONG PRESS END Ở ĐÂY NỮA =====
-        // Long press end sẽ được xử lý bởi setupLongPressEvents riêng biệt
+        const touchDuration = touchEndTime - touchStartTime;
         
+        // ===== XỬ LÝ LONG PRESS =====
+        if (touchDuration >= this.gameState.getLongPressDelay()) {
+            // Long press - hiển thị thông tin card
+            this.uiManager.showCardInfo(index, this.cardManager);
+        }
         // ===== XỬ LÝ TAP =====
-        // Nếu là tap (thời gian ngắn và khoảng cách nhỏ)
-        if (touchEndTime - touchStartTime < 300 && distance < 10) {
+        else if (touchDuration < 300 && distance < 10) {
+            // Tap - thực hiện hành động click
             // ===== KIỂM TRA ANIMATION STATE =====
             if (this.animationManager.isCurrentlyAnimating()) {
-                console.log(`🎬 Bỏ qua tap vì đang có animation`);
                 return;
             }
             
@@ -412,7 +401,6 @@ class EventManager {
         // Chỉ bắt đầu timer nếu chưa có timer nào
         if (!this.gameState.getLongPressTimer()) {
             const timer = setTimeout(() => {
-                console.log(`📋 Long press triggered for card ${index}`);
                 this.uiManager.showCardInfo(index, this.cardManager); // Hiển thị thông tin thẻ
             }, this.gameState.getLongPressDelay());
             this.gameState.setLongPressTimer(timer);
@@ -430,7 +418,6 @@ class EventManager {
         const currentTime = Date.now();
         
         if (touchStartTime && (currentTime - touchStartTime) < this.gameState.getLongPressDelay()) {
-            console.log(`📋 Long press cancelled - time: ${currentTime - touchStartTime}ms`);
             this.gameState.clearLongPressTimer();
         }
         
@@ -443,7 +430,6 @@ class EventManager {
      * @param {Event} e - Mouse/Touch event
      */
     handleLongPressCancel(e) {
-        console.log(`📋 Long press cancelled`);
         this.gameState.clearLongPressTimer();
         this.gameState.clearTouchStartTime();
     }
@@ -456,15 +442,6 @@ class EventManager {
     moveCharacter(fromIndex, toIndex) {
         // ===== KIỂM TRA ANIMATION STATE =====
         if (this.animationManager.isCurrentlyAnimating()) {
-            console.log(`🎬 Bỏ qua input vì đang có animation`);
-            return;
-        }
-
-        // ===== KIỂM TRA TÍNH HỢP LỆ =====
-        if (!this.uiManager.isValidMove(fromIndex, toIndex, this.cardManager)) return;
-        
-        if (this.cardManager.getCard(toIndex).type === 'character') {
-            console.warn('Attempted to eat character card - prevented');
             return;
         }
 
@@ -472,100 +449,36 @@ class EventManager {
         this.animationManager.startAnimation();
 
         // ===== XỬ LÝ ĂN THẺ =====
-        console.log(`🎯 moveCharacter: Bắt đầu xử lý ăn thẻ từ ${fromIndex} đến ${toIndex}`);
         const eatingResult = this.combatManager.processCardEating(fromIndex, toIndex);
         
-        // ===== TĂNG MOVES KHI WARRIOR DI CHUYỂN =====
-        this.gameState.incrementMoves();
-        
-        // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
-        this.onMoveCompleted();
-        
         if (eatingResult === true) {
-            console.log(`⚔️ Đã xử lý combat (tấn công từ xa) - không cần làm gì thêm`);
-            
-            // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS (SAU KHI TẤN CÔNG TỪ XA) =====
-            this.decreaseBoomCountdown();
-            
-            this.animationManager.endAnimation(); // Kết thúc animation
+            this.onMoveCompleted(); 
+            this.animationManager.endAnimation();
             return;
-        }
-
-        if (eatingResult) {
-            // ===== CẬP NHẬT SCORE =====
-            console.log(`🎯 Eating result:`, eatingResult);
-            console.log(`🎯 Score from eatingResult:`, eatingResult.score);
-            console.log(`🎯 Card type:`, eatingResult.type);
-            
-            // ===== XỬ LÝ SHUFFLE EFFECT CHO QUICKSAND =====
-            if (eatingResult.shuffleEffect) {
-                console.log(`🔄 Quicksand shuffle effect triggered`);
-                // Shuffle sẽ được xử lý sau khi thẻ đã bị ăn hoàn toàn
-            }
-            
-            // ===== HIỂN THỊ DAMAGE NẾU ĂN ENEMY =====
-            // Damage popup giờ được xử lý trong CharacterManager.updateCharacterHP()
-            
-            // ===== CẬP NHẬT UI SAU KHI ĂN THẺ =====
-            console.log(`🔄 Cập nhật UI sau khi ăn thẻ`);
-            this.animationManager.updateCharacterDisplay();
-            this.uiManager.updateSellButtonVisibility();
         }
 
         // ===== TÌM THẺ CẦN DI CHUYỂN (DOMINO EFFECT) =====
         const cardToMove = this.cardManager.findCardToMove(fromIndex, toIndex);
         
-        // ===== TÍNH TOÁN VỊ TRÍ DI CHUYỂN =====
-        const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
-        const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
-        
-        const moveX = (toPos.col - fromPos.col) * 100;
-        const moveY = (toPos.row - fromPos.row) * 100;
-        
-        // ===== LẤY CÁC ELEMENT CẦN THIẾT =====
-        const characterElement = document.querySelector(`[data-index="${fromIndex}"]`);
-        const targetElement = document.querySelector(`[data-index="${toIndex}"]`);
-        
-        if (!characterElement || !targetElement) return;
-        
-        // ===== THIẾT LẬP ANIMATION =====
-        characterElement.style.setProperty('--dual-move-x', `${moveX}px`);
-        characterElement.style.setProperty('--dual-move-y', `${moveY}px`);
-        
-        characterElement.classList.add('dual-moving'); // Animation di chuyển
-        targetElement.classList.add('dual-eating'); // Animation ăn
-        
-        // ===== ANIMATION CHO THẺ BỊ ĐẨY (DOMINO) =====
-        if (cardToMove) {
-            const cardToMoveElement = document.querySelector(`[data-index="${cardToMove.fromIndex}"]`);
-            if (cardToMoveElement) {
-                const reverseMoveX = (fromPos.col - Math.floor(cardToMove.fromIndex % 3)) * 100;
-                const reverseMoveY = (fromPos.row - Math.floor(cardToMove.fromIndex / 3)) * 100;
-                
-                cardToMoveElement.style.setProperty('--dual-reverse-x', `${reverseMoveX}px`);
-                cardToMoveElement.style.setProperty('--dual-reverse-y', `${reverseMoveY}px`);
-                cardToMoveElement.classList.add('dual-reverse'); // Animation đẩy ngược
-            }
-        }
-        
-        // ===== XỬ LÝ SAU KHI ANIMATION HOÀN THÀNH =====
-        setTimeout(() => {
+        // ===== GỌI ANIMATION MANAGER ĐỂ THỰC HIỆN ANIMATION =====
+        this.animationManager.startMoveCharacterAnimation(fromIndex, toIndex, cardToMove, () => {
+            // ===== CALLBACK SAU KHI ANIMATION HOÀN THÀNH =====
             const newCards = [...this.cardManager.getAllCards()];
             
             // ===== LƯU THÔNG TIN THẺ BỊ ĂN TRƯỚC KHI XÓA =====
             const targetCard = newCards[toIndex];
             
             // ===== CẬP NHẬT VỊ TRÍ CHARACTER =====
-            const characterCard = newCards[fromIndex]; // Lấy instance của Card
-            characterCard.position = { row: Math.floor(toIndex / 3), col: toIndex % 3 }; // Cập nhật vị trí
-            newCards[toIndex] = characterCard; // Di chuyển instance
-            newCards[fromIndex] = null; // Xóa character ở vị trí cũ
+            const characterCard = newCards[fromIndex];
+            characterCard.position = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
+            newCards[toIndex] = characterCard;
+            newCards[fromIndex] = null;
             
             // ===== XỬ LÝ THẺ BỊ ĐẨY =====
             if (cardToMove) {
-                const pushedCard = cardToMove.card; // Lấy instance của Card
-                pushedCard.position = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 }; // Cập nhật vị trí
-                newCards[fromIndex] = pushedCard; // Di chuyển instance
+                const pushedCard = cardToMove.card;
+                pushedCard.position = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
+                newCards[fromIndex] = pushedCard;
                 
                 // Tạo thẻ mới ở vị trí cũ của thẻ bị đẩy
                 const newCard = this.cardManager.createRandomCard(cardToMove.fromIndex);
@@ -589,28 +502,19 @@ class EventManager {
             // ===== SETUP EVENTS LẠI CHO CÁC THẺ MỚI =====
             this.setupCardEvents();
             
-            // ===== KIỂM TRA GAME COMPLETE =====
-            if (this.cardManager.isGameComplete()) {
-                this.animationManager.showMessage("Congratulations! You've eaten all cards!");
-            }
-            
             // ===== XỬ LÝ QUICKSAND SHUFFLE SAU KHI ĂN THẺ =====
-            console.log(`🔍 Checking targetCard:`, targetCard);
             if (targetCard && targetCard.nameId === 'quicksand') {
-                console.log(`🔄 Quicksand shuffle triggered!`);
-                
-                // Thực hiện shuffle sau khi thẻ đã bị ăn và thẻ mới đã được tạo
                 setTimeout(() => {
                     this.performQuicksandShuffleWithFlipEffect();
-                }, 100); // Chờ 100ms để đảm bảo thẻ đã được xử lý xong
+                }, 100);
             }
             
-            // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
-            this.checkCoinRowsAndColumns();
-            
+            // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
+            this.onMoveCompleted(); 
+           
             // ===== KẾT THÚC ANIMATION =====
             this.animationManager.endAnimation();
-        }, 300); // Giảm từ 400ms xuống 300ms để responsive hơn
+        });
     }
 
     /**
@@ -618,11 +522,12 @@ class EventManager {
      * Chứa tất cả logic cần chạy sau mỗi move
      */
     onMoveCompleted() {
-        console.log(`🎯 onMoveCompleted: Bắt đầu xử lý sau khi move hoàn thành`);
-        
+        // ===== TĂNG MOVES KHI WARRIOR DI CHUYỂN =====
+        this.gameState.incrementMoves();
         // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS =====
         this.decreaseBoomCountdown();
-        
+        // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
+        this.checkCoinRowsAndColumns();
         // ===== XOAY ARROW CỦA TẤT CẢ TRAP CARDS =====
         this.transformAllTrapArrows();
         
@@ -630,28 +535,18 @@ class EventManager {
         this.uiManager.updateUI();
         
         // ===== KIỂM TRA GAME OVER =====
-        if (this.combatManager.checkGameOver()) {
-            this.animationManager.triggerGameOver();
-            return;
-        }
+        // Game over được xử lý trong damageCharacterHP khi HP = 0
         
         // ===== LƯU Ý: COIN UPGRADE ĐÃ ĐƯỢC XỬ LÝ TRONG moveCharacter() =====
         // Không cần gọi checkCoinRowsAndColumns() ở đây nữa vì đã được gọi ngay sau animation
-        
-        console.log(`🎯 onMoveCompleted: Hoàn thành xử lý sau khi move`);
     }
     
     /**
      * Kiểm tra hàng và cột có 3 thẻ coin liên tục
      */
     checkCoinRowsAndColumns() {
-        console.log(`🎯 Bắt đầu kiểm tra hàng/cột coin liên tục`);
-        
         const allCards = this.cardManager.getAllCards();
         let foundUpgrade = false;
-        
-        // Debug: In ra toàn bộ board
-        this.debugPrintBoard(allCards);
         
         // Kiểm tra 3 hàng
         for (let row = 0; row < 3; row++) {
@@ -662,8 +557,8 @@ class EventManager {
             ];
             
             if (this.isCoinRow(rowCards)) {
+                // nghi ngờ firstCoin là code cũ có thể có xóa đoạn này
                 const firstCoin = rowCards.find(card => card && card.type === 'coin');
-                console.log(`🎯 Tìm thấy hàng ${row} có 3 coin ${firstCoin.nameId} liên tục!`);
                 this.processCoinRow(row, rowCards);
                 foundUpgrade = true;
             }
@@ -678,15 +573,11 @@ class EventManager {
             ];
             
             if (this.isCoinColumn(colCards)) {
+                // nghi ngờ firstCoin là code cũ có thể có xóa đoạn này
                 const firstCoin = colCards.find(card => card && card.type === 'coin');
-                console.log(`🎯 Tìm thấy cột ${col} có 3 coin ${firstCoin.nameId} liên tục!`);
                 this.processCoinColumn(col, colCards);
                 foundUpgrade = true;
             }
-        }
-        
-        if (!foundUpgrade) {
-            console.log(`🎯 Không tìm thấy hàng/cột nào có 3 coin cùng nameId`);
         }
     }
     
@@ -694,21 +585,21 @@ class EventManager {
      * Debug: In ra toàn bộ board để kiểm tra
      * @param {Array} allCards - Tất cả thẻ trên board
      */
-    debugPrintBoard(allCards) {
-        console.log(`🎯 Debug Board:`);
-        for (let row = 0; row < 3; row++) {
-            let rowStr = '';
-            for (let col = 0; col < 3; col++) {
-                const card = allCards[row * 3 + col];
-                if (card) {
-                    rowStr += `[${card.nameId || 'null'}] `;
-                } else {
-                    rowStr += `[null] `;
-                }
-            }
-            console.log(`🎯 Hàng ${row}: ${rowStr}`);
-        }
-    }
+    // debugPrintBoard(allCards) {
+    //     // console.log(`🎯 Debug Board:`);
+    //     for (let row = 0; row < 3; row++) {
+    //         let rowStr = '';
+    //         for (let col = 0; col < 3; col++) {
+    //             const card = allCards[row * 3 + col];
+    //             if (card) {
+    //                 rowStr += `[${card.nameId || 'null'}] `;
+    //             } else {
+    //                 rowStr += `[null] `;
+    //             }
+    //         }
+    //         // console.log(`🎯 Hàng ${row}: ${rowStr}`);
+    //     }
+    // }
     
     /**
      * Kiểm tra xem hàng có 3 thẻ coin cùng nameId liên tục không
@@ -718,7 +609,6 @@ class EventManager {
     isCoinRow(rowCards) {
         // Kiểm tra xem có 3 thẻ không null
         if (!rowCards || rowCards.length !== 3) {
-            console.log(`🎯 isCoinRow: Không đủ 3 thẻ`);
             return false;
         }
         
@@ -730,15 +620,12 @@ class EventManager {
         );
         
         if (coins.length !== 3) {
-            console.log(`🎯 isCoinRow: Chỉ có ${coins.length} coin thay vì 3`);
             return false;
         }
         
         // Kiểm tra xem 3 coin có cùng nameId không
         const firstCoinNameId = coins[0].nameId;
         const allSameNameId = coins.every(coin => coin.nameId === firstCoinNameId);
-        
-        console.log(`🎯 isCoinRow: ${coins.length} coins, nameId: ${firstCoinNameId}, same: ${allSameNameId}`);
         
         return allSameNameId;
     }
@@ -751,7 +638,6 @@ class EventManager {
     isCoinColumn(colCards) {
         // Kiểm tra xem có 3 thẻ không null
         if (!colCards || colCards.length !== 3) {
-            console.log(`🎯 isCoinColumn: Không đủ 3 thẻ`);
             return false;
         }
         
@@ -763,15 +649,12 @@ class EventManager {
         );
         
         if (coins.length !== 3) {
-            console.log(`🎯 isCoinColumn: Chỉ có ${coins.length} coin thay vì 3`);
             return false;
         }
         
         // Kiểm tra xem 3 coin có cùng nameId không
         const firstCoinNameId = coins[0].nameId;
         const allSameNameId = coins.every(coin => coin.nameId === firstCoinNameId);
-        
-        console.log(`🎯 isCoinColumn: ${coins.length} coins, nameId: ${firstCoinNameId}, same: ${allSameNameId}`);
         
         return allSameNameId;
     }
@@ -783,14 +666,12 @@ class EventManager {
      */
     processCoinRow(row, rowCards) {
         const firstCoin = rowCards.find(card => card && card.type === 'coin');
-        console.log(`🎯 Xử lý hàng ${row} có 3 coin ${firstCoin.nameId} liên tục`);
         
         for (let col = 0; col < 3; col++) {
             const cardIndex = row * 3 + col;
             const card = rowCards[col];
             
             if (card && typeof card.upCoinEffect === 'function') {
-                console.log(`🎯 Gọi upCoinEffect cho ${card.nameId} tại index ${cardIndex}`);
                 const result = card.upCoinEffect();
                 
                 if (result && result.type === 'coin_upgrade' && result.newCard) {
@@ -801,8 +682,6 @@ class EventManager {
                     
                     // Render thẻ mới với hiệu ứng
                     this.animationManager.renderCardsWithAppearEffect(cardIndex);
-                    
-                    console.log(`🎯 Đã thay thế ${card.nameId} bằng ${result.newCard.nameId} tại index ${cardIndex}`);
                 }
             }
         }
@@ -823,14 +702,12 @@ class EventManager {
      */
     processCoinColumn(col, colCards) {
         const firstCoin = colCards.find(card => card && card.type === 'coin');
-        console.log(`🎯 Xử lý cột ${col} có 3 coin ${firstCoin.nameId} liên tục`);
         
         for (let row = 0; row < 3; row++) {
             const cardIndex = row * 3 + col;
             const card = colCards[row];
             
             if (card && typeof card.upCoinEffect === 'function') {
-                console.log(`🎯 Gọi upCoinEffect cho ${card.nameId} tại index ${cardIndex}`);
                 const result = card.upCoinEffect();
                 
                 if (result && result.type === 'coin_upgrade' && result.newCard) {
@@ -841,8 +718,6 @@ class EventManager {
                     
                     // Render thẻ mới với hiệu ứng
                     this.animationManager.renderCardsWithAppearEffect(cardIndex);
-                    
-                    console.log(`🎯 Đã thay thế ${card.nameId} bằng ${result.newCard.nameId} tại index ${cardIndex}`);
                 }
             }
         }
@@ -951,10 +826,7 @@ class EventManager {
                 this.uiManager.updateSellButtonVisibility();
                 this.setupCardEvents();
                 
-                // Kiểm tra game over sau khi shuffle
-                if (this.combatManager.checkGameOver()) {
-                    this.animationManager.triggerGameOver();
-                }
+                // Game over được xử lý trong damageCharacterHP khi HP = 0
             }, 600); // Thời gian flip animation
         }, 50); // Delay nhỏ để bắt đầu flip trước
     }
@@ -966,21 +838,19 @@ class EventManager {
     interactWithTreasure(treasureIndex) {
         // ===== KIỂM TRA ANIMATION STATE =====
         if (this.animationManager.isCurrentlyAnimating()) {
-            console.log(`🎬 Bỏ qua tương tác vì đang có animation`);
+            //🎬 Bỏ qua tương tác vì đang có animation
             return;
         }
 
         const treasureCard = this.cardManager.getCard(treasureIndex);
         if (!treasureCard || treasureCard.type !== 'treasure') {
-            console.log(`❌ Không phải treasure card tại index ${treasureIndex}`);
+            // console.log(`❌ Không phải treasure card tại index ${treasureIndex}`);
             return;
         }
 
         // ===== BẮT ĐẦU ANIMATION TRACKING =====
         this.animationManager.startAnimation();
 
-        console.log(`💎 Tương tác với treasure tại index ${treasureIndex}`);
-        
         // ===== TÌM CHARACTER INDEX =====
         const characterIndex = this.cardManager.findCharacterIndex();
         
@@ -997,12 +867,8 @@ class EventManager {
         this.onMoveCompleted();
         
         if (interactResult) {
-            console.log(`💎 Interact result:`, interactResult);
-            
             // ===== XỬ LÝ KHI TREASURE HẾT DURABILITY =====
             if (interactResult.type === 'treasure_killed_by_interact') {
-                console.log(`💎 Treasure hết durability, tạo reward mới`);
-                
                 // Sử dụng reward card từ treasure
                 setTimeout(() => {
                     const rewardCard = interactResult.reward.card;
@@ -1037,21 +903,19 @@ class EventManager {
     interactWithBoom(boomIndex) {
         // ===== KIỂM TRA ANIMATION STATE =====
         if (this.animationManager.isCurrentlyAnimating()) {
-            console.log(`🎬 Bỏ qua tương tác boom vì đang có animation`);
+            //🎬 Bỏ qua tương tác vì đang có animation
             return;
         }
 
         const boomCard = this.cardManager.getCard(boomIndex);
         if (!boomCard || boomCard.type !== 'boom') {
-            console.log(`❌ Không phải boom card tại index ${boomIndex}`);
+            // console.log(`❌ Không phải boom card tại index ${boomIndex}`);
             return;
         }
 
         // ===== BẮT ĐẦU ANIMATION TRACKING =====
         this.animationManager.startAnimation();
 
-        console.log(`💥 Tương tác với boom tại index ${boomIndex}`);
-        
         // ===== TÌM CHARACTER INDEX =====
         const characterIndex = this.cardManager.findCharacterIndex();
         
@@ -1065,12 +929,8 @@ class EventManager {
         this.onMoveCompleted();
         
         if (interactResult) {
-            console.log(`💥 Interact result:`, interactResult);
-            
             // ===== XỬ LÝ KHI BOOM ĐỔI VỊ TRÍ =====
             if (interactResult.type === 'boom_interact') {
-                console.log(`💥 Boom đổi vị trí với character`);
-                
                 // Sử dụng vị trí mới sau khi đổi chỗ
                 const newCharacterIndex = interactResult.boomPosition; // Character giờ ở vị trí cũ của boom
                 const newBoomIndex = interactResult.characterPosition; // Boom giờ ở vị trí cũ của character
@@ -1087,22 +947,22 @@ class EventManager {
         }
         
         // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS (SAU KHI MOVE HOÀN THÀNH) =====
-        this.decreaseBoomCountdown();
+        //this.decreaseBoomCountdown();
     }
 
     /**
      * Xử lý khi click New Game
      */
     onNewGame() {
-        // ===== FORCE RESET ANIMATION STATE =====
-        this.animationManager.forceResetAnimationState();
-        
         this.gameState.reset(); // Reset score, moves
         this.characterManager.reset(); // Reset HP, weapon
         this.cardManager.createCards(this.characterManager); // Tạo cards mới với characterManager
         this.animationManager.renderCards(); // Render cards
         this.uiManager.updateUI(); // Cập nhật UI
         this.setupCardEvents(); // Setup events
+        
+        // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
+        this.checkCoinRowsAndColumns();
     }
 
 
@@ -1111,13 +971,11 @@ class EventManager {
      * Xử lý khi click Sell Weapon
      */
     onSellWeapon() {
-        const weaponDurability = this.characterManager.getWeaponDurability();
-        console.log(`⚔️ Selling weapon: durability=${weaponDurability}`);
+        const weaponDurability = this.characterManager.getCharacterWeaponDurability();
         if (weaponDurability > 0) {
             // Bán vũ khí và nhận điểm
             const sellValue = this.characterManager.sellWeapon();
             this.gameState.addScore(sellValue);
-            console.log(`💰 Bán vũ khí với giá trị: ${sellValue}`);
             this.uiManager.updateUI();
             this.updateSellButtonVisibility(); // Cập nhật hiển thị nút Sell
         }
@@ -1128,7 +986,7 @@ class EventManager {
      */
     updateSellButtonVisibility() {
         const sellButton = document.getElementById('sell-weapon');
-        const weaponDurability = this.characterManager.getWeaponDurability();
+        const weaponDurability = this.characterManager.getCharacterWeaponDurability();
         
         if (weaponDurability > 0) {
             sellButton.style.display = 'inline-block';
@@ -1149,7 +1007,6 @@ class EventManager {
             const card = cards[i];
             if (card && card.type === 'boom') {
                 card.countdown -= 1;
-                console.log(`💥 Boom tại index ${i}: countdown = ${card.countdown}`);
                 
                 // Cập nhật hiển thị countdown
                 this.animationManager.updateBoomDisplay(i);
@@ -1166,8 +1023,6 @@ class EventManager {
         
         // Xử lý các boom nổ
         if (explodingBooms.length > 0) {
-            console.log(`💥 Có ${explodingBooms.length} boom sắp nổ!`);
-            
             // Xử lý từng boom nổ
             explodingBooms.forEach((boomData, index) => {
                 setTimeout(() => {
@@ -1183,8 +1038,6 @@ class EventManager {
      * @param {number} boomIndex - Index của boom card
      */
     handleBoomExplosion(boomCard, boomIndex) {
-        console.log(`💥 Boom nổ tại index ${boomIndex}!`);
-        
         // Gọi hàm explodeEffect của boom
         const explosionResult = boomCard.explodeEffect(
             this.characterManager, 
@@ -1240,8 +1093,6 @@ class EventManager {
                 
                 // Cập nhật UI
                 this.uiManager.updateUI();
-                
-                console.log(`💥 ${explosionResult.effect}`);
             }, 500); // Đợi animation hoàn thành
         }
     }
@@ -1250,9 +1101,6 @@ class EventManager {
      * Xử lý khi restart từ game over dialog
      */
     onRestartFromGameOver() {
-        // ===== FORCE RESET ANIMATION STATE =====
-        this.animationManager.forceResetAnimationState();
-        
         this.animationManager.hideGameOverDialog(); // Ẩn dialog
         this.onNewGame(); // Bắt đầu game mới
     }

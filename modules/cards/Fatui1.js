@@ -7,7 +7,8 @@ class Fatui1 extends Card {
             "Fatui - Người Xử Lý Nợ Hỏa", 
             "enemy", 
             "resources/fatui1.webp", 
-            "Quái vật Fatui mạnh"
+            "Quái vật Fatui mạnh",
+            "fatui1"
         );
         this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
         this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
@@ -22,7 +23,7 @@ class Fatui1 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Character bị mất HP bằng với HP của quái vật
-        characterManager.updateCharacterHP(this.hp);
+        characterManager.damageCharacterHP(this.hp);
         
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
@@ -43,7 +44,7 @@ class Fatui1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Quái vật mạnh - HP: ${this.hp}`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Người Xử Lý Nợ Hỏa là chiến binh tinh nhuệ của Fatui. Chuyên về các nhiệm vụ thu hồi nợ và sử dụng sức mạnh hỏa nguyên tố để đe dọa.</i>`,
             hp: this.hp
         };
     }

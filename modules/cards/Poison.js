@@ -7,7 +7,8 @@ class Poison extends Card {
             "Súp Huyền Bí", 
             "food", 
             "resources/poison.webp", 
-            "Chất độc"
+            "Chất độc",
+            "poison"
         );
         this.poisonDuration = Math.floor(Math.random() * 9) + 2; // Độc kéo dài 2-10 lượt
         this.heal = this.poisonDuration;  
@@ -39,7 +40,7 @@ class Poison extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Chất độc nguy hiểm - Gây độc trong ${this.poisonDuration} lượt`,
+            description: `<strong>${this.type}</strong> - Poison: <span class="poison-text">${this.poisonDuration}</span><br><i>Súp Huyền Bí là món ăn độc hại được chế biến từ các nguyên liệu bí ẩn. Khi ăn sẽ bị nhiễm độc và mất HP dần dần.</i>`,
             poisonDuration: this.poisonDuration
         };
     }

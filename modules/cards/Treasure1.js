@@ -7,7 +7,8 @@ class Treasure1 extends Card {
             "Kho Báu Dưới Đáy Biển", 
             "treasure", 
             "resources/treasure1.webp", 
-            "Kho Báu Dưới Đáy Biển"
+            "Kho Báu Dưới Đáy Biển",
+            "treasure1"
         );
         this.score = 0; // Điểm số nhận được
         this.durability = 1; // Độ bền của kho báu
@@ -65,7 +66,7 @@ class Treasure1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `Kho Báu Dưới Đáy Biển có thể mở ra điều bất ngờ`,
+            description: `<strong>${this.type}</strong> - Effect: <span class="effect-text">Random Reward</span><br><i>Kho Báu Dưới Đáy Biển chứa đựng những bí mật của đại dương. Khi mở ra có thể nhận được coin, thức ăn hoặc vũ khí ngẫu nhiên.</i>`,
             score: 0
         };
     }

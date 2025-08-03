@@ -110,59 +110,23 @@ class CardFactory {
      * @returns {Card} Thẻ ngẫu nhiên
      */
     createRandomCard(characterManager = null) {
-        console.log(`🎲 [DEBUG] CardFactory.createRandomCard called`);
         const random = Math.random() * 100;
         let cumulativeWeight = 0;
         
         for (const [cardType, weight] of Object.entries(this.cardWeights)) {
             cumulativeWeight += weight;
             if (random <= cumulativeWeight) {
-                console.log(`🎲 [DEBUG] Selected card type: ${cardType}, weight=${weight}, random=${random}`);
                 // Nếu là Coin và có characterManager, tạo Coin động dựa trên elementCoin
                 if (cardType === 'Coin' && characterManager) {
-                    console.log(`🪙 [DEBUG] Creating dynamic coin`);
                     return this.createDynamicCoin(characterManager);
                 }
                 const card = new this.cardClasses[cardType]();
-                console.log(`🎲 [DEBUG] Created card: type=${card.type}, image=${card.image}`);
                 return card;
             }
         }
         
-        // Fallback về Fatui0 nếu có lỗi
-        console.log(`🎲 [DEBUG] Fallback to Fatui0`);
-        return new Fatui0();
-    }
-
-
-
-    /**
-     * Tạo Coin động dựa trên elementCoin của Warrior
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @returns {Card} Thẻ Coin động
-     */
-    createDynamicCoin(characterManager) {
-        // Lấy elementCoin từ Warrior
-        const elementCoin = characterManager.getCharacterElementCoin();
-        
-        // Tạo Coin class tương ứng với elementCoin
-        const coinClassName = `Coin${elementCoin}`;
-        
-        console.log(`🎯 [DEBUG] Creating dynamic coin: elementCoin=${elementCoin}, className=${coinClassName}`);
-        console.log(`🎯 [DEBUG] Available coin classes:`, Object.keys(this.cardClasses).filter(key => key.startsWith('Coin')));
-        
-        if (this.cardClasses[coinClassName]) {
-            console.log(`✅ [DEBUG] Successfully created ${coinClassName}`);
-            const coin = new this.cardClasses[coinClassName]();
-            console.log(`🖼�? [DEBUG] Created coin: image=${coin.image}, score=${coin.score}, type=${coin.type}`);
-            return coin;
-        }
-        
-        // Fallback v�? Coin0 nếu không tìm thấy class tương ứng
-        console.log(`⚠�? [DEBUG] Fallback to Coin0 - ${coinClassName} not found`);
-        const fallbackCoin = new Coin0();
-        console.log(`🖼�? [DEBUG] Fallback coin: image=${fallbackCoin.image}, score=${fallbackCoin.score}, type=${fallbackCoin.type}`);
-        return fallbackCoin;
+        // Fallback về null nếu có lỗi
+        return null;
     }
 
     /**
@@ -178,14 +142,60 @@ class CardFactory {
     }
 
     /**
-     * Tạo Coin động dựa trên elementCoin
+     * Tạo Coin động dựa trên elementCoin của Warrior
      * @param {CharacterManager} characterManager - Manager quản lý character
      * @returns {Card} Thẻ Coin động
      */
-    createCoinByElement(characterManager) {
-        return this.createDynamicCoin(characterManager);
+    createDynamicCoin(characterManager) {
+        // Lấy elementCoin từ Warrior
+        const elementCoin = characterManager.getCharacterElementCoin();
+        
+        // Tạo Coin class tương ứng với elementCoin
+        const coinClassName = `Coin${elementCoin}`;
+                
+        if (this.cardClasses[coinClassName]) {
+            const coin = new this.cardClasses[coinClassName]();
+            return coin;
+        }
+
+        // Fallback về Coin0 nếu không tìm thấy class tương ứng
+        return new Coin0();
     }
 
+    /**
+     * Tạo CoinUp động dựa trên elementCoin của Character
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {number} score - Điểm cho CoinUp (optional)
+     * @returns {Card} Thẻ CoinUp động
+     */
+    createDynamicCoinUp(characterManager, score = null) {
+    // Lấy elementCoin từ Warrior
+    const elementCoin = characterManager.getCharacterElementCoin();
+    
+    // Tạo CoinUp class tương ứng với elementCoin
+    const coinUpClassName = `CoinUp${elementCoin}`;
+
+    if (this.cardClasses[coinUpClassName]) {
+        const coinUp = new this.cardClasses[coinUpClassName]();
+        
+        // Set điểm nếu được truyền vào
+        if (score !== null) {
+            coinUp.score = score;
+        }
+        
+        return coinUp;
+    }
+    
+    // Fallback về CoinUp0 nếu không tìm thấy class tương ứng
+    const fallbackCoinUp = new CoinUp0();
+        
+        // Set điểm nếu được truyền vào
+        if (score !== null) {
+            fallbackCoinUp.score = score;
+        }
+        
+        return fallbackCoinUp;
+    }
     /**
      * Tạo Warrior
      * @returns {Warrior} Thẻ Warrior
@@ -210,60 +220,4 @@ class CardFactory {
         return Object.keys(this.cardClasses);
     }
 
-    /**
-     * Tạo CoinUp động dựa trên elementCoin của Warrior
-     * @param {CharacterManager} characterManager - Manager quản lý character
-     * @param {number} score - Điểm cho CoinUp (optional)
-     * @returns {Card} Thẻ CoinUp động
-     */
-    createDynamicCoinUp(characterManager, score = null) {
-        // Lấy elementCoin từ Warrior
-        const elementCoin = characterManager.getCharacterElementCoin();
-        
-        // Tạo CoinUp class tương ứng với elementCoin
-        const coinUpClassName = `CoinUp${elementCoin}`;
-        
-        console.log(`🎯 [DEBUG] Creating dynamic coinUp: elementCoin=${elementCoin}, className=${coinUpClassName}, score=${score}`);
-        console.log(`🎯 [DEBUG] Available coinUp classes:`, Object.keys(this.cardClasses).filter(key => key.startsWith('CoinUp')));
-        
-        if (this.cardClasses[coinUpClassName]) {
-            console.log(`✅ [DEBUG] Successfully created ${coinUpClassName}`);
-            const coinUp = new this.cardClasses[coinUpClassName]();
-            
-            // Set điểm nếu được truyền vào
-            if (score !== null) {
-                coinUp.score = score;
-                console.log(`💰 [DEBUG] Set custom score for CoinUp: ${score}`);
-            }
-            
-            console.log(`🖼️ [DEBUG] Created coinUp: image=${coinUp.image}, score=${coinUp.score}, type=${coinUp.type}`);
-            return coinUp;
-        }
-        
-        // Fallback về CoinUp0 nếu không tìm thấy class tương ứng
-        console.log(`⚠️ [DEBUG] Fallback to CoinUp0 - ${coinUpClassName} not found`);
-        const fallbackCoinUp = new CoinUp0();
-        
-        // Set điểm nếu được truyền vào
-        if (score !== null) {
-            fallbackCoinUp.score = score;
-            console.log(`💰 [DEBUG] Set custom score for fallback CoinUp: ${score}`);
-        }
-        
-        console.log(`🖼️ [DEBUG] Fallback coinUp: image=${fallbackCoinUp.image}, score=${fallbackCoinUp.score}, type=${fallbackCoinUp.type}`);
-        return fallbackCoinUp;
-    }
-
-    /**
-     * Lấy thông tin hiển thị cho tất cả thẻ
-     * @returns {Object} Thông tin tất cả thẻ
-     */
-    getAllCardInfo() {
-        const info = {};
-        for (const [cardType, CardClass] of Object.entries(this.cardClasses)) {
-            const card = new CardClass();
-            info[cardType] = card.getDisplayInfo();
-        }
-        return info;
-    }
 } 
