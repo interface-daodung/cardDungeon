@@ -452,7 +452,7 @@ class EventManager {
         const eatingResult = this.combatManager.processCardEating(fromIndex, toIndex);
         
         if (eatingResult === true) {
-            this.onMoveCompleted(); 
+            // onMoveCompleted() sẽ được gọi sau khi tạo thẻ mới trong attackMonsterWithWeapon
             this.animationManager.endAnimation();
             return;
         }
@@ -495,8 +495,39 @@ class EventManager {
             // ===== CẬP NHẬT HIỂN THỊ =====
             this.animationManager.updateCharacterDisplay();
             
-            const newCardIndex = cardToMove ? cardToMove.fromIndex : fromIndex;
-            this.animationManager.renderCardsWithAppearEffect(newCardIndex);
+            // ===== CẬP NHẬT CÁC THẺ THAY ĐỔI =====
+            // Character và card bị đẩy: cập nhật bằng updateEntireGrid (không có hiệu ứng)
+            // Thẻ mới: cập nhật bằng renderCardsWithAppearEffect (có hiệu ứng xuất hiện)
+            
+            // Cập nhật tất cả thẻ (character, card bị đẩy, thẻ mới) bằng updateEntireGrid
+            this.animationManager.updateEntireGrid();
+            
+            // Thêm hiệu ứng xuất hiện cho thẻ mới
+            if (cardToMove) {
+                // Thẻ mới được tạo ở vị trí cũ của thẻ bị đẩy
+                this.animationManager.renderCardsWithAppearEffect(cardToMove.fromIndex);
+            } else {
+                // Thẻ mới được tạo ở vị trí cũ của character
+                this.animationManager.renderCardsWithAppearEffect(fromIndex);
+            }
+            
+            // Thêm hiệu ứng xuất hiện cho thẻ mới
+            // newCardIndexes.forEach(index => {
+            //     const card = this.cardManager.getAllCards()[index];
+            //     if (card) {
+            //         // Sử dụng renderCardsWithAppearEffect thay vì createOrUpdateCardElement
+            //         this.animationManager.renderCardsWithAppearEffect(index);
+            //             // Thêm class appearing cho thẻ mới
+            //             // const cardElement = document.querySelector(`[data-index="${index}"]`);
+            //             // if (cardElement) {
+            //             //     cardElement.classList.add('appearing');
+            //             //     setTimeout(() => {
+            //             //         cardElement.classList.remove('appearing');
+            //             //     }, 500);
+            //             // }
+            //     }
+            // });
+            
             this.uiManager.updateUI();
             
             // ===== SETUP EVENTS LẠI CHO CÁC THẺ MỚI =====
@@ -511,7 +542,7 @@ class EventManager {
             
             // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
             this.onMoveCompleted(); 
-           
+        
             // ===== KẾT THÚC ANIMATION =====
             this.animationManager.endAnimation();
         });
@@ -527,7 +558,11 @@ class EventManager {
         // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS =====
         this.decreaseBoomCountdown();
         // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
-        this.checkCoinRowsAndColumns();
+        const foundUpgrade = this.checkCoinRowsAndColumns();
+        if (foundUpgrade) {
+            console.log('foundUpgrade thành công ------------------------------', foundUpgrade);
+        }
+
         // ===== XOAY ARROW CỦA TẤT CẢ TRAP CARDS =====
         this.transformAllTrapArrows();
         
@@ -579,6 +614,7 @@ class EventManager {
                 foundUpgrade = true;
             }
         }
+        return foundUpgrade;
     }
     
     /**
@@ -666,6 +702,7 @@ class EventManager {
      */
     processCoinRow(row, rowCards) {
         const firstCoin = rowCards.find(card => card && card.type === 'coin');
+        const upgradedCardIndexes = []; // Lưu danh sách các thẻ được upgrade
         
         for (let col = 0; col < 3; col++) {
             const cardIndex = row * 3 + col;
@@ -680,10 +717,16 @@ class EventManager {
                     result.newCard.position = { row: row, col: col };
                     this.cardManager.updateCard(cardIndex, result.newCard);
                     
-                    // Render thẻ mới với hiệu ứng
-                    this.animationManager.renderCardsWithAppearEffect(cardIndex);
+                    // Thêm vào danh sách thẻ cần render
+                    upgradedCardIndexes.push(cardIndex);
                 }
             }
+        }
+        
+        // Render tất cả thẻ được upgrade cùng lúc với hiệu ứng mượt mà
+        if (upgradedCardIndexes.length > 0) {
+            // Sử dụng upgradedCardIndexes để đảm bảo không mất thẻ
+            this.animationManager.renderListCardsWithAppearEffect(upgradedCardIndexes);
         }
         
         // Setup lại events sau khi thay thế
@@ -691,7 +734,7 @@ class EventManager {
             this.setupCardEvents();
             
             // Kiểm tra lại coin upgrade ngay lập tức sau khi tạo thẻ mới
-            this.checkCoinRowsAndColumns();
+            //this.checkCoinRowsAndColumns();
         }, 100); // Giảm delay từ 300ms xuống 100ms
     }
     
@@ -702,6 +745,7 @@ class EventManager {
      */
     processCoinColumn(col, colCards) {
         const firstCoin = colCards.find(card => card && card.type === 'coin');
+        const upgradedCardIndexes = []; // Lưu danh sách các thẻ được upgrade
         
         for (let row = 0; row < 3; row++) {
             const cardIndex = row * 3 + col;
@@ -716,10 +760,16 @@ class EventManager {
                     result.newCard.position = { row: row, col: col };
                     this.cardManager.updateCard(cardIndex, result.newCard);
                     
-                    // Render thẻ mới với hiệu ứng
-                    this.animationManager.renderCardsWithAppearEffect(cardIndex);
+                    // Thêm vào danh sách thẻ cần render
+                    upgradedCardIndexes.push(cardIndex);
                 }
             }
+        }
+        
+        // Render tất cả thẻ được upgrade cùng lúc với hiệu ứng mượt mà
+        if (upgradedCardIndexes.length > 0) {
+            // Sử dụng upgradedCardIndexes để đảm bảo không mất thẻ
+            this.animationManager.renderListCardsWithAppearEffect(upgradedCardIndexes);
         }
         
         // Setup lại events sau khi thay thế
@@ -727,7 +777,7 @@ class EventManager {
             this.setupCardEvents();
             
             // Kiểm tra lại coin upgrade ngay lập tức sau khi tạo thẻ mới
-            this.checkCoinRowsAndColumns();
+            //this.checkCoinRowsAndColumns();
         }, 100); // Giảm delay từ 300ms xuống 100ms
     }
     
@@ -861,7 +911,7 @@ class EventManager {
         const interactResult = treasureCard.interactWithCharacter(this.characterManager, this.gameState, this.cardManager);
         
         // ===== TĂNG MOVES =====
-        this.gameState.incrementMoves();
+        //this.gameState.incrementMoves();
         
         // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
         this.onMoveCompleted();
@@ -923,7 +973,7 @@ class EventManager {
         const interactResult = boomCard.interactWithCharacter(this.characterManager, this.gameState, this.cardManager, boomIndex);
         
         // ===== TĂNG MOVES =====
-        this.gameState.incrementMoves();
+        //this.gameState.incrementMoves();
         
         // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
         this.onMoveCompleted();
@@ -1073,22 +1123,13 @@ class EventManager {
                 });
             }
             
-            // Xử lý render lại các thẻ bị thay thế (coin mới được tạo)
-            if (explosionResult.affectedNonCharacterCards) {
-                explosionResult.affectedNonCharacterCards.forEach(affectedCard => {
-                    if (affectedCard.wasKilled) {
-                        // Render lại thẻ đã được thay thế bằng coin
-                        this.animationManager.renderCardsWithAppearEffect(affectedCard.index);
-                    }
-                });
-            }
-            
             // Thay thế boom bằng thẻ mới sau khi animation hoàn thành
             setTimeout(() => {
                 this.cardManager.updateCard(boomIndex, explosionResult.newCard);
                 
-                // Render lại cards với hiệu ứng xuất hiện
-                this.animationManager.renderCardsWithAppearEffect(boomIndex);
+                // Sử dụng renderListCardsWithAppearEffect để đảm bảo không mất thẻ
+                this.animationManager.renderListCardsWithAppearEffect([boomIndex]);
+                
                 this.setupCardEvents();
                 
                 // Cập nhật UI

@@ -1,50 +1,71 @@
-// Card.js - Class co b?n cho t?t c? các th?
-// Ch?c nang: Ð?nh nghia interface và thu?c tính chung cho t?t c? th?
+// Card.js - Class co ban cho tat ca cac tháº»
+// Chuc nang: dinh nghia interface va thuoc tinh chung cho tat ca tháº»
 
 class Card {
     /**
-     * Kh?i t?o th? co b?n
-     * @param {string} name - Tên th?
-     * @param {string} type - Lo?i th? (enemy, food, sword, coin, character)
-     * @param {string} image - Ðu?ng d?n hình ?nh
-     * @param {string} description - Mô t? th?
-     * @param {string} nameId - Tên c?a image file (không có extension)
+     * Khoi tao tháº» co ban
+     * @param {string} name - Ten tháº»
+     * @param {string} type - Loai tháº» (enemy, food, sword, coin, character)
+     * @param {string} image - Duong dan hinh anh
+     * @param {string} description - Mo ta tháº»
+     * @param {string} nameId - Ten cua image file (khong co extension)
      */
     constructor(name, type, image, description, nameId) {
         this.name = name;
         this.type = type;
         this.image = image;
         this.description = description;
-        this.nameId = nameId; // Fix c?ng nameId thay vì tính toán
-        this.id = null; // S? du?c set b?i CardManager
-        this.position = null; // S? du?c set b?i CardManager
+        this.nameId = nameId; // Fix cung nameId thay vÃ  tÃ­nh toÃ¡n
+        this.id = null; // So duoc set boi CardManager
+        this.position = null; // So duoc set boi CardManager
     }
 
     /**
-     * Hi?u ?ng khi th? b? an
-     * @param {CharacterManager} characterManager - Manager qu?n lý character
-     * @param {GameState} gameState - Manager qu?n lý game state
-     * @param {CardManager} cardManager - Manager qu?n lý th? (optional)
-     * @returns {Object|null} Thông tin k?t qu? ho?c null
+     * Hieu ung khi tháº» bá»‹ an
+     * @param {CharacterManager} characterManager - Manager quan ly character
+     * @param {GameState} gameState - Manager quan ly game state
+     * @param {CardManager} cardManager - Manager quan ly tháº» (optional)
+     * @returns {Object|null} Thong tin ket qua hoac null
      */
     cardEffect(characterManager, gameState, cardManager = null) {
-        // Override trong các class con
+        // Override trong cac class con
         return null;
     }
 
     /**
-     * Hi?u ?ng khi th? b? gi?t b?i vu khí
-     * @param {CharacterManager} characterManager - Manager qu?n lý character (optional)
-     * @returns {Object|null} Thông tin k?t qu? ho?c null
+     * Hieu ung khi tháº» bá»‹ giáº¿t bá»Ÿi vu kho
+     * @param {CharacterManager} characterManager - Manager quan ly character (optional)
+     * @returns {Object|null} Thong tin ket qua hoac null
      */
     killByWeaponEffect(characterManager = null) {
-        // Override trong các class enemy
+        // Override trong cac class enemy
         return null;
     }
 
     /**
-     * L?y thông tin hi?n th? cho dialog
-     * @returns {Object} Thông tin d? hi?n th?
+     * Hieu ung khi tháº» nháº­n damage
+     * @param {CharacterManager} characterManager - Manager quan ly character
+     * @param {number} damage - So damage nhan duoc
+     * @param {string} damageType - Loai damage (physical, elemental, etc.)
+     * @param {GameState} gameState - Manager quan ly game state (optional)
+     * @returns {Object|null} Thong tin ket qua hoac null
+     */
+    takeDamageEffect(characterManager, damage, damageType = 'physical', gameState = null) {
+        // Override trong cac class con de xu ly damage
+        return {
+            damage: damage,
+            damageType: damageType,
+            absorbed: false,
+            reflected: false,
+            resisted: false,
+            critical: false,
+            message: `${this.name} nhan ${damage} damage ${damageType}`
+        };
+    }
+
+    /**
+     * Lay thong tin hien thi cho dialog
+     * @returns {Object} Thong tin de hien thi
      */
     getDisplayInfo() {
         return {

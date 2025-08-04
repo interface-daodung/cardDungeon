@@ -34,6 +34,6 @@ class DungeonCardGame {
         this.eventManager.setupCardEvents(); // Setup events cho từng thẻ
         
         // ===== KIỂM TRA COIN UPGRADE NGAY LẬP TỨC SAU KHI MOVE =====
-        this.checkCoinRowsAndColumns();
+        this.eventManager.checkCoinRowsAndColumns();
     }
 } 

@@ -967,18 +967,18 @@ body {
 }
 
 .card.appearing {
-    animation: appearEffect 0.5s ease-in-out forwards;
+    animation: appearEffect 0.2s ease-in-out forwards;
     z-index: 997;
 }
 
 /* NEW: Dual movement classes */
 .card.dual-moving {
-    animation: dualCardMove 0.8s ease-in-out forwards;
+    animation: dualCardMove 0.5s ease-in-out forwards;
     z-index: 1000;
 }
 
 .card.dual-reverse {
-    animation: dualCardReverse 0.8s ease-in-out forwards;
+    animation: dualCardReverse 0.5s ease-in-out forwards;
     z-index: 999;
 }
 
@@ -1314,4 +1314,175 @@ body {
     opacity: 1 !important;
     visibility: visible !important;
 } */
+
+/* ===== COWARDLY EFFECT CHO OPERATIVE CARDS ===== */
+.card.cowardly {
+    position: relative;
+}
+
+.card.cowardly::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    background: linear-gradient(to bottom, rgba(128, 0, 128, 0.6), rgba(128, 0, 128, 0.3));
+    /* border-radius: 8px; */
+    z-index: 5;
+    pointer-events: none;
+}
+
+.card.cowardly::after {
+    content: "😰";
+    position: absolute;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    z-index: 10;
+    pointer-events: none;
+    animation: cowardlyShake 2s ease-in-out infinite;
+}
+
+@keyframes cowardlyShake {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+    }
+    25% {
+        transform: translateX(-50%) translateY(-2px);
+    }
+    75% {
+        transform: translateX(-50%) translateY(2px);
+    }
+}
+
+/* Loading Screen Styles - Optimized for Performance */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.3s ease-out;
+}
+
+.loading-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-content {
+    text-align: center;
+    color: white;
+    max-width: 400px;
+    padding: 20px;
+}
+
+.loading-logo h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.loading-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+.loading-spinner {
+    margin: 30px 0;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-progress {
+    margin: 20px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    width: 0%;
+    transition: width 0.2s ease;
+    border-radius: 4px;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.loading-tips {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.loading-tips p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+}
+
+/* Responsive loading screen */
+@media (max-width: 480px) {
+    .loading-logo h1 {
+        font-size: 2rem;
+    }
+    
+    .loading-subtitle {
+        font-size: 1rem;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .loading-content {
+        padding: 15px;
+    }
+}
 

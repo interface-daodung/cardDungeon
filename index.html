@@ -9,6 +9,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <h1>CardDungeon</h1>
+                <div class="loading-subtitle">Khám phá hầm mộ bí ẩn</div>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div class="loading-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="loading-text" id="loading-text">Đang tải...</div>
+            </div>
+            <div class="loading-tips" id="loading-tips">
+                <p>💡 Mẹo: Ghép các thẻ cùng loại để tạo ra thẻ mạnh hơn!</p>
+            </div>
+        </div>
+    </div>
+
     <div class="game-container">
         <!-- Header -->
         <header class="game-header">
@@ -63,6 +85,9 @@
     </div>
 
     <!-- Load tất cả modules theo thứ tự -->
+    <!-- Load LoadingManager trước -->
+    <script src="modules/LoadingManager.js"></script>
+    
     <!-- Load Card classes trước -->
     <script src="modules/cards/Card.js"></script>
     <script src="modules/cards/Fatui0.js"></script>
