@@ -929,11 +929,20 @@ class AnimationManager {
             hpDisplay.textContent = this.characterManager.getCharacterHP();
             cardElement.appendChild(hpDisplay);
 
-            if (this.characterManager.getCharacterWeaponDurability() > 0) {
+            if (this.characterManager.hasWeapon()) {
                 const weaponDisplay = document.createElement('div');
                 weaponDisplay.className = 'weapon-display';
                 weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
                 cardElement.appendChild(weaponDisplay);
+
+                // Tạo ảnh nhỏ và thêm vào góc dưới bên phải
+                const badgeElement = document.createElement('img');
+                badgeElement.className = 'card-badge';
+                badgeElement.src = `resources/${this.characterManager.getCharacterWeaponObject().nameId}_Badge.webp`; // thay bằng đường dẫn ảnh thực tế
+                badgeElement.alt = 'badge';
+                cardElement.appendChild(badgeElement);
+
+
             }
         }
         // Enemy card

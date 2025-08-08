@@ -314,7 +314,7 @@ class Card {
             Object.assign(this, patternLogicCoin);
         } else if (type === "food") {
             Object.assign(this, patternLogicFood);
-        } else if (type === "weapon" || type === "sword") {
+        } else if (type === "weapon") {
             Object.assign(this, patternLogicWeapon);
         } else if (type === "boom") {
             Object.assign(this, patternLogicBoom);

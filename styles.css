@@ -117,6 +117,16 @@ body {
     position: relative;
 }
 
+.card.character .card-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 32px;     /* hoặc điều chỉnh theo ý bạn */
+    height: 32px;
+    pointer-events: none; /* để không cản click vào card */
+    z-index: 2;       /* đảm bảo nằm trên nền card */
+}
+
 .card.character .hp-display {
     position: absolute;
     top: 5px;
