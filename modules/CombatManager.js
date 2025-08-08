@@ -52,6 +52,11 @@ class CombatManager {
             this.animationManager.startTrapActivationAnimation(toIndex, targetCard, this.cardManager);
         }
         
+        // // ===== XỬ LÝ QUICKSAND SHUFFLE SAU KHI ĂN THẺ =====
+        // if (targetCard && targetCard.nameId === 'quicksand') {
+        //         this.animationManager.eventManager.performQuicksandShuffleWithFlipEffect();
+        // }
+        
         // ===== TRẢ VỀ THÔNG TIN THẺ BỊ AN =====
         return result;
     }
@@ -77,19 +82,81 @@ class CombatManager {
         // ===== XỬ LÝ KẾT QUẢ SAU 150ms =====
         setTimeout(() => {
             // ===== ÁP DỤNG SÁT THƯƠNG =====
-            monster.hp = monsterHP - actualDamage; // Giảm HP monster
-            
             // Giảm độ bền vu khốc
             const weaponObject = this.characterManager.getCharacterWeaponObject();
             if (weaponObject) {
                 weaponObject.durability -= actualDamage;
             }
-            
+            const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
+            // Áp dụng hiệu ứng sát thương
+            if (monster.takeDamageEffect) {
+                monster.takeDamageEffect(monsterElement, actualDamage, weaponObject?.blessed || 'weapon', this.characterManager, this.cardManager);
+            } else {
+                monster.hp = monsterHP - actualDamage;
+            }         
             // ===== GỌI attackWeaponEffect NẾU CÓ =====
             let weaponKillEffect = null;
             if (weaponObject && weaponObject.attackWeaponEffect) {
                 const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
                 weaponKillEffect = weaponObject.attackWeaponEffect(this.characterManager, gameState, actualDamage);
+            }
+
+            // ===== XỬ LÝ CATALYST WEAPON - TẤN CÔNG NHIỀU THẺ CÙNG HƯỚNG =====
+            if (weaponObject && weaponObject.nameId) {
+                // Kiểm tra xem có phải là catalyst không (bỏ 1 ký tự cuối của nameId)
+                const weaponNameId = weaponObject.nameId;
+                const isCatalyst = weaponNameId.startsWith('catalyst');
+                
+                if (isCatalyst) {
+                    // Tính toán hướng từ character đến monster
+                    const characterPos = { row: Math.floor(characterIndex / 3), col: characterIndex % 3 };
+                    const monsterPos = { row: Math.floor(monsterIndex / 3), col: monsterIndex % 3 };
+                    
+                    // Xác định hướng tấn công
+                    let direction = '';
+                    if (monsterPos.row < characterPos.row) direction = 'up';
+                    else if (monsterPos.row > characterPos.row) direction = 'down';
+                    else if (monsterPos.col < characterPos.col) direction = 'left';
+                    else if (monsterPos.col > characterPos.col) direction = 'right';
+                    
+                    // Tìm tất cả thẻ trong cùng hướng tấn công
+                    const cardsInDirection = [];
+                    for (let i = 0; i < this.cardManager.cards.length; i++) {
+                        const card = this.cardManager.cards[i];
+                        if (card && card.type !== 'character' && i !== monsterIndex) {
+                            const cardPos = { row: Math.floor(i / 3), col: i % 3 };
+                            let inDirection = false;
+                            
+                            // Kiểm tra xem thẻ có nằm trong hướng tấn công không
+                            switch (direction) {
+                                case 'up': 
+                                    inDirection = cardPos.row < characterPos.row && cardPos.col === characterPos.col; 
+                                    break;
+                                case 'down': 
+                                    inDirection = cardPos.row > characterPos.row && cardPos.col === characterPos.col; 
+                                    break;
+                                case 'left': 
+                                    inDirection = cardPos.col < characterPos.col && cardPos.row === characterPos.row; 
+                                    break;
+                                case 'right': 
+                                    inDirection = cardPos.col > characterPos.col && cardPos.row === characterPos.row; 
+                                    break;
+                            }
+                            
+                            if (inDirection) {
+                                cardsInDirection.push({ card, index: i });
+                            }
+                        }
+                    }
+                    
+                    // Tấn công tất cả thẻ trong hướng
+                    cardsInDirection.forEach(({ card, index }) => {
+                        if (card.takeDamageEffect) {
+                            const cardElement = document.querySelector(`[data-index="${index}"]`);
+                            card.takeDamageEffect(cardElement, actualDamage, weaponObject?.blessed || 'catalyst', this.characterManager, this.cardManager);
+                        }
+                    });
+                }
             }
             
             // ===== CẬP NHẬT HIỂN THỊ =====
@@ -103,15 +170,14 @@ class CombatManager {
             // ===== XỬ LÝ KHI MONSTER CHẾT =====
             if (monster.hp <= 0) {
                 // Thêm hiệu ứng chết cho monster
-                const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
+                
                 if (monsterElement) {
                     monsterElement.classList.add('monster-dying');
                 }
                 
                     // ===== GỌI killByWeaponEffect NẾU CÓ =====
                 // Lazy evaluation: chỉ tính toán gameState khi cần thiết
-                const killEffect = monster.killByWeaponEffect ? 
-                    monster.killByWeaponEffect(this.characterManager, null) : null;
+                
                 
                 // // ===== KIỂM TRA HIỆU ỨNG VU KHỐC KHI GIẾT QUÁI =====
                 // const weaponObject = this.characterManager.getCharacterWeaponObject();
@@ -130,27 +196,20 @@ class CombatManager {
                     if (weaponKillEffect && weaponKillEffect.shouldCreateCoinUp) {
                         // Tạo CoinUp với điểm từ hiệu ứng vu khốc
                         newCard = this.cardManager.cardFactory.createDynamicCoinUp(this.characterManager, weaponKillEffect.coinUpScore);
-                    } else if (killEffect && killEffect.type === 'enemy_killed_by_weapon') {
-                        // Sử dụng hiệu ứng đặc biệt của monster
-                        if (killEffect.reward.type === 'food3') {
-                            // Tạo thẻ Food3
-                            newCard = this.cardManager.cardFactory.createCard(killEffect.reward.cardName);
-                        } else if (killEffect.reward.type === 'coin') {
-                            // Tạo coin mặc định
-                            newCard = this.cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                        } else if (killEffect.reward.type === 'abysslector') {
-                            // Tạo AbyssLector mới
-                            newCard = killEffect.reward.card;
-                        }
-                    } else {
-                        // Tạo coin mặc định cho các enemy không có killByWeaponEffect
-                        newCard = this.cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                    }
-                    
-                    if (newCard) {
+                        
                         newCard.id = monsterIndex;
                         newCard.position = { row: Math.floor(monsterIndex / 3), col: monsterIndex % 3 };
                         this.cardManager.updateCard(monsterIndex, newCard);
+                    } 
+                    //  else {
+                    //     // Sử dụng hiệu ứng đặc biệt của monster
+                    //     const killEffect = monster.killByWeaponEffect ? 
+                    // monster.killByWeaponEffect(this.characterManager, this.cardManager) : null;
+                        
+                    // }  
+                    
+                    
+                        
                         
                         // Warrior không di chuyển, chỉ render thẻ mới
                         this.animationManager.renderCardsWithAppearEffect(monsterIndex);
@@ -177,7 +236,7 @@ class CombatManager {
                         //     this.animationManager.triggerGameOver();
                         //     return;
                         // }
-                    }
+                    
                 }, 600);
             } else {
                 // ===== MONSTER CÒN SỐNG =====
@@ -185,31 +244,31 @@ class CombatManager {
                 this.animationManager.updateCharacterDisplay(); // Cập nhật hiển thị dụng lực vu khốc
                 
                 // ===== GỌI attackByWeaponEffect NẾU CÓ =====
-                if (monster.attackByWeaponEffect) {
-                    const cards = this.cardManager.getAllCards();
-                    const attackEffect = monster.attackByWeaponEffect(cards, monsterIndex);
+                //if (monster.attackByWeaponEffect) {
+                    //const cards = this.cardManager.getAllCards();
+                    //monster.attackByWeaponEffect(cards, monsterIndex, cardManager, animationManager);
                     
-                    if (attackEffect && attackEffect.type === 'enemy_attacked_by_weapon') {
-                        // Xử lý các loại hiệu ứng khác nhau
-                        if (attackEffect.newPosition !== undefined) {
-                            // Hiệu ứng độc biệt vị trí (Narwhal)
-                            this.cardManager.setAllCards(cards);
+                    // if (attackEffect && attackEffect.type === 'enemy_attacked_by_weapon') {
+                    //     // Xử lý các loại hiệu ứng khác nhau
+                    //     if (attackEffect.newPosition !== undefined) {
+                    //         // Hiệu ứng độc biệt vị trí (Narwhal)
+                    //         this.cardManager.setAllCards(cards);
                             
-                            // Thêm hiệu ứng flip cho cả 2 thẻ
-                            this.animationManager.flipCards(
-                                attackEffect.oldPosition, 
-                                attackEffect.newPosition,
-                                () => {
-                                    // Callback sau khi animation hoàn thành
-                                    this.animationManager.renderCards();
-                                    this.setupCardEventsAfterCombat();
-                                }
-                            );
+                    //         // Thêm hiệu ứng flip cho cả 2 thẻ
+                    //         this.animationManager.flipCards(
+                    //             attackEffect.oldPosition, 
+                    //             attackEffect.newPosition,
+                    //             () => {
+                    //                 // Callback sau khi animation hoàn thành
+                    //                 this.animationManager.renderCards();
+                    //                 this.setupCardEventsAfterCombat();
+                    //             }
+                    //         );
                             
-                            // Hiển thị thông báo hiệu ứng
-                        }
-                    }
-                }
+                    //         // Hiển thị thông báo hiệu ứng
+                    //     }
+                    // }
+              //  }
             }
         }, 150);
         
@@ -233,9 +292,75 @@ class CombatManager {
 
     /**
      * Kiểm tra game over
-     * @returns {boolean} True nếu character chết
      */
     checkGameOver() {
-        return !this.characterManager.isAlive();
+        if (!this.characterManager.isAlive()) {
+            this.animationManager.triggerGameOver();
+        }
+    }
+
+    /**
+     * Kiểm tra xem có thể di chuyển từ vị trí này đến vị trí kia không
+     * @param {number} fromIndex - Vị trí bắt đầu
+     * @param {number} toIndex - Vị trí đích
+     * @returns {boolean} True nếu có thể di chuyển
+     */
+    isValidMove(fromIndex, toIndex) {
+        // ===== KIỂM TRA VỊ TRÍ HỢP LỆ =====
+        if (fromIndex === toIndex) return false; // Không thể di chuyển đến chính mình
+        
+        const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
+        const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
+        
+        // ===== KIỂM TRA KHOẢNG CÁCH =====
+        const rowDiff = Math.abs(fromPos.row - toPos.row);
+        const colDiff = Math.abs(fromPos.col - toPos.col);
+        
+        // Chỉ cho phép di chuyển 1 ô theo chiều ngang hoặc dọc
+        if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Tìm thẻ cần di chuyển khi Warrior di chuyển (hiệu ứng domino)
+     * Khi Warrior di chuyển, thẻ phía sau sẽ bị đẩy theo
+     * @param {number} fromIndex - Vị trí bắt đầu của Warrior
+     * @param {number} toIndex - Vị trí đích của Warrior
+     * @returns {Object|null} Thông tin thẻ cần di chuyển hoặc null
+     */
+    findCardToMove(fromIndex, toIndex) {
+        // Tính toán vị trí
+        const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
+        const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
+        
+        // Xác định hướng di chuyển
+        let direction = '';
+        if (toPos.row < fromPos.row) direction = 'up';
+        else if (toPos.row > fromPos.row) direction = 'down';
+        else if (toPos.col < fromPos.col) direction = 'left';
+        else if (toPos.col > fromPos.col) direction = 'right';
+        
+        // Tìm thẻ cần di chuyển theo hướng
+        for (let i = 0; i < this.cardManager.cards.length; i++) {
+            const card = this.cardManager.cards[i];
+            if (card && card.type !== 'character' && i !== toIndex) {
+                const cardPos = { row: Math.floor(i / 3), col: i % 3 };
+                let shouldMove = false;
+                
+                // Kiểm tra xem thẻ có nên di chuyển theo hướng không
+                switch (direction) {
+                    case 'up': shouldMove = cardPos.row > fromPos.row && cardPos.col === fromPos.col; break;
+                    case 'down': shouldMove = cardPos.row < fromPos.row && cardPos.col === fromPos.col; break;
+                    case 'left': shouldMove = cardPos.col > fromPos.col && cardPos.row === fromPos.row; break;
+                    case 'right': shouldMove = cardPos.col < fromPos.col && cardPos.row === fromPos.row; break;
+                }
+                
+                if (shouldMove) return { card, fromIndex: i };
+            }
+        }
+        return null;
     }
 } 

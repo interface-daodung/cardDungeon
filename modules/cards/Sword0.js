@@ -7,10 +7,9 @@ class Sword0 extends Card {
             "Thiên Không Kiếm", 
             "weapon", 
             "resources/sword0.webp", 
-            "Vũ khí cơ bản",
             "sword0"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(8, 16); // Độ bền 1-16
     }
 
     /**
@@ -45,7 +44,7 @@ class Sword0 extends Card {
     attackWeaponEffect(characterManager, gameState, damageDealt) {
         // ⚔️ Sword0 attackWeaponEffect: Kích hoạt hiệu ứng tạo CoinUp khi giết quái
         // Tạo CoinUp với điểm ngẫu nhiên từ 1-9, nhân 2
-        const coinUpScore = (Math.floor(Math.random() * 9) + 1) * 2;
+        const coinUpScore = this.GetRandom(1, 9) * 2;
         
         return {
             type: 'weapon_attack_effect',

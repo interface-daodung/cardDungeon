@@ -7,10 +7,12 @@ class Sword2 extends Card {
             "Kiếm Gỗ", 
             "weapon", 
             "resources/sword2.webp", 
-            "Vũ khí loại 2",
             "sword2"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 12); // Độ bền 1-16
+        this.blessed = 'Forest'; // 🌲 🌴 🍃 ☘️ 🍁 🌿 🍄 🍂 🌳
+        
+        
     }
 
     /**

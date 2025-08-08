@@ -1,28 +1,20 @@
 // GameState.js - Quản lý trạng thái tổng thể của game
 // Chức năng: Lưu trữ và quản lý tất cả trạng thái của game
-// Bao gồm score, moves, high score, drag state, touch state
+// Bao gồm score, moves, high score, touch state
 
 class GameState {
     /**
      * Khởi tạo GameState với các trạng thái ban đầu
      * Quản lý tất cả state cần thiết cho game
      */
-    constructor(characterManager = null) {
+    constructor() {
         // ===== GAME STATISTICS =====
         this.score = 0; // Điểm số hiện tại
         this.moves = 0; // Số lượt di chuyển
         this.highScore = this.loadHighScore(); // High score từ localStorage
-        
-        // ===== CHARACTER MANAGER REFERENCE =====
-        this.characterManager = characterManager; // Reference đến CharacterManager để xử lý độc
-        
-        // ===== DRAG & DROP STATE =====
-        this.draggedCard = null; // Thẻ đang được kéo (index)
-        this.dragStartPos = null; // Vị trí bắt đầu kéo (x, y)
-        
         // ===== LONG PRESS STATE =====
         this.longPressTimer = null; // Timer cho long press
-        this.longPressDelay = 1000; // Thời gian delay cho long press (2.0 giây)
+        this.longPressDelay = 1000; // Thời gian delay cho long press (1.0 giây)
         
         // ===== TOUCH STATE =====
         this.touchStartTime = null; // Thời điểm bắt đầu touch
@@ -39,10 +31,6 @@ class GameState {
         // ===== RESET GAME STATISTICS =====
         this.score = 0; // Reset điểm số
         this.moves = 0; // Reset số lượt
-        
-        // ===== RESET DRAG STATE =====
-        this.draggedCard = null; // Reset thẻ đang kéo
-        this.dragStartPos = null; // Reset vị trí bắt đầu
         
         // ===== RESET LONG PRESS STATE =====
         this.longPressTimer = null; // Reset timer
@@ -63,9 +51,7 @@ class GameState {
     addScore(points) { 
         // Đảm bảo points là số hợp lệ
         const validPoints = points || 0;
-        // console.log(`💰 Adding score: points=${points}, validPoints=${validPoints}, currentScore=${this.score}`);
         this.score += validPoints; 
-        // console.log(`💰 New score: ${this.score}`);
         this.updateHighScore(); // Cập nhật high score khi score thay đổi
     }
     
@@ -74,13 +60,6 @@ class GameState {
      */
     incrementMoves() { 
         this.moves++; 
-        
-        // ===== XỬ LÝ ĐỘC VÀ HỒI PHỤC KHI TĂNG MOVE =====
-        if (this.characterManager) {
-            this.characterManager.processRecovery(); // Xử lý hồi phục trước 
-            this.characterManager.processPoison(); // Xử lý độc sau 
-            
-        }
     }
     
     /**
@@ -97,54 +76,6 @@ class GameState {
      */
     getMoves() { 
         return this.moves; 
-    }
-
-    // ===== QUẢN LÝ DRAG STATE =====
-
-    /**
-     * Set thẻ đang được kéo
-     * @param {number} index - Index của thẻ đang kéo
-     */
-    setDraggedCard(index) { 
-        this.draggedCard = index; 
-    }
-    
-    /**
-     * Lấy thẻ đang được kéo
-     * @returns {number|null} Index của thẻ đang kéo hoặc null
-     */
-    getDraggedCard() { 
-        return this.draggedCard; 
-    }
-    
-    /**
-     * Xóa thẻ đang được kéo
-     */
-    clearDraggedCard() { 
-        this.draggedCard = null; 
-    }
-    
-    /**
-     * Set vị trí bắt đầu kéo
-     * @param {Object} pos - Vị trí bắt đầu (x, y)
-     */
-    setDragStartPos(pos) { 
-        this.dragStartPos = pos; 
-    }
-    
-    /**
-     * Lấy vị trí bắt đầu kéo
-     * @returns {Object|null} Vị trí bắt đầu hoặc null
-     */
-    getDragStartPos() { 
-        return this.dragStartPos; 
-    }
-    
-    /**
-     * Xóa vị trí bắt đầu kéo
-     */
-    clearDragStartPos() { 
-        this.dragStartPos = null; 
     }
 
     // ===== QUẢN LÝ TOUCH STATE =====

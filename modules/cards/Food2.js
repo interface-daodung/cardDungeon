@@ -7,10 +7,9 @@ class Food2 extends Card {
             "Pizza Nấm Rơm Nướng", 
             "food", 
             "resources/food2.webp", 
-            "Thức ăn hồi phục đặc biệt",
             "food2"
         );
-        this.heal = Math.floor(Math.random() * 9) + 2; // Tổng hồi phục 2-10 HP
+        this.heal = this.GetRandom(3, 12); // Tổng hồi phục 2-10 HP
     }
 
     /**
@@ -20,7 +19,7 @@ class Food2 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         //  set số lượt hồi phục dần dần
         characterManager.setRecovery(this.heal); // Trừ 1 vì đã hồi phục ngay
         

@@ -10,17 +10,40 @@ class AnimationManager {
      */
     constructor(cardManager, characterManager) {
         // ===== KHỞI TẠO DEPENDENCIES =====
-        this.cardManager = cardManager; // Quản lý dữ liệu cards
-        this.characterManager = characterManager; // Quản lý dữ liệu character
-        this.eventManager = null; // Sẽ được set từ DungeonCardGame để setup events sau combat
-        
+        this.cardManager = cardManager;
+        this.characterManager = characterManager;
+        this.eventManager = null;
+
         // ===== ANIMATION STATE TRACKING =====
-        this.isAnimating = false; // Trạng thái đang có animation hay không
-        this.animationCount = 0; // Số lượng animation đang chạy
-        
+        this.isAnimating = false;
+        this.animationCount = 0;
+
         // ===== ANIMATION QUEUE SYSTEM =====
-        this.animationQueue = []; // Hàng đợi các animation
-        this.isProcessingQueue = false; // Trạng thái đang xử lý hàng đợi
+        this.animationQueue = [];
+        this.isProcessingQueue = false;
+
+        // ===== ANIMATION CONSTANTS =====
+        this.ANIMATION_DURATIONS = {
+            FLIP: 600,
+            TRAP: 600,
+            TREASURE: 300,
+            BOOM: 500,
+            COMBAT: 300,
+            MOVE: 500,
+            GAME_OVER: 800,
+            APPEAR: 200
+        };
+
+        this.ANIMATION_PRIORITIES = {
+            GAME_OVER: 1,
+            MOVE: 2,
+            FLIP: 4,
+            COMBAT: 3,
+            TRAP: 4,
+            TREASURE: 4,
+            BOOM: 6,
+            RENDER: 7
+        };
     }
 
     // ===== CÁC HÀM QUẢN LÝ ANIMATION STATE =====
@@ -65,8 +88,6 @@ class AnimationManager {
         return this.isAnimating || this.animationQueue.length > 0 || this.isProcessingQueue;
     }
 
-
-
     // ===== ANIMATION QUEUE SYSTEM =====
 
     /**
@@ -77,18 +98,16 @@ class AnimationManager {
      */
     queueAnimation(animationFunction, animationName = 'Unknown', priority = 5) {
         const animationTask = {
-            id: Date.now() + Math.random(), // ID duy nhất
+            id: Date.now() + Math.random(),
             function: animationFunction,
             name: animationName,
             priority: priority,
             timestamp: Date.now()
         };
-        
-        // Thêm vào hàng đợi và sắp xếp theo priority
+
         this.animationQueue.push(animationTask);
         this.animationQueue.sort((a, b) => a.priority - b.priority);
-        
-        // Bắt đầu xử lý hàng đợi nếu chưa đang xử lý
+
         if (!this.isProcessingQueue) {
             this.processAnimationQueue();
         }
@@ -101,21 +120,19 @@ class AnimationManager {
         if (this.isProcessingQueue || this.animationQueue.length === 0) {
             return;
         }
-        
+
         this.isProcessingQueue = true;
-        
+
         while (this.animationQueue.length > 0) {
             const animationTask = this.animationQueue.shift();
-            
+
             try {
-                // Thực hiện animation
                 await this.executeAnimation(animationTask);
-                
             } catch (error) {
                 console.error(`🎬 Error in animation: ${animationTask.name}`, error);
             }
         }
-        
+
         this.isProcessingQueue = false;
     }
 
@@ -126,13 +143,10 @@ class AnimationManager {
     async executeAnimation(animationTask) {
         return new Promise((resolve, reject) => {
             try {
-                // Bắt đầu animation tracking
                 this.startAnimation();
-                
-                // Thực hiện animation function
+
                 const result = animationTask.function();
-                
-                // Nếu animation function trả về Promise
+
                 if (result && typeof result.then === 'function') {
                     result.then(() => {
                         this.endAnimation();
@@ -143,13 +157,12 @@ class AnimationManager {
                         reject(error);
                     });
                 } else {
-                    // Nếu animation function không trả về Promise, đợi một khoảng thời gian
                     setTimeout(() => {
                         this.endAnimation();
                         resolve();
-                    }, 100); // Default delay
+                    }, 100);
                 }
-                
+
             } catch (error) {
                 console.error(`🎬 Animation execution error in ${animationTask.name}:`, error);
                 this.endAnimation();
@@ -168,71 +181,143 @@ class AnimationManager {
     /**
      * Lấy thông tin về hàng đợi animation
      * @returns {Object} Thông tin về hàng đợi
+     * có thể xóa 
      */
-    getQueueInfo() {
-        return {
-            queueSize: this.animationQueue.length,
-            isProcessing: this.isProcessingQueue,
-            isAnimating: this.isAnimating,
-            animationCount: this.animationCount,
-            queueItems: this.animationQueue.map(item => ({
-                name: item.name,
-                priority: item.priority,
-                timestamp: item.timestamp
-            }))
+    // getQueueInfo() {
+    //     return {
+    //         queueSize: this.animationQueue.length,
+    //         isProcessing: this.isProcessingQueue,
+    //         isAnimating: this.isAnimating,
+    //         animationCount: this.animationCount,
+    //         queueItems: this.animationQueue.map(item => ({
+    //             name: item.name,
+    //             priority: item.priority,
+    //             timestamp: item.timestamp
+    //         }))
+    //     };
+    // }
+
+    // ===== HELPER FUNCTIONS =====
+
+    /**
+     * Tạo animation loop với requestAnimationFrame
+     * @param {Function} animateFunction - Hàm animation
+     * @param {number} duration - Thời gian animation (ms)
+     * @param {Function} easingFunction - Hàm easing
+     * @param {Function} onComplete - Callback khi hoàn thành
+     * @param {string} animationKey - Key để lưu vào window
+     * @returns {Object} Cleanup function
+     */
+    createAnimationLoop(animateFunction, duration, easingFunction, onComplete, animationKey) {
+        const startTime = performance.now();
+        let animationId = null;
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easingFunction ? easingFunction(progress) : progress;
+
+            animateFunction(easedProgress, progress);
+
+            if (progress < 1) {
+                animationId = requestAnimationFrame(animate);
+            } else {
+                if (onComplete) onComplete();
+            }
         };
-    }
 
-    // ===== HELPER FUNCTIONS FOR ANIMATION QUEUE =====
+        animationId = requestAnimationFrame(animate);
 
-    /**
-     * Thêm animation đơn giản vào hàng đợi
-     * @param {Function} animationFunction - Hàm animation
-     * @param {string} name - Tên animation
-     * @param {number} priority - Độ ưu tiên
-     */
-    queueSimpleAnimation(animationFunction, name, priority = 5) {
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                animationFunction();
-                setTimeout(resolve, 100); // Default delay
-            });
-        }, name, priority);
-    }
+        const cleanup = () => {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        };
 
-    /**
-     * Thêm animation với timeout vào hàng đợi
-     * @param {Function} animationFunction - Hàm animation
-     * @param {string} name - Tên animation
-     * @param {number} timeout - Thời gian chờ (ms)
-     * @param {number} priority - Độ ưu tiên
-     */
-    queueTimedAnimation(animationFunction, name, timeout = 600, priority = 5) {
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                animationFunction();
-                setTimeout(resolve, timeout);
-            });
-        }, name, priority);
+        if (animationKey) {
+            window[animationKey] = { cancel: cleanup, animationId };
+        }
+
+        return cleanup;
     }
 
     /**
-     * Thêm animation với callback vào hàng đợi
-     * @param {Function} animationFunction - Hàm animation
-     * @param {string} name - Tên animation
-     * @param {Function} callback - Callback sau khi hoàn thành
-     * @param {number} priority - Độ ưu tiên
+     * Easing functions
      */
-    queueCallbackAnimation(animationFunction, name, callback = null, priority = 5) {
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                animationFunction();
-                if (callback) {
-                    callback();
-                }
-                setTimeout(resolve, 100);
-            });
-        }, name, priority);
+    static EASING = {
+        easeInOutCubic: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+        easeInOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
+        easeInOutBack: (t) => {
+            const c1 = 1.70158;
+            const c2 = c1 * 1.525;
+            return t < 0.5
+                ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+                : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
+        },
+        easeOutBounce: (t) => {
+            const n1 = 7.5625;
+            const d1 = 2.75;
+            if (t < 1 / d1) return n1 * t * t;
+            if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
+            if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
+            return n1 * (t -= 2.625 / d1) * t + 0.984375;
+        },
+        easeInOutQuart: (t) => t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2,
+        easeInOutQuad: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+        easeInBack: (t) => {
+            const c1 = 1.70158;
+            const c3 = c1 + 1;
+            return c3 * t * t * t - c1 * t * t;
+        }
+    };
+
+    /**
+     * Hủy tất cả animation đang chạy
+     */
+    cancelAllRunningAnimations() {
+        const animationKeys = [
+            'currentGameOverAnimation',
+            'currentFlipAnimation',
+            'currentTrapAnimation',
+            'currentTreasureAnimation',
+            'currentBoomAnimation',
+            'currentCombatAnimation',
+            'currentMoveAnimation'
+        ];
+
+        animationKeys.forEach(key => {
+            if (window[key] && window[key].cancel) {
+                console.log(`🎬 Cancelling ${key}`);
+                window[key].cancel();
+                delete window[key];
+            }
+        });
+    }
+
+    /**
+     * Xóa toàn bộ cards grid
+     */
+    clearCardsGrid() {
+        const grid = document.getElementById('cards-grid');
+        if (grid) {
+            console.log('🎬 Clearing cards grid');
+            grid.innerHTML = '';
+        }
+    }
+
+    /**
+     * Trộn mảng theo thuật toán Fisher-Yates shuffle
+     * @param {Array} array - Mảng cần trộn
+     * @returns {Array} Mảng đã được trộn
+     */
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
     }
 
     // ===== CÁC HÀM ANIMATION CƠ BẢN =====
@@ -244,40 +329,42 @@ class AnimationManager {
      * @param {Function} callback - Callback được gọi sau khi animation hoàn thành
      */
     flipCards(index1, index2, callback = null) {
-        // Thêm vào hàng đợi với priority cao (ưu tiên flip cards)
         this.queueAnimation(() => {
             return new Promise((resolve) => {
                 const card1Element = document.querySelector(`[data-index="${index1}"]`);
                 const card2Element = document.querySelector(`[data-index="${index2}"]`);
-                
-                if (card1Element && card2Element) {
-                    // Thêm class flip cho cả 2 thẻ
-                    card1Element.classList.add('flipping');
-                    card2Element.classList.add('flipping');
-                    
-                    // Xóa class và resolve sau khi animation hoàn thành
-                    setTimeout(() => {
+
+                if (!card1Element || !card2Element) {
+                    if (callback) callback();
+                    resolve();
+                    return;
+                }
+
+                card1Element.classList.add('flipping');
+                card2Element.classList.add('flipping');
+
+                this.createAnimationLoop(
+                    (easedProgress) => {
+                        const rotation = easedProgress * 180;
+                        card1Element.style.transform = `rotateY(${rotation}deg)`;
+                        card2Element.style.transform = `rotateY(${rotation}deg)`;
+                    },
+                    this.ANIMATION_DURATIONS.FLIP,
+                    AnimationManager.EASING.easeInOutCubic,
+                    () => {
                         card1Element.classList.remove('flipping');
                         card2Element.classList.remove('flipping');
-                        
-                        if (callback) {
-                            callback();
-                        }
+                        card1Element.style.transform = '';
+                        card2Element.style.transform = '';
+                        if (callback) callback();
                         resolve();
-                    }, 600);
-                } else {
-                    if (callback) {
-                        callback();
-                    }
-                    resolve();
-                }
+                    },
+                    'currentFlipAnimation'
+                );
             });
-        }, `Flip Cards (${index1} ↔ ${index2})`, 2);
+        }, `Flip Cards (${index1} ↔ ${index2})`, this.ANIMATION_PRIORITIES.FLIP);
     }
 
-
-    // ===== CÁC HÀM ANIMATION ĐẶC BIỆT =====
-    
     /**
      * Hiệu ứng khi trap được kích hoạt
      * @param {number} trapIndex - Index của trap card
@@ -285,7 +372,6 @@ class AnimationManager {
      * @param {CardManager} cardManager - Manager quản lý thẻ
      */
     startTrapActivationAnimation(trapIndex, trapCard, cardManager) {
-        // Thêm vào hàng đợi với priority trung bình
         this.queueAnimation(() => {
             return new Promise((resolve) => {
                 const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
@@ -293,436 +379,341 @@ class AnimationManager {
                     resolve();
                     return;
                 }
-                
-                // Thêm class animation cho trap
+
+                const damageDelay = 300;
+                let damageProcessed = false;
+
                 trapElement.classList.add('trap-activating');
-                
-                // Tìm các thẻ liền kề bị chỉ bởi arrow
-                const adjacentTargets = this.findAdjacentTargets(trapIndex, trapCard, cardManager);
-                
-                // Thêm animation cho các thẻ bị chỉ
+
+                const adjacentTargets = trapCard.findAdjacentTargets(trapIndex, cardManager);
                 adjacentTargets.forEach(targetIndex => {
                     const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
                     if (targetElement) {
                         targetElement.classList.add('trap-targeted');
-                        
-                        const targetCard = cardManager.getCard(targetIndex);
-                        if (targetCard) {
-                            setTimeout(() => {
-                                this.processTrapDamageToCard(targetCard, targetElement, trapCard.damage, cardManager, targetIndex);
-                            }, 300);
-                        }
                     }
                 });
-                
-                // Xóa class animation và resolve
-                setTimeout(() => {
-                    trapElement.classList.remove('trap-activating');
-                    adjacentTargets.forEach(targetIndex => {
-                        const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
-                        if (targetElement) {
-                            targetElement.classList.remove('trap-targeted');
+
+                this.createAnimationLoop(
+                    (easedProgress, progress) => {
+                        const pulseScale = 1 + (easedProgress * 0.2);
+                        trapElement.style.transform = `scale(${pulseScale})`;
+
+                        if (progress >= damageDelay / this.ANIMATION_DURATIONS.TRAP && !damageProcessed) {
+                            damageProcessed = true;
+                            adjacentTargets.forEach(targetIndex => {
+                                const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
+                                const targetCard = cardManager.getCard(targetIndex);
+                                if (targetElement && targetCard) {
+                                    console.log('processTrapDamageToCard targetCard.score----------------------------------------', targetCard.score);
+                                    trapCard.processTrapDamageToCard(targetCard, targetElement, trapCard.damage, cardManager, targetIndex, this, this.characterManager);
+                                }
+                            });
                         }
-                    });
-                    
-                    // Setup lại events sau khi animation hoàn thành
-                    setTimeout(() => {
-                        if (this.eventManager) {
-                            this.eventManager.setupCardEvents();
-                        }
-                    }, 100);
-                    
-                    resolve();
-                }, 600);
+                    },
+                    this.ANIMATION_DURATIONS.TRAP,
+                    AnimationManager.EASING.easeInOutSine,
+                    () => {
+                        trapElement.classList.remove('trap-activating');
+                        trapElement.style.transform = '';
+
+                        adjacentTargets.forEach(targetIndex => {
+                            const targetElement = document.querySelector(`[data-index="${targetIndex}"]`);
+                            if (targetElement) {
+                                targetElement.classList.remove('trap-targeted');
+                            }
+                        });
+
+                        setTimeout(() => {
+                            if (this.eventManager) {
+                                this.eventManager.setupCardEvents();
+                            }
+                        }, 100);
+
+                        resolve();
+                    },
+                    'currentTrapAnimation'
+                );
             });
-        }, `Trap Activation (${trapIndex})`, 4);
+        }, `Trap Activation (${trapIndex})`, this.ANIMATION_PRIORITIES.TRAP);
     }
-    
-    /**
-     * Xử lý damage cho thẻ bị chỉ bởi trap (giống boom class)
-     * @param {Card} targetCard - Thẻ bị chỉ
-     * @param {HTMLElement} targetElement - Element của thẻ
-     * @param {number} damage - Lượng damage
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     * @param {number} targetIndex - Index của thẻ
-     */
-    processTrapDamageToCard(targetCard, targetElement, damage, cardManager, targetIndex) {
-        // Tạo damage popup
-        //this.createDamagePopup(targetElement, damage);
-        
-        // Xử lý theo loại thẻ (giống boom class)
-        if (targetCard.type === 'character') {
-            // Character nhận damage
-            this.characterManager.damageCharacterHP(damage);
-            // console.log(`🎯 Character nhận ${damage} damage từ trap`);
-            // Game over được xử lý trong damageCharacterHP khi HP = 0
-        } else if (targetCard.type === 'enemy' && targetCard.hp !== undefined && targetCard.hp > 0) {
-            // Enemy nhận damage
-            const originalHP = targetCard.hp;
-            // console.log(`🎯 Enemy ${targetCard.nameId} tại index ${targetIndex}: HP ban đầu = ${originalHP}, damage = ${damage}`);
-            targetCard.hp -= damage;
-            console.log(`🎯 Enemy ${targetCard.nameId} sau damage: HP = ${targetCard.hp}`);
-            // Tạo damage popup ngay lập tức
-            this.createDamagePopup(targetElement, damage);
-            // Cập nhật hiển thị enemy
-            this.updateMonsterDisplay(targetIndex);
-            
-            if (targetCard.hp <= 0) {
-                targetCard.hp = 0;
-                // console.log(`🎯 Enemy ${targetCard.nameId} HP = 0, sẽ chết!`);
-                this.handleEnemyDeathByTrap(targetIndex, targetCard, cardManager);
-            } else {
-                // HP chưa về 0, chạy attackByWeaponEffect nếu có
-                // if (typeof targetCard.attackByWeaponEffect === 'function') {
-                //     // console.log(`🎯 Enemy ${targetCard.nameId} bị damage bởi trap, chạy attackByWeaponEffect`);
-                //     targetCard.attackByWeaponEffect(this.characterManager, this.eventManager ? this.eventManager.gameState : null);
-                // }
-            }
-        } else if (targetCard.type === 'food' && targetCard.heal !== undefined && targetCard.heal > 0) {
-            // Food nhận damage
-            const originalHeal = targetCard.heal;
 
-            targetCard.heal -= damage;
-            this.createDamagePopup(targetElement, damage);
-            if (targetCard.nameId === 'poison') {
-                targetCard.poisonDuration -= damage;
-            }
-            // console.log(`🎯 Food ${targetCard.nameId} sau damage: heal = ${targetCard.heal}`);
-            
-            if (targetCard.heal <= 0) {
-                targetCard.heal = 0;
-                if (targetCard.nameId === 'poison') {
-                    targetCard.poisonDuration = 0;
-                }
-                // console.log(`🎯 Food ${targetCard.nameId} heal = 0, tạo thẻ void!`);
-                this.createVoidCard(targetIndex, cardManager);
-            }
-        } else if (targetCard.type === 'coin' && targetCard.score !== undefined && targetCard.score > 0) {
-            // Coin nhận damage
-            const originalScore = targetCard.score;
-            // console.log(`🎯 Coin ${targetCard.nameId} tại index ${targetIndex}: score ban đầu = ${originalScore}, damage = ${damage}`);
-            targetCard.score -= damage;
-            // console.log(`🎯 Coin ${targetCard.nameId} sau damage: score = ${targetCard.score}`);
-            this.createDamagePopup(targetElement, damage);
 
-            if (targetCard.score <= 0) {
-                targetCard.score = 0;
-                // console.log(`🎯 Coin ${targetCard.nameId} score = 0, tạo thẻ void!`);
-                this.createVoidCard(targetIndex, cardManager);
-            }
-        } else if ((targetCard.type === 'weapon') && targetCard.durability !== undefined && targetCard.durability > 0) {
-            // Weapon nhận damage
-            const originalDurability = targetCard.durability;
-            // console.log(`🎯 Weapon ${targetCard.nameId} tại index ${targetIndex}: durability ban đầu = ${originalDurability}, damage = ${damage}`);
-            targetCard.durability -= damage;
-            // console.log(`🎯 Weapon ${targetCard.nameId} sau damage: durability = ${targetCard.durability}`);
-            this.createDamagePopup(targetElement, damage);
 
-            if (targetCard.durability <= 0) {
-                targetCard.durability = 0;
-                // console.log(`🎯 Weapon ${targetCard.nameId} durability = 0, tạo thẻ void!`);
-                this.createVoidCard(targetIndex, cardManager);
-            }
-        } else if (targetCard.type === 'boom') {
-            // Boom nhận damage - kích hoạt ngay lập tức
-            // console.log(`🎯 Boom nhận ${damage} damage từ trap, kích hoạt ngay lập tức`);
-            targetCard.damage -= damage;
-            //targetCard.damage = Math.max(0, targetCard.damage - damage);
-            this.createDamagePopup(targetElement, damage);
-
-            if (targetCard.damage <= 0) {
-                targetCard.damage = 0;
-                // console.log(`🎯 Trap damage = 0, tạo void thay thế!`);
-                this.createCoinFromTrap(targetIndex, cardManager);
-            } else {
-                // Cập nhật hiển thị damage của boom
-                this.updateBoomDisplay(targetIndex);
-            }
-        } else if (targetCard.nameId === 'trap') {
-            // Trap nhận damage - giảm damage và tạo void khi damage = 0
-            //const originalDamage = targetCard.damage;
-            // console.log(`🎯 Trap nhận ${damage} damage từ trap, damage hiện tại: ${targetCard.damage}`);
-            targetCard.damage -= damage;
-            //targetCard.damage = Math.max(0, targetCard.damage - damage);
-            this.createDamagePopup(targetElement, damage);
-
-            if (targetCard.damage <= 0) {
-                targetCard.damage = 0;
-                // console.log(`🎯 Trap damage = 0, tạo void thay thế!`);
-                this.createCoinFromTrap(targetIndex, cardManager);
-            } else {
-                // Cập nhật hiển thị damage của trap
-                this.updateTrapDamageDisplay(targetIndex);
-            }
-        } else {
-            // Các thẻ khác chỉ hiển thị damage popup
-            // console.log(`🎯 Thẻ ${targetCard.type} nhận ${damage} damage từ trap`);
-        }
-    }
-    
-    /**
-     * Xử lý khi enemy chết do trap damage (giống boom class)
-     * @param {number} enemyIndex - Index của enemy
-     * @param {Card} enemyCard - Enemy card
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     */
-    handleEnemyDeathByTrap(enemyIndex, enemyCard, cardManager) {
-        // Thêm hiệu ứng chết cho enemy
-        const enemyElement = document.querySelector(`[data-index="${enemyIndex}"]`);
-        if (enemyElement) {
-            enemyElement.classList.add('monster-dying');
-        }
-        
-        // Chạy killByWeaponEffect nếu có (giống boom class)
-        if (typeof enemyCard.killByWeaponEffect === 'function') {
-            // console.log(`🎯 Enemy ${enemyCard.nameId} bị giết bởi trap, chạy killByWeaponEffect`);
-            // Lazy evaluation: chỉ truyền null cho gameState vì không được sử dụng
-            const killResult = enemyCard.killByWeaponEffect(this.characterManager, null);
-            // console.log(`🎯 Kill result:`, killResult);
-            
-            // Xử lý kết quả từ killByWeaponEffect
-            if (killResult && killResult.reward) {
-                setTimeout(() => {
-                    if (killResult.reward.type === 'coin') {
-                        // Tạo coin mặc định
-                        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                        coinCard.id = enemyIndex;
-                        coinCard.position = { 
-                            row: Math.floor(enemyIndex / 3), 
-                            col: enemyIndex % 3 
-                        };
-                        // console.log(`🎯 Tạo coin từ killByWeaponEffect: ${coinCard.nameId} tại index ${enemyIndex}`);
-                        cardManager.updateCard(enemyIndex, coinCard);
-                        this.renderCardsWithAppearEffect(enemyIndex);
-                        
-                        // Setup lại events cho thẻ mới với delay
-                        setTimeout(() => {
-                            if (this.eventManager) {
-                                // console.log(`🎯 Setup events cho coin mới tại index ${enemyIndex}`);
-                                this.eventManager.setupCardEvents();
-                            }
-                        }, 200);
-                    } else if (killResult.reward.type === 'food3') {
-                        // Tạo Food3 card
-                        const foodCard = cardManager.cardFactory.createCard('Food3');
-                        foodCard.id = enemyIndex;
-                        foodCard.position = { 
-                            row: Math.floor(enemyIndex / 3), 
-                            col: enemyIndex % 3 
-                        };
-                        // console.log(`🎯 Tạo Food3 từ killByWeaponEffect: ${foodCard.nameId} tại index ${enemyIndex}`);
-                        cardManager.updateCard(enemyIndex, foodCard);
-                        this.renderCardsWithAppearEffect(enemyIndex);
-                        
-                        // Setup lại events cho thẻ mới với delay
-                        setTimeout(() => {
-                            if (this.eventManager) {
-                                // console.log(`🎯 Setup events cho food mới tại index ${enemyIndex}`);
-                                this.eventManager.setupCardEvents();
-                            }
-                        }, 200);
-                    } else if (killResult.reward.type === 'abysslector') {
-                        // Tạo AbyssLector card từ reward
-                        const abyssLectorCard = killResult.reward.card;
-                        abyssLectorCard.id = enemyIndex;
-                        abyssLectorCard.position = { 
-                            row: Math.floor(enemyIndex / 3), 
-                            col: enemyIndex % 3 
-                        };
-                        // console.log(`🎯 Tạo AbyssLector từ killByWeaponEffect: ${abyssLectorCard.nameId} tại index ${enemyIndex}`);
-                        cardManager.updateCard(enemyIndex, abyssLectorCard);
-                        this.renderCardsWithAppearEffect(enemyIndex);
-                        
-                        // Setup lại events cho thẻ mới với delay
-                        setTimeout(() => {
-                            if (this.eventManager) {
-                                // console.log(`🎯 Setup events cho abysslector mới tại index ${enemyIndex}`);
-                                this.eventManager.setupCardEvents();
-                            }
-                        }, 200);
-                    } else {
-                        // Xử lý các loại reward khác chưa được định nghĩa
-                        // console.log(`🎯 Reward type chưa được xử lý: ${killResult.reward.type}`);
-                        // Tạo coin mặc định cho các loại reward chưa xử lý
-                        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                        coinCard.id = enemyIndex;
-                        coinCard.position = { 
-                            row: Math.floor(enemyIndex / 3), 
-                            col: enemyIndex % 3 
-                        };
-                        // console.log(`🎯 Tạo coin mặc định cho reward type chưa xử lý: ${coinCard.nameId} tại index ${enemyIndex}`);
-                        cardManager.updateCard(enemyIndex, coinCard);
-                        this.renderCardsWithAppearEffect(enemyIndex);
-                        
-                        // Setup lại events cho thẻ mới với delay
-                        setTimeout(() => {
-                            if (this.eventManager) {
-                                // console.log(`🎯 Setup events cho coin mặc định tại index ${enemyIndex}`);
-                                this.eventManager.setupCardEvents();
-                            }
-                        }, 200);
-                    }
-                }, 600);
-            } else {
-                // Tạo coin mặc định nếu không có reward
-                setTimeout(() => {
-                    const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                    coinCard.id = enemyIndex;
-                    coinCard.position = { 
-                        row: Math.floor(enemyIndex / 3), 
-                        col: enemyIndex % 3 
-                    };
-                    // console.log(`🎯 Tạo coin mặc định: ${coinCard.nameId} tại index ${enemyIndex}`);
-                    cardManager.updateCard(enemyIndex, coinCard);
-                    this.renderCardsWithAppearEffect(enemyIndex);
-                    
-                    // Setup lại events cho thẻ mới với delay
-                    setTimeout(() => {
-                        if (this.eventManager) {
-                            // console.log(`🎯 Setup events cho coin mặc định tại index ${enemyIndex}`);
-                            this.eventManager.setupCardEvents();
-                        }
-                    }, 200);
-                }, 600);
-            }
-        } else {
-            // Tạo coin theo mặc định nếu không có killByWeaponEffect
-            // console.log(`🎯 Enemy ${enemyCard.nameId} bị giết bởi trap, tạo coin mặc định`);
-            setTimeout(() => {
-                const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-                coinCard.id = enemyIndex;
-                coinCard.position = { 
-                    row: Math.floor(enemyIndex / 3), 
-                    col: enemyIndex % 3 
-                };
-                // console.log(`🎯 Tạo coin mới: ${coinCard.nameId} tại index ${enemyIndex}`);
-                cardManager.updateCard(enemyIndex, coinCard);
-                this.renderCardsWithAppearEffect(enemyIndex);
-                
-                // Setup lại events cho thẻ mới với delay
-                setTimeout(() => {
-                    if (this.eventManager) {
-                        // console.log(`🎯 Setup events cho coin mới tại index ${enemyIndex}`);
-                        this.eventManager.setupCardEvents();
-                    }
-                }, 200);
-            }, 600);
-        }
-    }
-    
     /**
      * Tạo thẻ void thay thế thẻ bị hủy
      * @param {number} cardIndex - Index của thẻ
      * @param {CardManager} cardManager - Manager quản lý thẻ
-     */
-    createVoidCard(cardIndex, cardManager) {
-        const voidCard = cardManager.cardFactory.createVoid();
-        voidCard.id = cardIndex;
-        voidCard.position = { 
-            row: Math.floor(cardIndex / 3), 
-            col: cardIndex % 3 
-        };
-        // console.log(`🎯 Tạo void thay thế: ${voidCard.nameId} tại index ${cardIndex}`);
-        cardManager.updateCard(cardIndex, voidCard);
-        this.renderCardsWithAppearEffect(cardIndex);
-        // Events được setup trong renderCardsWithAppearEffect
-    }
-    
+    //  */
+    // createVoidCard(cardIndex, cardManager) {
+    //     const voidCard = cardManager.cardFactory.createVoid();
+    //     voidCard.id = cardIndex;
+    //     voidCard.position = { 
+    //         row: Math.floor(cardIndex / 3), 
+    //         col: cardIndex % 3 
+    //     };
+    //     cardManager.updateCard(cardIndex, voidCard);
+    //     this.renderCardsWithAppearEffect(cardIndex);
+    // }
+
     /**
      * Tạo coin từ trap khi damage = 0
      * @param {number} trapIndex - Index của trap
      * @param {CardManager} cardManager - Manager quản lý thẻ
      */
-    createCoinFromTrap(trapIndex, cardManager) {
-        const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-        coinCard.id = trapIndex;
-        coinCard.position = { 
-            row: Math.floor(trapIndex / 3), 
-            col: trapIndex % 3 
-        };
-        // console.log(`🎯 Tạo coin từ trap: ${coinCard.nameId} tại index ${trapIndex}`);
-        cardManager.updateCard(trapIndex, coinCard);
-        this.renderCardsWithAppearEffect(trapIndex);
-        // Events được setup trong renderCardsWithAppearEffect
-    }
-    
-    /**
-     * Cập nhật hiển thị damage của trap
-     * @param {number} trapIndex - Index của trap
-     */
-    updateTrapDamageDisplay(trapIndex) {
-        const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
-        if (trapElement) {
-            const damageDisplay = trapElement.querySelector('.damage-display');
-            if (damageDisplay) {
-                const trapCard = this.cardManager.getCard(trapIndex);
-                if (trapCard && trapCard.damage !== undefined) {
-                    damageDisplay.textContent = trapCard.damage;
-                    // console.log(`🎯 Cập nhật trap damage display: ${trapCard.damage}`);
-                }
-            }
-        }
-    }
-    
+    // createCoinFromTrap(trapIndex, cardManager) {
+    //     const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+    //     coinCard.id = trapIndex;
+    //     coinCard.position = { 
+    //         row: Math.floor(trapIndex / 3), 
+    //         col: trapIndex % 3 
+    //     };
+    //     cardManager.updateCard(trapIndex, coinCard);
+    //     this.renderCardsWithAppearEffect(trapIndex);
+    // }
 
-    
     /**
-     * Tìm các thẻ liền kề bị chỉ bởi arrow của trap
-     * @param {number} trapIndex - Index của trap
-     * @param {Card} trapCard - Trap card instance
+     * Tạo coin mặc định
+     * @param {number} cardIndex - Index của thẻ
      * @param {CardManager} cardManager - Manager quản lý thẻ
-     * @returns {Array} Mảng index của các thẻ bị chỉ
      */
-    findAdjacentTargets(trapIndex, trapCard, cardManager) {
-        const targets = [];
-        const trapPos = { row: Math.floor(trapIndex / 3), col: trapIndex % 3 };
-        
-        // Kiểm tra từng hướng arrow
-        if (trapCard.arrowTop && trapPos.row > 0) {
-            const targetIndex = (trapPos.row - 1) * 3 + trapPos.col;
-            if (cardManager.getCard(targetIndex)) {
-                targets.push(targetIndex);
-            }
-        }
-        if (trapCard.arrowBottom && trapPos.row < 2) {
-            const targetIndex = (trapPos.row + 1) * 3 + trapPos.col;
-            if (cardManager.getCard(targetIndex)) {
-                targets.push(targetIndex);
-            }
-        }
-        if (trapCard.arrowLeft && trapPos.col > 0) {
-            const targetIndex = trapPos.row * 3 + (trapPos.col - 1);
-            if (cardManager.getCard(targetIndex)) {
-                targets.push(targetIndex);
-            }
-        }
-        if (trapCard.arrowRight && trapPos.col < 2) {
-            const targetIndex = trapPos.row * 3 + (trapPos.col + 1);
-            if (cardManager.getCard(targetIndex)) {
-                targets.push(targetIndex);
-            }
-        }
-        
-        return targets;
-    }
+    // createDefaultCoin(cardIndex, cardManager) {
+    //     const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+    //     coinCard.id = cardIndex;
+    //     coinCard.position = { 
+    //         row: Math.floor(cardIndex / 3), 
+    //         col: cardIndex % 3 
+    //     };
+    //     cardManager.updateCard(cardIndex, coinCard);
+    //     this.renderCardsWithAppearEffect(cardIndex);
 
-
+    //     setTimeout(() => {
+    //         if (this.eventManager) {
+    //             this.eventManager.setupCardEvents();
+    //         }
+    //     }, 200);
+    // }
 
     /**
-     * Render tất cả cards lên màn hình (không có effect đặc biệt)
-     * Sử dụng khi khởi tạo game hoặc reset game
+     * Tạo thẻ reward từ kill effect
+     * @param {number} cardIndex - Index của thẻ
+     * @param {Object} reward - Thông tin reward
+     * @param {CardManager} cardManager - Manager quản lý thẻ
      */
-    renderCards() {
-        // ===== RESET ANIMATION STATE =====
+    // createRewardCard(cardIndex, reward, cardManager) {
+    //     let newCard;
+
+    //     if (reward.type === 'food3') {
+    //         newCard = cardManager.cardFactory.createCard('Food3');
+    //     } else if (reward.type === 'coin') {
+    //         newCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+    //     } else if (reward.type === 'abysslector') {
+    //         newCard = reward.card;
+    //     } else {
+    //         newCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
+    //     }
+
+    //     if (newCard) {
+    //         newCard.id = cardIndex;
+    //         newCard.position = { 
+    //             row: Math.floor(cardIndex / 3), 
+    //             col: cardIndex % 3 
+    //         };
+    //         cardManager.updateCard(cardIndex, newCard);
+    //         this.renderCardsWithAppearEffect(cardIndex);
+
+    //         setTimeout(() => {
+    //             if (this.eventManager) {
+    //                 this.eventManager.setupCardEvents();
+    //             }
+    //         }, 200);
+    //     }
+    // }
+
+    /**
+     * Tạo popup hiển thị damage
+     * @param {HTMLElement} element - Element để thêm popup vào
+     * @param {number} damage - Số damage cần hiển thị
+     */
+    createDamagePopup(element, damage, card = null, cardManager = null) {
+        const validDamage = damage || 0;
+        if (validDamage <= 0) return;
+
+        const popup = document.createElement('div');
+        popup.className = 'damage-popup';
+        popup.textContent = `-${validDamage}`;
+
+        //element.appendChild(popup);
+        if (element && element.appendChild) {
+            element.appendChild(popup);
+        } else {
+            console.log(` card-----------------${card}`)
+            document.querySelector(`[data-card-id="${card.id}"]`).appendChild(popup);
+        }
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.parentNode.removeChild(popup);
+            }
+        }, 800);
+    }
+
+    /**
+     * Bắt đầu animation take damage effect
+     * @param {HTMLElement} cardElement - Element của card
+     * @param {Card} card - Card instance
+     * @param {string} damageType - Loại damage (trap, boom, etc.)
+     */
+    startTakeDamageEffectAnimation(cardElement, card, damage, damageType, cardManager) {
+        // Chạy hàm createDamagePopup trực tiếp, không thêm vào hàng đợi
+
+        this.createDamagePopup(cardElement, damage, card, cardManager);
+        if(damageType=='curse'){
+            console.log(` card--curse---------------${card}------`);
+            if (cardElement && cardElement?.classList.add) {
+                cardElement.style.setProperty('border-color', '#00AA00', 'important'); // xanh lá đậm
+                cardElement.style.setProperty('box-shadow', '0 0 15px rgba(0, 170, 0, 0.8)', 'important');
+
+                cardElement.classList.add('combat-attacking');
+            } else {
+                // thường thì không fallback
+                console.log(` card--------curse---------${card}--------fallback`)
+                document.querySelector(`[data-card-id="${card.id}"]`).classList.add('combat-attacking');
+            }
+
+            setTimeout(() => {
+                if (cardElement) {
+                    cardElement.classList.remove('combat-attacking');
+                    this.updateEntireGrid();
+                } else {
+                    console.log(` card---curse---${card}--------fallback remove lỗi ?????????`);
+                }
+
+            }, 300);
+        }
+        if (['Mystic Heaven', 'Ocean', 'Forest'].includes(damageType)) {
+
+            console.log(` card-----------------${card}--------not fallback`);
+            if (cardElement && cardElement?.classList.add) {
+                cardElement.classList.add('combat-attacking');
+            } else {
+                // thường thì không fallback
+                console.log(` card-----------------${card}--------fallback`)
+                document.querySelector(`[data-card-id="${card.id}"]`).classList.add('combat-attacking');
+            }
+
+            setTimeout(() => {
+                if (cardElement) {
+                    cardElement.classList.remove('combat-attacking');
+                    this.updateEntireGrid();
+                } else {
+                    console.log(` card------${card}--------fallback remove lỗi ?????????`);
+                }
+
+            }, 300);
+        }
+    }
+
+    /**
+     * Bắt đầu animation game over
+     */
+    triggerGameOver() {
+        console.log('🎬 Game Over triggered - Clearing all animation queue');
+        this.clearAnimationQueue();
+        this.cancelAllRunningAnimations();
+
         this.animationCount = 0;
         this.isAnimating = false;
-        // console.log(`🎬 Reset animation state for new game`);
-        
-        // ===== CLEAR GRID =====
+        this.isProcessingQueue = false;
+
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const cards = document.querySelectorAll('.card');
+                console.log(`Found ${cards.length} cards to animate`);
+
+                if (cards.length === 0) {
+                    console.warn('No cards found to animate');
+                    this.showGameOverDialog();
+                    this.clearCardsGrid();
+                    resolve();
+                    return;
+                }
+
+                const staggerDelay = 80;
+                const startTime = performance.now();
+                let currentCardIndex = 0;
+                let completedCards = 0;
+
+                const cardsArray = Array.from(cards);
+                const shuffledCards = this.shuffleArray(cardsArray);
+
+                this.createAnimationLoop(
+                    (easedProgress, progress) => {
+                        const elapsed = progress * (this.ANIMATION_DURATIONS.GAME_OVER + (shuffledCards.length - 1) * staggerDelay);
+                        const currentTimeForCard = elapsed - (currentCardIndex * staggerDelay);
+                        const cardProgress = Math.min(currentTimeForCard / this.ANIMATION_DURATIONS.GAME_OVER, 1);
+
+                        if (currentCardIndex < shuffledCards.length && cardProgress >= 0) {
+                            const card = shuffledCards[currentCardIndex];
+                            if (card) {
+                                const scale = 1 - (easedProgress * 0.8);
+                                const opacity = 1 - easedProgress;
+
+                                card.style.transform = `scale(${scale})`;
+                                card.style.opacity = opacity;
+
+                                if (!card.classList.contains('shrinking')) {
+                                    card.classList.add('shrinking');
+                                }
+
+                                if (cardProgress >= 1) {
+                                    completedCards++;
+                                    currentCardIndex++;
+                                }
+                            }
+                        }
+                    },
+                    this.ANIMATION_DURATIONS.GAME_OVER + (shuffledCards.length - 1) * staggerDelay,
+                    AnimationManager.EASING.easeInBack,
+                    () => {
+                        setTimeout(() => {
+                            this.showGameOverDialog();
+                            this.clearCardsGrid();
+                            resolve();
+                        }, 500);
+                    },
+                    'currentGameOverAnimation'
+                );
+            });
+        }, 'Game Over Animation', this.ANIMATION_PRIORITIES.GAME_OVER);
+    }
+
+    /**
+     * Hiển thị dialog game over
+     */
+    showGameOverDialog() {
+        const dialog = document.getElementById('game-over-dialog');
+        dialog.classList.add('show');
+    }
+
+    /**
+     * Ẩn dialog game over
+     */
+    hideGameOverDialog() {
+        const dialog = document.getElementById('game-over-dialog');
+        dialog.classList.remove('show');
+    }
+
+    // ===== CÁC HÀM RENDER VÀ UPDATE =====
+
+    /**
+     * Render tất cả cards lên màn hình
+     */
+    renderCards() {
+        this.animationCount = 0;
+        this.isAnimating = false;
+
         const grid = document.getElementById('cards-grid');
-        grid.innerHTML = ''; // Xóa tất cả cards cũ
-        
-        // ===== RENDER EACH CARD =====
+        grid.innerHTML = '';
+
         this.cardManager.getAllCards().forEach((card, index) => {
             if (card) {
                 const cardElement = this.createOrUpdateCardElement(card, index, false);
@@ -732,32 +723,78 @@ class AnimationManager {
     }
 
     /**
+     * Render card với hiệu ứng xuất hiện
+     * @param {number} newCardIndex - Index của thẻ cần render
+     */
+    renderCardsWithAppearEffect(newCardIndex) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const card = this.cardManager.getCard(newCardIndex);
+                if (!card) {
+                    resolve();
+                    return;
+                }
+
+                const existingCardElement = document.querySelector(`[data-index="${newCardIndex}"]`);
+
+                if (existingCardElement) {
+                    this.createOrUpdateCardElement(card, newCardIndex, true, existingCardElement);
+                    existingCardElement.classList.add('appearing');
+
+                    setTimeout(() => {
+                        existingCardElement.classList.remove('appearing');
+                    }, this.ANIMATION_DURATIONS.APPEAR);
+                } else {
+                     // code này có thể ko bao giờ chạy 
+                            console.warn('renderListCardsWithAppearEffect-----------')
+                    console.log(`-------- thẻ dc tạo mới ----------`)
+                    const grid = document.getElementById('cards-grid');
+                    const cardElement = this.createOrUpdateCardElement(card, newCardIndex, false);
+                    cardElement.classList.add('appearing');
+
+                    const targetPosition = Array.from(grid.children)[newCardIndex];
+                    if (targetPosition !== undefined) {
+                        grid.insertBefore(cardElement, targetPosition);
+                    } else {
+                        grid.appendChild(cardElement);
+                    }
+
+                    setTimeout(() => {
+                        cardElement.classList.remove('appearing');
+                    }, this.ANIMATION_DURATIONS.APPEAR);
+                }
+
+                if (this.eventManager) {
+                    // code này có thể ko bao giờ chạy 
+                           // console.warn('renderCardsWithAppearEffect-----------')
+                    //this.eventManager.setupCardEventsForIndex(newCardIndex);
+                }
+
+                setTimeout(resolve, this.ANIMATION_DURATIONS.APPEAR);
+            });
+        }, `Render Cards with Appear Effect (${newCardIndex})`, this.ANIMATION_PRIORITIES.RENDER);
+    }
+
+    /**
      * Cập nhật toàn bộ grid một cách an toàn
-     * Giữ nguyên events và tránh mất thẻ
      */
     updateEntireGrid() {
         const grid = document.getElementById('cards-grid');
-        if (!grid) {
-            return;
-        }
+        if (!grid) return;
 
-        // ===== LẤY DỮ LIỆU CARDS HIỆN TẠI =====
         const allCards = this.cardManager.getAllCards();
-        
-        // ===== CẬP NHẬT TỪNG CARD ELEMENT =====
+
         allCards.forEach((card, index) => {
             if (card) {
                 const existingElement = document.querySelector(`[data-index="${index}"]`);
-                
-                                        if (existingElement) {
-                            // Cập nhật card element hiện có
-                            this.createOrUpdateCardElement(card, index, true, existingElement);
-                        } else {
-                            // Tạo card element mới nếu chưa có
-                            const newElement = this.createOrUpdateCardElement(card, index, false);
-                    
-                    // Tìm vị trí đúng trong grid
-                    const targetPosition = this.getGridPosition(index);
+
+                if (existingElement) {
+                    this.createOrUpdateCardElement(card, index, true, existingElement);
+                } else {
+                    // code này có thể ko bao giờ xảy ra 
+                    console.log(`hàm này dc goiiiiiiiiiiiiiiiiiittttttttttttttttiiiiiiiii`);
+                    const newElement = this.createOrUpdateCardElement(card, index, false);
+                    const targetPosition = Array.from(grid.children)[index];
                     if (targetPosition !== null) {
                         grid.insertBefore(newElement, targetPosition);
                     } else {
@@ -766,421 +803,278 @@ class AnimationManager {
                 }
             }
         });
-
-        // ===== SETUP EVENTS CHỈ CHO CARD MỚI (NẾU CÓ) =====
-        // Events không bị xóa khi cập nhật card content, chỉ cần setup cho card mới
+        // thêm _clickHandler nếu thiếu 
         if (this.eventManager) {
-            // Chỉ setup events cho card mới được tạo
             allCards.forEach((card, index) => {
                 if (card) {
                     const existingElement = document.querySelector(`[data-index="${index}"]`);
-                    // Chỉ setup cho card mới (không có events) hoặc card được tạo lại
                     if (existingElement && !existingElement._clickHandler) {
-                        this.eventManager.setupCardEventsForIndex(index);
+                        console.warn(`hàm này dc setupCardEventsForIndex---------------`);
+                        //this.eventManager.setupCardEventsForIndex(index);
                     }
                 }
             });
         }
-    }
-
-
-
-    /**
-     * Render card với hiệu ứng xuất hiện (có thể cập nhật toàn bộ grid nếu cần)
-     * @param {number} newCardIndex - Index của thẻ cần render
-     */
-    renderCardsWithAppearEffect(newCardIndex) {
-        // Thêm vào hàng đợi với priority thấp (render cards)
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                // ===== KIỂM TRA XEM CÓ CẦN CẬP NHẬT TOÀN BỘ GRID KHÔNG =====
-                // const grid = document.getElementById('cards-grid');
-                // const allCards = this.cardManager.getAllCards();
-                // const gridChildren = Array.from(grid.children);
-                
-                // // Nếu số lượng cards trong data khác với số lượng elements trong grid
-                // const dataCardCount = allCards.filter(card => card !== null).length;
-                // const gridElementCount = gridChildren.length;
-                
-                // if (dataCardCount !== gridElementCount) {
-                //     // Cập nhật toàn bộ grid nếu có sự không đồng bộ
-                //     // Gọi trực tiếp thay vì qua queue để tránh deadlock
-                //     this.updateEntireGrid();
-                //     resolve();
-                //     return;
-                // }
-                
-                // ===== LẤY CARD CẦN CẬP NHẬT =====
-                const card = this.cardManager.getCard(newCardIndex);
-                if (!card) {
-                    resolve();
-                    return;
-                }
-                
-                // ===== TÌM CARD ELEMENT HIỆN TẠI =====
-                const existingCardElement = document.querySelector(`[data-index="${newCardIndex}"]`);
-                
-                if (existingCardElement) {
-                    // ===== CẬP NHẬT CARD ELEMENT HIỆN CÓ =====
-                    this.createOrUpdateCardElement(card, newCardIndex, true, existingCardElement);
-                    
-                    // ===== THÊM HIỆU ỨNG APPEARING =====
-                    existingCardElement.classList.add('appearing');
-                    
-                    // ===== XÓA CLASS SAU KHI ANIMATION HOÀN THÀNH =====
-                    setTimeout(() => {
-                        existingCardElement.classList.remove('appearing');
-                    }, 200); // Giảm từ 500ms xuống 200ms để game nhanh hơn
-                } else {
-                    // ===== TẠO CARD ELEMENT MỚI NẾU CHƯA CÓ =====
-                    const grid = document.getElementById('cards-grid');
-                    const cardElement = this.createOrUpdateCardElement(card, newCardIndex, false);
-                    cardElement.classList.add('appearing');
-                    
-                    // Tìm vị trí đúng trong grid
-                    const targetPosition = this.getGridPosition(newCardIndex);
-                    if (targetPosition !== null) {
-                        grid.insertBefore(cardElement, targetPosition);
-                    } else {
-                        grid.appendChild(cardElement);
-                    }
-                    
-                    // ===== XÓA CLASS SAU KHI ANIMATION HOÀN THÀNH =====
-                    setTimeout(() => {
-                        cardElement.classList.remove('appearing');
-                    }, 200); // Giảm từ 500ms xuống 200ms để game nhanh hơn
-                }
-                
-                // ===== SETUP EVENTS CHO CARD MỚI =====
-                if (this.eventManager) {
-                    this.eventManager.setupCardEventsForIndex(newCardIndex);
-                }
-                
-                // Resolve sau khi appear effect hoàn thành
-                setTimeout(resolve, 200); // Giảm từ 500ms xuống 200ms để game nhanh hơn
-            });
-        }, `Render Cards with Appear Effect (${newCardIndex})`, 7);
-    }
-
-    /**
-     * Render nhiều cards với hiệu ứng xuất hiện cùng lúc
-     * @param {Array} newCardIndexes - Mảng các index của thẻ mới cần render
-     */
-    renderListCardsWithAppearEffect(newCardIndexes) {
-        // Thêm vào hàng đợi với priority thấp (render effect)
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                const grid = document.getElementById('cards-grid');
-                
-                // ===== LẤY TẤT CẢ CARD ELEMENTS VÀ TẠO MỚI NẾU CẦN =====
-                const cardElements = [];
-                newCardIndexes.forEach(index => {
-                    let cardElement = document.querySelector(`[data-index="${index}"]`);
-                    
-                    if (!cardElement) {
-                        // ===== TẠO CARD ELEMENT MỚI NẾU CHƯA CÓ =====
-                        const card = this.cardManager.getCard(index);
-                        if (card) {
-                            cardElement = this.createOrUpdateCardElement(card, index, false);
-                            cardElement.classList.add('appearing');
-                            
-                            // Tìm vị trí đúng trong grid
-                            const targetPosition = this.getGridPosition(index);
-                            if (targetPosition !== null) {
-                                grid.insertBefore(cardElement, targetPosition);
-                            } else {
-                                grid.appendChild(cardElement);
-                            }
-                        }
-                    } else {
-                        // ===== CẬP NHẬT CARD ELEMENT HIỆN CÓ =====
-                        const card = this.cardManager.getCard(index);
-                        if (card) {
-                            this.createOrUpdateCardElement(card, index, true, cardElement);
-                            cardElement.classList.add('appearing');
-                        }
-                    }
-                    
-                    if (cardElement) {
-                        cardElements.push(cardElement);
-                    }
-                });
-                
-                if (cardElements.length === 0) {
-                    resolve();
-                    return;
-                }
-                
-                // ===== XÓA CLASS SAU KHI ANIMATION HOÀN THÀNH =====
-                setTimeout(() => {
-                    cardElements.forEach(cardElement => {
-                        cardElement.classList.remove('appearing');
-                    });
-                }, 200); // Giảm từ 500ms xuống 200ms để game nhanh hơn
-                
-                // ===== SETUP EVENTS CHO CÁC CARD MỚI =====
-                if (this.eventManager) {
-                    newCardIndexes.forEach(index => {
-                        this.eventManager.setupCardEventsForIndex(index);
-                    });
-                }
-                
-                // Resolve sau khi appear effect hoàn thành
-                setTimeout(resolve, 200); // Giảm từ 500ms xuống 200ms để game nhanh hơn
-            });
-        }, `Render List Cards with Appear Effect (${newCardIndexes.join(', ')})`, 3);
     }
 
     /**
      * Tạo hoặc cập nhật card element
      * @param {Object} card - Dữ liệu card
      * @param {number} index - Index của card trong grid
-     * @param {boolean} isUpdate - True nếu cập nhật element hiện có, False nếu tạo mới
-     * @param {HTMLElement} existingElement - Element hiện có (chỉ cần khi isUpdate = true)
+     * @param {boolean} isUpdate - True nếu cập nhật element hiện có
+     * @param {HTMLElement} existingElement - Element hiện có
      * @returns {HTMLElement} Card element đã được tạo hoặc cập nhật
      */
     createOrUpdateCardElement(card, index, isUpdate = false, existingElement = null) {
         let cardElement;
-        
+
         if (isUpdate && existingElement) {
-            // ===== CẬP NHẬT ELEMENT HIỆN CÓ =====
             cardElement = existingElement;
-            
-            // ===== CẬP NHẬT CARD IMAGE =====
+
             const imageElement = cardElement.querySelector('.card-image');
             if (imageElement) {
                 imageElement.src = card.image;
                 imageElement.alt = card.type;
             }
-            
-            // ===== XÓA TẤT CẢ ANIMATION STYLES =====
+
             this.clearAnimationStyles(cardElement);
-            
-            // ===== XÓA TẤT CẢ DISPLAY ELEMENTS CŨ =====
-            // Giữ lại card-image, xóa tất cả elements khác
+
             const cardImage = cardElement.querySelector('.card-image');
             cardElement.innerHTML = '';
             if (cardImage) {
                 cardElement.appendChild(cardImage);
             }
         } else {
-            // ===== TẠO ELEMENT MỚI =====
             cardElement = document.createElement('div');
             
-            // ===== TẠO CARD IMAGE =====
             const imageElement = document.createElement('img');
             imageElement.className = 'card-image';
             imageElement.src = card.image;
             imageElement.alt = card.type;
             cardElement.appendChild(imageElement);
         }
-        
-        // ===== CẬP NHẬT CLASS VÀ DATASET =====
+
         cardElement.className = `card ${card.type}`;
         cardElement.dataset.index = index;
         cardElement.dataset.cardId = card.id;
         cardElement.dataset.type = card.type;
 
-        // ===== THÊM DISPLAY THEO LOẠI CARD =====
-        // Coin card - hiển thị điểm số (trừ thẻ Void)
+        this.addCardDisplayElements(cardElement, card);
+
+        return cardElement;
+    }
+
+    /**
+     * Thêm các element hiển thị cho card
+     * @param {HTMLElement} cardElement - Element của card
+     * @param {Object} card - Dữ liệu card
+     */
+    addCardDisplayElements(cardElement, card) {
+        // Coin card
         if (card.type === 'coin' && card.nameId !== 'void') {
-            const scoreDisplay = document.createElement('div');
-            scoreDisplay.className = 'score-display';
-            scoreDisplay.textContent = card.score || 0; // Hiển thị điểm, mặc định 0
-            cardElement.appendChild(scoreDisplay);
-        }
-
-        // Food card - hiển thị lượng hồi máu
-        if (card.type === 'food') {
-            const healDisplay = document.createElement('div');
-            healDisplay.className = 'heal-display';
-            healDisplay.textContent = card.heal || 0; // Hiển thị heal, mặc định 0
-            cardElement.appendChild(healDisplay);
-        }
-
-        // Sword card - hiển thị độ bền
-        if (card.type === 'weapon') {
-            const durabilityDisplay = document.createElement('div');
-            durabilityDisplay.className = 'durability-display';
-            durabilityDisplay.textContent = card.durability || 0; // Hiển thị durability, mặc định 0
-            cardElement.appendChild(durabilityDisplay);
-        }
-
-        // Treasure card - hiển thị durability và score
-        if (card.nameId === 'treasure0') {
-            // Hiển thị durability ở góc trên bên phải (nếu có)
-            if (card.durability) {
-                const durabilityDisplay = document.createElement('div');
-                durabilityDisplay.className = 'durability-display';
-                durabilityDisplay.textContent = card.durability;
-                cardElement.appendChild(durabilityDisplay);
-            }
-            
-            // Hiển thị score ở góc dưới bên phải
             const scoreDisplay = document.createElement('div');
             scoreDisplay.className = 'score-display';
             scoreDisplay.textContent = card.score || 0;
             cardElement.appendChild(scoreDisplay);
         }
 
-        // Boom card - hiển thị damage và countdown
+        // Food card
+        if (card.type === 'food') {
+            const healDisplay = document.createElement('div');
+            healDisplay.className = 'heal-display';
+            healDisplay.textContent = card.heal || 0;
+            cardElement.appendChild(healDisplay);
+        }
+
+        // Weapon card
+        if (card.type === 'weapon') {
+            const durabilityDisplay = document.createElement('div');
+            durabilityDisplay.className = 'durability-display';
+            durabilityDisplay.textContent = card.durability || 0;
+            cardElement.appendChild(durabilityDisplay);
+        }
+
+        // Treasure card
+        if (card.nameId === 'treasure0') {
+            if (card.durability) {
+                const durabilityDisplay = document.createElement('div');
+                durabilityDisplay.className = 'durability-display';
+                durabilityDisplay.textContent = card.durability;
+                cardElement.appendChild(durabilityDisplay);
+            }
+
+            const scoreDisplay = document.createElement('div');
+            scoreDisplay.className = 'score-display';
+            scoreDisplay.textContent = card.score || 0;
+            cardElement.appendChild(scoreDisplay);
+        }
+
+        // Boom card
         if (card.type === 'boom') {
-            // Hiển thị damage ở góc dưới bên phải
             const damageDisplay = document.createElement('div');
             damageDisplay.className = 'damage-display';
             damageDisplay.textContent = card.damage || 0;
             cardElement.appendChild(damageDisplay);
-            
-            // Hiển thị countdown ở góc trên bên phải
+
             const countdownDisplay = document.createElement('div');
             countdownDisplay.className = 'countdown-display';
             countdownDisplay.textContent = card.countdown || 0;
             cardElement.appendChild(countdownDisplay);
         }
 
-        // Character card - hiển thị HP và weapon
+        // Character card
         if (card.type === 'character') {
-            // Hiển thị HP hiện tại
             const hpDisplay = document.createElement('div');
             hpDisplay.className = 'hp-display';
             hpDisplay.textContent = this.characterManager.getCharacterHP();
             cardElement.appendChild(hpDisplay);
-            
-            // Hiển thị weapon nếu có
+
             if (this.characterManager.getCharacterWeaponDurability() > 0) {
                 const weaponDisplay = document.createElement('div');
                 weaponDisplay.className = 'weapon-display';
                 weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
                 cardElement.appendChild(weaponDisplay);
             }
-        } 
-        // Enemy card - hiển thị HP
+        }
+        // Enemy card
         else if (card.type === 'enemy') {
             const hpDisplay = document.createElement('div');
             hpDisplay.className = 'hp-display';
-
-            // ===== THÊM COWARDLY STYLING CHO OPERATIVE CARDS =====
-            if (card.nameId === 'operative') {
-                // Kiểm tra cowardlyEffect và thêm class nếu cần
-                if (card.cowardlyEffect && typeof card.cowardlyEffect === 'function') {
-                    const isCowardly = card.cowardlyEffect(this.characterManager);
-                    if (isCowardly) {
-                        cardElement.classList.add('cowardly');
-                    } else {
-                        cardElement.classList.remove('cowardly');
-                    }
-                }
-            }
-            
-            const currentHP = card.hp || 0; // Sử dụng HP từ Card instance
-            hpDisplay.textContent = currentHP;
+            this.addEnemySpecialStyling(cardElement, card);
+            hpDisplay.textContent = card.hp || 0;
             cardElement.appendChild(hpDisplay);
-            
-            // ===== THÊM SHIELD STYLING CHO ABYSSLECTOR CARDS =====
-            if (card.nameId === 'abyssLector0') {
-                if (card.shield === 1) {
-                    cardElement.classList.add('shield-active-red');
-                } else if (card.shield === 0) {
-                    cardElement.classList.remove('shield-active-red');
-                }
-            } else if (card.nameId === 'abyssLector1') {
-                if (card.shield === 1) {
-                    cardElement.classList.add('shield-active-purple');
-                } else if (card.shield === 0) {
-                    cardElement.classList.remove('shield-active-purple');
-                }
-            } else if (card.nameId === 'abyssLector2') {
-                if (card.shield === 1) {
-                    cardElement.classList.add('shield-active-blue');
-                } else if (card.shield === 0) {
-                    cardElement.classList.remove('shield-active-blue');
-                }
-            }
-            
-
         }
-        // Trap card - hiển thị damage và mũi tên theo thuộc tính
+        // Trap card
         else if (card.nameId === 'trap') {
-            // Hiển thị damage ở góc dưới bên phải
             const damageDisplay = document.createElement('div');
             damageDisplay.className = 'damage-display';
             damageDisplay.textContent = card.damage || 0;
             cardElement.appendChild(damageDisplay);
-            
-            // Tạo mũi tên theo thuộc tính arrow của card
-            const arrowConfigs = [
-                { position: 'top-center', property: 'arrowTop' },
-                { position: 'bottom-center', property: 'arrowBottom' },
-                { position: 'left-center', property: 'arrowLeft' },
-                { position: 'right-center', property: 'arrowRight' }
-            ];
-            
-            arrowConfigs.forEach(({ position, property }) => {
-                // Chỉ tạo arrow nếu thuộc tính = 1
-                if (card[property] === 1) {
-                    const arrowElement = document.createElement('div');
-                    arrowElement.className = `trap-arrow ${position}`;
-                    arrowElement.innerHTML = '➤'; // Unicode arrow symbol
-                    cardElement.appendChild(arrowElement);
-                }
-            });
+
+            this.addTrapArrows(cardElement, card);
         }
-
-        return cardElement;
     }
-
-
 
     /**
-     * Tìm vị trí của một card trong grid để chèn vào đúng vị trí
-     * @param {number} cardIndex - Index của card cần tìm vị trí
-     * @returns {HTMLElement | null} Element của vị trí cần chèn hoặc null nếu không tìm thấy
+     * Thêm styling đặc biệt cho enemy cards
+     * @param {HTMLElement} cardElement - Element của card
+     * @param {Object} card - Dữ liệu card
      */
-    getGridPosition(cardIndex) {
-        const grid = document.getElementById('cards-grid');
-        if (!grid) return null;
-
-        // Tính toán vị trí trong grid dựa trên index
-        const row = Math.floor(cardIndex / 3);
-        const col = cardIndex % 3;
-        
-        // Tìm element ở vị trí tương ứng trong grid
-        const gridChildren = Array.from(grid.children);
-        const targetPosition = row * 3 + col;
-        
-        if (targetPosition < gridChildren.length) {
-            return gridChildren[targetPosition];
+    addEnemySpecialStyling(cardElement, card) {
+        if (card.nameId === 'operative') {
+            if (card.cowardlyEffect && typeof card.cowardlyEffect === 'function') {
+                const isCowardly = card.cowardlyEffect(this.characterManager);
+                if (isCowardly) {
+                    cardElement.classList.add('cowardly');
+                } else {
+                    cardElement.classList.remove('cowardly');
+                }
+            }
         }
-        
-        // Nếu không tìm thấy, trả về null để append vào cuối
-        return null;
+
+        if (card.nameId === 'fatui1') {
+            if (card.repaymentReceipt > 0) {
+                const repaymentReceiptDisplay = document.createElement('div');
+                repaymentReceiptDisplay.className = 'repayment-receipt-display';
+                repaymentReceiptDisplay.textContent = card.repaymentReceipt;
+                cardElement.appendChild(repaymentReceiptDisplay);
+            }
+        }
+
+        if (card.nameId === 'abyssLector0') {
+            if (card.shield === 1) {
+                cardElement.classList.add('shield-active-red');
+            } else if (card.shield === 0) {
+                cardElement.classList.remove('shield-active-red');
+            }
+        } else if (card.nameId === 'abyssLector1') {
+            if (card.shield === 1) {
+                cardElement.classList.add('shield-active-purple');
+            } else if (card.shield === 0) {
+                cardElement.classList.remove('shield-active-purple');
+            }
+        } else if (card.nameId === 'abyssLector2') {
+            if (card.shield === 1) {
+                cardElement.classList.add('shield-active-blue');
+            } else if (card.shield === 0) {
+                cardElement.classList.remove('shield-active-blue');
+            }
+        }
     }
+
+    /**
+     * Thêm mũi tên cho trap cards
+     * @param {HTMLElement} cardElement - Element của card
+     * @param {Object} card - Dữ liệu card
+     */
+    addTrapArrows(cardElement, card) {
+        const arrowConfigs = [
+            { position: 'top-center', property: 'arrowTop' },
+            { position: 'bottom-center', property: 'arrowBottom' },
+            { position: 'left-center', property: 'arrowLeft' },
+            { position: 'right-center', property: 'arrowRight' }
+        ];
+
+        arrowConfigs.forEach(({ position, property }) => {
+            if (card[property] === 1) {
+                const arrowElement = document.createElement('div');
+                arrowElement.className = `trap-arrow ${position}`;
+                arrowElement.innerHTML = '➤';
+                cardElement.appendChild(arrowElement);
+            }
+        });
+    }
+
+    /**
+     * Tìm vị trí của một card trong grid
+     * @param {number} cardIndex - Index của card cần tìm vị trí
+     * @returns {HTMLElement | null} Element của vị trí cần chèn
+     */
+    // getGridPosition(cardIndex) {
+    //     const grid = document.getElementById('cards-grid');
+    //     if (!grid) return null;
+
+    //     const gridChildren = Array.from(grid.children);
+
+    //     if (targetPosition < gridChildren.length) {
+    //         return Array.from(grid.children)[cardIndex];
+    //     }
+
+    //     return null;
+    // }
+
+    /**
+     * Xóa tất cả CSS styles và animation classes khỏi element
+     * @param {HTMLElement} element - Element cần xóa CSS
+     */
+    clearAnimationStyles(element) {
+        if (!element) return;
+        element.removeAttribute('style');
+        element.className = '';
+    }
+
+    // ===== CÁC HÀM UPDATE DISPLAY =====
 
     /**
      * Cập nhật hiển thị character (HP và weapon)
-     *?ược g?i khi character thay đổi stats
      */
     updateCharacterDisplay() {
         const characterElement = document.querySelector('.card.character');
         if (characterElement) {
-            // ===== CẬP NHẬT HP DISPLAY =====
             const hpDisplay = characterElement.querySelector('.hp-display');
             if (hpDisplay) {
                 hpDisplay.textContent = this.characterManager.getCharacterHP();
             }
-            
-            // ===== CẬP NHẬT WEAPON DISPLAY =====
+
             let weaponDisplay = characterElement.querySelector('.weapon-display');
             if (this.characterManager.getCharacterWeaponDurability() > 0) {
-            // Tạo weapon display nếu chưa có
-            if (!weaponDisplay) {
-                weaponDisplay = document.createElement('div');
-                weaponDisplay.className = 'weapon-display';
-                characterElement.appendChild(weaponDisplay);
-            }
-            weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
+                if (!weaponDisplay) {
+                    weaponDisplay = document.createElement('div');
+                    weaponDisplay.className = 'weapon-display';
+                    characterElement.appendChild(weaponDisplay);
+                }
+                weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
             } else if (weaponDisplay) {
-                // Xóa weapon display nếu không có weapon
                 weaponDisplay.remove();
             }
         }
@@ -1189,49 +1083,20 @@ class AnimationManager {
     /**
      * Cập nhật hiển thị monster HP
      * @param {number} monsterIndex - Index của monster cần cập nhật
+     * đã lỗi thời cần sớm xóa và thay đổi
      */
     updateMonsterDisplay(monsterIndex) {
         const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
         if (monsterElement && this.cardManager.getCard(monsterIndex)) {
             const monster = this.cardManager.getCard(monsterIndex);
-            // ===== CẬP NHẬT COWARDLY STATE CHO OPERATIVE CARDS =====
-            if (monster.nameId === 'operative') {
-                // Kiểm tra cowardlyEffect và cập nhật class nếu cần
-                if (monster.cowardlyEffect && typeof monster.cowardlyEffect === 'function') {
-                    const isCowardly = monster.cowardlyEffect(this.characterManager);
-                    if (isCowardly) {
-                        monsterElement.classList.add('cowardly');
-                    } else {
-                        monsterElement.classList.remove('cowardly');
-                    }
-                }
-            }
+
+            this.addEnemySpecialStyling(monsterElement, monster);
+
             const hpDisplay = monsterElement.querySelector('.hp-display');
             if (hpDisplay) {
-                hpDisplay.textContent = monster.hp || 0; // Hiển thị HP, mặc định 0
+                hpDisplay.textContent = monster.hp || 0;
             }
-            
-            // ===== CẬP NHẬT SHIELD STATE CHO ABYSSLECTOR CARDS =====
-            if (monster.nameId === 'abyssLector0') {
-                if (monster.shield === 1) {
-                    monsterElement.classList.add('shield-active-red');
-                } else if (monster.shield === 0) {
-                    monsterElement.classList.remove('shield-active-red');
-                }
-            } else if (monster.nameId === 'abyssLector1') {
-                if (monster.shield === 1) {
-                    monsterElement.classList.add('shield-active-purple');
-                } else if (monster.shield === 0) {
-                    monsterElement.classList.remove('shield-active-purple');
-                }
-            } else if (monster.nameId === 'abyssLector2') {
-                if (monster.shield === 1) {
-                    monsterElement.classList.add('shield-active-blue');
-                } else if (monster.shield === 0) {
-                    monsterElement.classList.remove('shield-active-blue');
-                }
-            }
-            
+
         }
     }
 
@@ -1243,14 +1108,12 @@ class AnimationManager {
         const boomElement = document.querySelector(`[data-index="${boomIndex}"]`);
         if (boomElement && this.cardManager.getCard(boomIndex)) {
             const boom = this.cardManager.getCard(boomIndex);
-            
-            // Cập nhật countdown display
+
             const countdownDisplay = boomElement.querySelector('.countdown-display');
             if (countdownDisplay && boom.countdown !== undefined) {
                 countdownDisplay.textContent = boom.countdown;
             }
-            
-            // Cập nhật damage display
+
             const damageDisplay = boomElement.querySelector('.damage-display');
             if (damageDisplay && boom.damage !== undefined) {
                 damageDisplay.textContent = boom.damage;
@@ -1274,325 +1137,124 @@ class AnimationManager {
     }
 
     /**
-     * Bắt đầu animation tương tác với treasure
-     * @param {number} characterIndex - Index của character
-     * @param {number} treasureIndex - Index của treasure
+     * Cập nhật hiển thị damage của trap
+     * @param {number} trapIndex - Index của trap
      */
-    startTreasureInteractionAnimation(characterIndex, treasureIndex) {
-        // Thêm vào hàng đợi với priority trung bình
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                // ===== TÌM CÁC ELEMENT =====
-                const characterElement = document.querySelector(`[data-index="${characterIndex}"]`);
-                const treasureElement = document.querySelector(`[data-index="${treasureIndex}"]`);
-                
-                // ===== ANIMATION CHO CHARACTER (INTERACTING) =====
-                if (characterElement) {
-                    characterElement.classList.add('treasure-interacting');
-                    setTimeout(() => {
-                        characterElement.classList.remove('treasure-interacting');
-                    }, 200);
-                }
-                
-                // ===== ANIMATION CHO TREASURE (BEING INTERACTED) =====
-                if (treasureElement) {
-                    treasureElement.classList.add('treasure-being-interacted');
-                    setTimeout(() => {
-                        treasureElement.classList.remove('treasure-being-interacted');
-                    }, 200);
-                }
-                
-                // Resolve sau khi animation hoàn thành
-                setTimeout(resolve, 300); // Tăng từ 200ms lên 300ms để khớp với CSS combatShake duration
-            });
-        }, `Treasure Interaction (${characterIndex} → ${treasureIndex})`, 4);
-    }
+    // updateTrapDamageDisplay(trapIndex) {
+    //     const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
+    //     if (trapElement) {
+    //         const damageDisplay = trapElement.querySelector('.damage-display');
+    //         if (damageDisplay) {
+    //             const trapCard = this.cardManager.getCard(trapIndex);
+    //             if (trapCard && trapCard.damage !== undefined) {
+    //                 damageDisplay.textContent = trapCard.damage;
+    //             }
+    //         }
+    //     }
+    // }
 
-    /**
-     * Bắt đầu animation boom explosion cho tất cả thẻ bị ảnh hưởng
-     * @param {Array} affectedCardIndexes - Mảng các index của thẻ bị ảnh hưởng
-     * @param {number} boomIndex - Index của boom card
-     */
-    startBoomExplosionAnimation(affectedCardIndexes, boomIndex) {
-        // Thêm vào hàng đợi với priority thấp (boom explosion)
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                // ===== ANIMATION CHO BOOM CARD =====
-                const boomElement = document.querySelector(`[data-index="${boomIndex}"]`);
-                if (boomElement) {
-                    boomElement.classList.add('boom-exploding');
-                    setTimeout(() => {
-                        boomElement.classList.remove('boom-exploding');
-                    }, 500);
-                }
-                
-                // ===== ANIMATION CHO TẤT CẢ THẺ BỊ ẢNH HƯỞNG =====
-                affectedCardIndexes.forEach((cardIndex) => {
-                    const cardElement = document.querySelector(`[data-index="${cardIndex}"]`);
-                    if (cardElement) {
-                        cardElement.classList.add('boom-exploding');
-                        setTimeout(() => {
-                            cardElement.classList.remove('boom-exploding');
-                        }, 500);
-                    }
-                });
-                
-                // Resolve sau khi animation hoàn thành
-                setTimeout(resolve, 500);
-            });
-        }, `Boom Explosion (${boomIndex})`, 6);
-    }
-
-
-
-    /**
-     * Tạo popup hiển thị damage
-     * @param {HTMLElement} element - Element để thêm popup vào
-     * @param {number} damage - Số damage cần hiển thị
-     */
-    createDamagePopup(element, damage) {
-        // ===== KIỂM TRA VÀ XỬ LÝ DAMAGE =====
-        const validDamage = damage || 0; // Đảm bảo damage không undefined
-        // console.log(`💥 Damage popup: original=${damage}, valid=${validDamage}`);
-        
-        // ===== CHỈ HIỂN THỊ POPUP NẾU DAMAGE > 0 =====
-        if (validDamage <= 0) {
-            // console.log(`💥 B? qua damage popup vì damage <= 0`);
-            return;
-        }
-        
-        // ===== TẠO POPUP ELEMENT =====
-        const popup = document.createElement('div');
-        popup.className = 'damage-popup';
-        popup.textContent = `-${validDamage}`; // Hiển thị damage với dấu trừ
-        
-        // ===== THÊM VÀO ELEMENT =====
-        element.appendChild(popup);
-        
-        // ===== TỰ XÓA SAU 800ms =====
-        setTimeout(() => {
-            if (popup.parentNode) {
-                popup.parentNode.removeChild(popup);
-            }
-        }, 800);
-    }
-
-
-
-    /**
-     * Bắt đầu animation chiến đấu
-     * @param {number} characterIndex - Index của character
-     * @param {number} monsterIndex - Index của monster
-     * @param {number} damage - Damage gây ra
-     */
-    startCombatAnimation(characterIndex, monsterIndex, damage) {
-        // Thêm vào hàng đợi với priority cao (combat animation)
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                // ===== TÌM CÁC ELEMENT =====
-                const characterElement = document.querySelector(`[data-index="${characterIndex}"]`);
-                const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
-                
-                // ===== ANIMATION CHO CHARACTER (ATTACKING) =====
-                if (characterElement) {
-                    characterElement.classList.add('combat-attacking');
-                    setTimeout(() => {
-                        characterElement.classList.remove('combat-attacking');
-                    }, 300);
-                }
-                
-                // ===== ANIMATION CHO MONSTER (DEFENDING) =====
-                if (monsterElement) {
-                    monsterElement.classList.add('combat-defending');
-                    this.createDamagePopup(monsterElement, damage);
-                    setTimeout(() => {
-                        monsterElement.classList.remove('combat-defending');
-                    }, 300);
-                }
-                
-                // Resolve sau khi animation hoàn thành
-                setTimeout(resolve, 300); // Tăng từ 200ms lên 300ms để khớp với CSS combatShake duration
-            });
-        }, `Combat Animation (${characterIndex} → ${monsterIndex})`, 3);
-    }
-
-
-
-    /**
-     * Bắt đầu animation game over
-     * Tất cả cards sẽ co lại và biến mất
-     */
-    triggerGameOver() {
-        // Thêm vào hàng đợi với priority cao nhất (game over)
-        this.queueAnimation(() => {
-            return new Promise((resolve) => {
-                const cards = document.querySelectorAll('.card');
-                console.log(`Found ${cards.length} cards to animate`);
-                
-                // ===== KIỂM TRA CÓ CARDS KHÔNG =====
-                if (cards.length === 0) {
-                    console.warn('No cards found to animate');
-                    this.showGameOverDialog();
-                    resolve();
-                    return;
-                }
-                
-                // ===== ANIMATE TỪNG CARD =====
-                let animatedCount = 0;
-                cards.forEach((card, index) => {
-                    setTimeout(() => {
-                        card.classList.add('shrinking');
-                        animatedCount++;
-                        console.log(`Animating card ${index} (${animatedCount}/${cards.length})`);
-                        
-                        if (animatedCount === cards.length) {
-                            console.log('All cards animated successfully');
-                        }
-                    }, index * 100);
-                });
-
-                // ===== TÍNH THỜI GIAN TỔNG =====
-                const totalAnimationTime = cards.length * 100 + 1000;
-                console.log(`Game over dialog will show in ${totalAnimationTime}ms`);
-                
-                // ===== HIỂN THỊ DIALOG SAU KHI ANIMATION XONG =====
-                setTimeout(() => {
-                    this.showGameOverDialog();
-                    resolve();
-                }, totalAnimationTime);
-            });
-        }, 'Game Over Animation', 1);
-    }
-
-    /**
-     * Hiển thị dialog game over
-     * Ẩn tất cả cards và hiển thị dialog
-     */
-    showGameOverDialog() {
-        // Đợi animation shrinking hoàn thành trước khi ẩn cards
-        this.forceHideAllCards(); // Ẩn tất cả cards
-        
-        const dialog = document.getElementById('game-over-dialog');
-        dialog.classList.add('show'); // Hiển thị dialog
-    }
-
-    /**
-     * Buộc ẩn tất cả cards
-     * Sử dụng khi cần ẩn cards ngay lập tức
-     */
-    forceHideAllCards() {
-        const cards = document.querySelectorAll('.card');
-        cards.forEach((card, index) => {
-            console.log(`Card ${index} before hiding: classes = ${card.classList.toString()}`);
-            card.style.display = 'none'; // Ẩn card ngay lập tức
-            console.log(`Card ${index} after hiding: classes = ${card.classList.toString()}`);
-        });
-        console.log('Force hidden all cards');
-    }
-
-    /**
-     * Ẩn dialog game over
-     * Được gọi khi restart game
-     */
-    hideGameOverDialog() {
-        const dialog = document.getElementById('game-over-dialog');
-        dialog.classList.remove('show'); // Ẩn dialog
-    }
+    // ===== CÁC HÀM ANIMATION BỔ SUNG =====
 
     /**
      * Bắt đầu animation di chuyển character
      * @param {number} fromIndex - Index xuất phát
      * @param {number} toIndex - Index đích
-     * @param {Object} cardToMove - Thông tin thẻ bị đẩy (nếu có)
-     * @param {Function} onComplete - Callback khi animation hoàn thành
+     * @param {Object} cardToMove - Thông tin thẻ bị đẩy
+     * @param {Function} onComplete - Callback khi hoàn thành
      */
     startMoveCharacterAnimation(fromIndex, toIndex, cardToMove, onComplete) {
-        // Thêm vào hàng đợi với priority cao (move character)
         this.queueAnimation(() => {
             return new Promise((resolve) => {
-                // ===== TÍNH TOÁN VỊ TRÍ DI CHUYỂN =====
                 const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
                 const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
-                
-                // ===== LẤY CÁC ELEMENT CẦN THIẾT =====
+
                 const characterElement = document.querySelector(`[data-index="${fromIndex}"]`);
                 const targetElement = document.querySelector(`[data-index="${toIndex}"]`);
-                
+
                 if (!characterElement || !targetElement) {
                     resolve();
                     return;
                 }
-                
-                // ===== TÍNH TOÁN KHOẢNG CÁCH DI CHUYỂN =====
+
                 const moveDistance = this.calculateMoveDistance(fromPos.col, toPos.col, fromPos.row, toPos.row);
                 const moveX = moveDistance.x;
                 const moveY = moveDistance.y;
-                
-                // ===== THIẾT LẬP ANIMATION =====
+
                 characterElement.style.setProperty('--dual-move-x', `${moveX}px`);
                 characterElement.style.setProperty('--dual-move-y', `${moveY}px`);
-                
-                characterElement.classList.add('dual-moving'); // Animation di chuyển
-                targetElement.classList.add('dual-eating'); // Animation ăn
-                
-                // ===== ANIMATION CHO THẺ BỊ ĐẨY (DOMINO) =====
+
+                characterElement.classList.add('dual-moving');
+                targetElement.classList.add('dual-eating');
+
                 if (cardToMove) {
                     const cardToMoveElement = document.querySelector(`[data-index="${cardToMove.fromIndex}"]`);
                     if (cardToMoveElement) {
-                        const cardToMovePos = { 
-                            row: Math.floor(cardToMove.fromIndex / 3), 
-                            col: cardToMove.fromIndex % 3 
+                        const cardToMovePos = {
+                            row: Math.floor(cardToMove.fromIndex / 3),
+                            col: cardToMove.fromIndex % 3
                         };
-                        
-                        // Tính toán khoảng cách di chuyển ngược cho thẻ bị đẩy
+
                         const reverseMoveDistance = this.calculateMoveDistance(
-                            cardToMovePos.col, fromPos.col, 
+                            cardToMovePos.col, fromPos.col,
                             cardToMovePos.row, fromPos.row
                         );
                         const reverseMoveX = reverseMoveDistance.x;
                         const reverseMoveY = reverseMoveDistance.y;
-                        
+
                         cardToMoveElement.style.setProperty('--dual-reverse-x', `${reverseMoveX}px`);
                         cardToMoveElement.style.setProperty('--dual-reverse-y', `${reverseMoveY}px`);
-                        cardToMoveElement.classList.add('dual-reverse'); // Animation đẩy ngược
+                        cardToMoveElement.classList.add('dual-reverse');
                     }
                 }
-                
-                // ===== XỬ LÝ SAU KHI ANIMATION HOÀN THÀNH =====
-                setTimeout(() => {
-                    // ===== XÓA TẤT CẢ CSS CUSTOM PROPERTIES SAU ANIMATION =====
-                    const allElements = [characterElement, targetElement];
-                    if (cardToMove) {
-                        const cardToMoveElement = document.querySelector(`[data-index="${cardToMove.fromIndex}"]`);
-                        if (cardToMoveElement) {
-                            allElements.push(cardToMoveElement);
-                        }
-                    }
-                    
-                    // Xóa chỉ các class và style liên quan đến dual movement
-                    allElements.forEach(element => {
-                        this.clearDualMovementStyles(element);
-                    });
-                    
-                    // Gọi callback nếu có
-                    if (onComplete) {
-                        onComplete();
-                    }
-                    
-                    resolve();
-                }, 500); // Giảm từ 800ms xuống 500ms để game nhanh hơn
+
+                this.createAnimationLoop(
+                    (easedProgress) => {
+                        characterElement.style.transform = `translate(${moveX * easedProgress}px, ${moveY * easedProgress}px)`;
+                    },
+                    this.ANIMATION_DURATIONS.MOVE,
+                    AnimationManager.EASING.easeInOutQuad,
+                    () => {
+                        this.cleanupMoveAnimation(characterElement, targetElement, cardToMove, onComplete);
+                        resolve();
+                    },
+                    'currentMoveAnimation'
+                );
             });
-        }, `Move Character (${fromIndex} → ${toIndex})`, 2);
+        }, `Move Character (${fromIndex} → ${toIndex})`, this.ANIMATION_PRIORITIES.MOVE);
     }
 
     /**
-     * Debug: Kiểm tra và reset trạng thái animation nếu cần
-     * @returns {Object} Thông tin trạng thái hiện tại
+     * Cleanup function cho move animation
+     * @param {HTMLElement} characterElement - Character element
+     * @param {HTMLElement} targetElement - Target element
+     * @param {Object} cardToMove - Card to move info
+     * @param {Function} onComplete - Completion callback
      */
+    cleanupMoveAnimation(characterElement, targetElement, cardToMove, onComplete) {
+        const allElements = [characterElement, targetElement];
+        if (cardToMove) {
+            const cardToMoveElement = document.querySelector(`[data-index="${cardToMove.fromIndex}"]`);
+            if (cardToMoveElement) {
+                allElements.push(cardToMoveElement);
+            }
+        }
 
+        allElements.forEach(element => {
+            this.clearDualMovementStyles(element);
+            element.style.transform = '';
+        });
+
+        if (onComplete) {
+            onComplete();
+        }
+
+        if (window.currentMoveAnimation) {
+            delete window.currentMoveAnimation;
+        }
+    }
 
     /**
-     * Tính toán khoảng cách di chuyển dựa trên chiều rộng thẻ thực tế
+     * Tính toán khoảng cách di chuyển
      * @param {number} fromCol - Cột bắt đầu
      * @param {number} toCol - Cột đích
      * @param {number} fromRow - Hàng bắt đầu
@@ -1601,14 +1263,13 @@ class AnimationManager {
      */
     calculateMoveDistance(fromCol, toCol, fromRow, toRow) {
         const cardWidth = this.getCardWidth();
-        const cardHeight = cardWidth * (16/9); // Tỷ lệ 9:16 từ CSS
-        
+        const cardHeight = cardWidth * (12 / 7);
+
         return {
             x: (toCol - fromCol) * cardWidth,
             y: (toRow - fromRow) * cardHeight
         };
     }
-
 
     /**
      * Lấy chiều rộng thẻ bài động
@@ -1617,11 +1278,11 @@ class AnimationManager {
     getCardWidth() {
         const gridElement = document.querySelector('.cards-grid');
         if (!gridElement) {
-            return 100; // Fallback nếu không tìm thấy grid
+            return 100;
         }
         const gridWidth = gridElement.offsetWidth;
-        const gap = 4; // Gap giữa các thẻ (từ CSS)
-        const numColumns = 3; // Grid có 3 cột
+        const gap = 4;
+        const numColumns = 3;
         const totalGapWidth = gap * (numColumns - 1);
         const cardWidth = (gridWidth - totalGapWidth) / numColumns;
         return Math.round(cardWidth);
@@ -1633,31 +1294,483 @@ class AnimationManager {
      */
     clearDualMovementStyles(element) {
         if (!element) return;
-        
-        // Xóa chỉ các CSS custom properties liên quan đến dual movement
+
         element.style.removeProperty('--dual-move-x');
         element.style.removeProperty('--dual-move-y');
         element.style.removeProperty('--dual-reverse-x');
         element.style.removeProperty('--dual-reverse-y');
-        
-        // Xóa chỉ các classes liên quan đến dual movement
+
         element.classList.remove('dual-moving');
         element.classList.remove('dual-reverse');
         element.classList.remove('dual-eating');
     }
 
     /**
-     * Xóa tất cả CSS styles và animation classes khỏi element
-     * @param {HTMLElement} element - Element cần xóa CSS
+     * Bắt đầu animation tương tác với treasure
+     * @param {number} characterIndex - Index của character
+     * @param {number} treasureIndex - Index của treasure
      */
-    clearAnimationStyles(element) {
-        if (!element) return;
-        
-        // Xóa toàn bộ inline styles (bao gồm tất cả custom properties)
-        element.removeAttribute('style');
-        
-        // Xóa toàn bộ classes và chỉ giữ lại class cơ bản
-        element.className = '';
+    startTreasureInteractionAnimation(characterIndex, treasureIndex) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const characterElement = document.querySelector(`[data-index="${characterIndex}"]`);
+                const treasureElement = document.querySelector(`[data-index="${treasureIndex}"]`);
+
+                if (!characterElement || !treasureElement) {
+                    resolve();
+                    return;
+                }
+
+                characterElement.classList.add('treasure-interacting');
+                treasureElement.classList.add('treasure-being-interacted');
+
+                this.createAnimationLoop(
+                    (easedProgress) => {
+                        const shakeIntensity = (1 - easedProgress) * 5;
+                        const shakeX = Math.sin(easedProgress * Math.PI * 8) * shakeIntensity;
+                        characterElement.style.transform = `translateX(${shakeX}px)`;
+
+                        const glowIntensity = easedProgress * 0.3;
+                        treasureElement.style.filter = `brightness(${1 + glowIntensity})`;
+                    },
+                    this.ANIMATION_DURATIONS.TREASURE,
+                    AnimationManager.EASING.easeInOutBack,
+                    () => {
+                        characterElement.classList.remove('treasure-interacting');
+                        treasureElement.classList.remove('treasure-being-interacted');
+                        characterElement.style.transform = '';
+                        treasureElement.style.filter = '';
+                        resolve();
+                    },
+                    'currentTreasureAnimation'
+                );
+            });
+        }, `Treasure Interaction (${characterIndex} → ${treasureIndex})`, this.ANIMATION_PRIORITIES.TREASURE);
+    }
+
+    /**
+     * Bắt đầu animation boom explosion
+     * @param {Array} affectedCardIndexes - Mảng các index của thẻ bị ảnh hưởng
+     * @param {number} boomIndex - Index của boom card
+     */
+    startBoomExplosionAnimation(affectedCardIndexes, boomIndex) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const allElements = [];
+
+                const boomElement = document.querySelector(`[data-index="${boomIndex}"]`);
+                if (boomElement) {
+                    allElements.push(boomElement);
+                    boomElement.classList.add('boom-exploding');
+                }
+
+                affectedCardIndexes.forEach((cardIndex) => {
+                    const cardElement = document.querySelector(`[data-index="${cardIndex}"]`);
+                    if (cardElement) {
+                        allElements.push(cardElement);
+                        cardElement.classList.add('boom-exploding');
+                    }
+                });
+
+                if (allElements.length === 0) {
+                    resolve();
+                    return;
+                }
+
+                this.createAnimationLoop(
+                    (easedProgress) => {
+                        allElements.forEach((element, index) => {
+                            const delay = index * 50;
+                            const delayedProgress = Math.max(0, easedProgress - (delay / this.ANIMATION_DURATIONS.BOOM));
+
+                            const scale = 1 + (delayedProgress * 0.5);
+                            element.style.transform = `scale(${scale})`;
+
+                            const shakeIntensity = (1 - delayedProgress) * 8;
+                            const shakeX = Math.sin(easedProgress * Math.PI * 12) * shakeIntensity;
+                            const shakeY = Math.cos(easedProgress * Math.PI * 12) * shakeIntensity;
+                            element.style.transform += ` translate(${shakeX}px, ${shakeY}px)`;
+                        });
+                    },
+                    this.ANIMATION_DURATIONS.BOOM,
+                    AnimationManager.EASING.easeOutBounce,
+                    () => {
+                        allElements.forEach(element => {
+                            element.classList.remove('boom-exploding');
+                            element.style.transform = '';
+                        });
+                        resolve();
+                    },
+                    'currentBoomAnimation'
+                );
+            });
+        }, `Boom Explosion (${boomIndex})`, this.ANIMATION_PRIORITIES.BOOM);
+    }
+
+    /**
+     * Bắt đầu animation chiến đấu
+     * @param {number} characterIndex - Index của character
+     * @param {number} monsterIndex - Index của monster
+     * @param {number} damage - Damage gây ra
+     */
+    startCombatAnimation(characterIndex, monsterIndex, damage) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const characterElement = document.querySelector(`[data-index="${characterIndex}"]`);
+                const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
+
+                if (!characterElement || !monsterElement) {
+                    resolve();
+                    return;
+                }
+
+                let damageShown = false;
+
+                characterElement.classList.add('combat-attacking');
+                monsterElement.classList.add('combat-defending');
+
+                this.createAnimationLoop(
+                    (easedProgress, progress) => {
+                        const lungeDistance = easedProgress * 15;
+                        characterElement.style.transform = `translateX(${lungeDistance}px)`;
+
+                        const shakeIntensity = (1 - easedProgress) * 6;
+                        const shakeX = Math.sin(progress * Math.PI * 10) * shakeIntensity;
+                        const shakeY = Math.cos(progress * Math.PI * 10) * shakeIntensity;
+                        monsterElement.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+
+                        if (progress >= 0.5 && !damageShown) {
+                            damageShown = true;
+                            //this.createDamagePopup(monsterElement, damage);
+                        }
+                    },
+                    this.ANIMATION_DURATIONS.COMBAT,
+                    AnimationManager.EASING.easeInOutQuart,
+                    () => {
+                        characterElement.classList.remove('combat-attacking');
+                        monsterElement.classList.remove('combat-defending');
+                        characterElement.style.transform = '';
+                        monsterElement.style.transform = '';
+                        resolve();
+                    },
+                    'currentCombatAnimation'
+                );
+            });
+        }, `Combat Animation (${characterIndex} → ${monsterIndex})`, this.ANIMATION_PRIORITIES.COMBAT);
+    }
+
+    /**
+     * Render nhiều cards với hiệu ứng xuất hiện cùng lúc
+     * @param {Array} newCardIndexes - Mảng các index của thẻ mới cần render
+     */
+    renderListCardsWithAppearEffect(newCardIndexes) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                const grid = document.getElementById('cards-grid');
+                const cardElements = [];
+
+                newCardIndexes.forEach(index => {
+                    let cardElement = document.querySelector(`[data-index="${index}"]`);
+
+                    if (!cardElement) {
+                        const card = this.cardManager.getCard(index);
+                        if (card) {
+                            // code này có thể ko bao giờ chạy 
+                            console.warn('renderListCardsWithAppearEffect-----------')
+                            cardElement = this.createOrUpdateCardElement(card, index, false);
+                            cardElement.classList.add('appearing');
+
+                            const targetPosition = Array.from(grid.children)[cardIndex];
+                            if (targetPosition !== null) {
+                                grid.insertBefore(cardElement, targetPosition);
+                            } else {
+                                grid.appendChild(cardElement);
+                            }
+                        }
+                    } else {
+                        const card = this.cardManager.getCard(index);
+                        if (card) {
+                            this.createOrUpdateCardElement(card, index, true, cardElement);
+                            cardElement.classList.add('appearing');
+                        }
+                    }
+
+                    if (cardElement) {
+                        cardElements.push(cardElement);
+                    }
+                });
+
+                if (cardElements.length === 0) {
+                    resolve();
+                    return;
+                }
+
+                setTimeout(() => {
+                    cardElements.forEach(cardElement => {
+                        cardElement.classList.remove('appearing');
+                    });
+                }, this.ANIMATION_DURATIONS.APPEAR);
+
+                if (this.eventManager) {
+                    newCardIndexes.forEach(index => {
+                        // code này có thể ko bao giờ xảy ra 
+                        //console.warn('setupCardEventsForIndex-----------')
+                        //this.eventManager.setupCardEventsForIndex(index);
+                    });
+                }
+
+                setTimeout(resolve, this.ANIMATION_DURATIONS.APPEAR);
+            });
+        }, `Render List Cards with Appear Effect (${newCardIndexes.join(', ')})`, this.ANIMATION_PRIORITIES.RENDER);
+    }
+
+    /**
+     * Hiển thị popup khi HP thay đổi
+     * @param {number} change - Lượng HP thay đổi (dương = heal, âm = damage)
+     * @param {number} delay - Delay trước khi hiển thị (ms)
+     */
+    showHpChangePopup(change, delay = 0) {
+        const characterElement = document.querySelector('.card.character');
+        if (!characterElement) return;
+
+        setTimeout(() => {
+            // Tạo popup mới
+            const popup = document.createElement('div');
+            popup.className = 'hp-change-popup';
+
+            if (change > 0) {
+                // Heal
+                popup.textContent = `+${change}`;
+                popup.style.color = '#27ae60'; // Màu xanh lá
+            } else {
+                // Damage
+                popup.textContent = `${change}`; // đã có dấu âm
+                popup.style.color = '#e74c3c'; // Màu đỏ
+            }
+
+            popup.style.fontWeight = 'bold';
+            popup.style.position = 'absolute';
+            popup.style.zIndex = '1000';
+
+            characterElement.appendChild(popup);
+
+            // Tự động xóa sau 800ms
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 800);
+        }, delay);
+    }
+
+    /**
+     * Hiển thị 4 mũi tên 4 hướng cho character khi click
+     * @param {HTMLElement} cardElement - DOM element của character card
+     */
+    showCharacterArrows(cardElement) {
+        // Xóa các mũi tên cũ nếu có
+        const existingArrows = cardElement.querySelectorAll('.character-arrow');
+        existingArrows.forEach(arrow => arrow.remove());
+
+        // Tạo 4 mũi tên 4 hướng
+        const arrowConfigs = [
+            { position: 'top-center', symbol: '➤' },
+            { position: 'bottom-center', symbol: '➤' },
+            { position: 'left-center', symbol: '➤' },
+            { position: 'right-center', symbol: '➤' }
+        ];
+
+        arrowConfigs.forEach(({ position, symbol }) => {
+            const arrowElement = document.createElement('div');
+            arrowElement.className = `character-arrow ${position}`;
+            arrowElement.innerHTML = symbol;
+            cardElement.appendChild(arrowElement);
+        });
+
+        // Tự động ẩn mũi tên sau 1 giây
+        setTimeout(() => {
+            const arrows = cardElement.querySelectorAll('.character-arrow');
+            arrows.forEach(arrow => arrow.remove());
+        }, 1000);
+    }
+
+    /**
+     * Xoay arrow của tất cả trap cards
+     * Chức năng: Xoay arrow của các trap cards và cập nhật hiển thị
+     */
+    transformAllTrapArrows() {
+        const allCards = this.cardManager.getAllCards();
+
+        allCards.forEach((card, index) => {
+            if (card && card.nameId === 'trap' && typeof card.transformationAgency === 'function') {
+                // Gọi hàm xoay arrow của trap card
+                card.transformationAgency();
+
+                // Cập nhật hiển thị của trap card
+                const cardElement = document.querySelector(`[data-index="${index}"]`);
+                if (cardElement) {
+                    // Xóa tất cả arrow cũ
+                    const oldArrows = cardElement.querySelectorAll('.trap-arrow');
+                    oldArrows.forEach(arrow => arrow.remove());
+
+                    // Tạo lại arrow mới theo thuộc tính đã xoay
+                    const arrowConfigs = [
+                        { position: 'top-center', property: 'arrowTop' },
+                        { position: 'bottom-center', property: 'arrowBottom' },
+                        { position: 'left-center', property: 'arrowLeft' },
+                        { position: 'right-center', property: 'arrowRight' }
+                    ];
+
+                    arrowConfigs.forEach(({ position, property }) => {
+                        if (card[property] === 1) {
+                            const arrowElement = document.createElement('div');
+                            arrowElement.className = `trap-arrow ${position}`;
+                            arrowElement.innerHTML = '➤';
+                            cardElement.appendChild(arrowElement);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Bắt đầu animation thu nợ
+     * @param {number} fatui1Index - Index của thẻ Fatui1
+     * @param {Object} debtCollectionEffectResult - Kết quả từ debtCollectionEffect
+     */
+    startDebtCollectionAnimation(fatui1Index, debtCollectionEffectResult) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                // Lấy element của thẻ bị thu nợ
+                const targetCardElement = document.querySelector(`[data-index="${debtCollectionEffectResult.targetIndex}"]`);
+                // Lấy element của thẻ Fatui1
+                const fatui1Element = document.querySelector(`[data-index="${fatui1Index}"]`);
+
+                if (targetCardElement && fatui1Element && debtCollectionEffectResult.targetCardTakeDamageEffectResult) {
+                    // Thêm class animation cho cả hai thẻ
+                    fatui1Element.classList.add('debt-collection');
+                    targetCardElement.classList.add('debt-collection');
+
+                    // Tạo animation coin bay về phía Fatui1
+                    this.createCoinFlyingAnimation(targetCardElement, fatui1Element, debtCollectionEffectResult.targetCardTakeDamageEffectResult.damage);
+
+                    // Xóa class animation sau khi hoàn thành
+                    setTimeout(() => {
+                        fatui1Element.classList.remove('debt-collection');
+                        targetCardElement.classList.remove('debt-collection');
+
+                        // Cập nhật hiển thị thẻ
+                        const targetCard = this.cardManager.getCard(debtCollectionEffectResult.targetIndex);
+                        const fatui1Card = this.cardManager.getCard(fatui1Index);
+                        if (targetCard) {
+                            this.createOrUpdateCardElement(targetCard, debtCollectionEffectResult.targetIndex, true, targetCardElement);
+                            this.createOrUpdateCardElement(fatui1Card, fatui1Index, true, fatui1Element);
+                        }
+
+                        // Hiển thị popup damage
+                        this.createDamagePopup(targetCardElement, debtCollectionEffectResult.targetCardTakeDamageEffectResult.damage);
+
+                        resolve();
+                    }, 500); // Thời gian animation
+                } else {
+                    resolve();
+                }
+            });
+        }, `Debt Collection Animation (${fatui1Index} → ${debtCollectionEffectResult.targetIndex})`, this.ANIMATION_PRIORITIES.TRAP);
+    }
+
+    /**
+     * Tạo animation coin bay về phía Fatui1
+     * @param {HTMLElement} fromElement - Element nguồn (coin)
+     * @param {HTMLElement} toElement - Element đích (Fatui1)
+     * @param {number} damage - Số lượng damage
+     */
+    createCoinFlyingAnimation(fromElement, toElement, damage) {
+        const coinCount = damage; // Tối đa 3 coin
+
+        for (let i = 0; i < coinCount; i++) {
+            setTimeout(() => {
+                this.createSingleCoinAnimation(fromElement, toElement, i);
+            }, i * 200); // Delay giữa các coin
+        }
+    }
+
+    /**
+     * Tạo animation cho một coin
+     * @param {HTMLElement} fromElement - Element nguồn
+     * @param {HTMLElement} toElement - Element đích
+     * @param {number} index - Index của coin
+     */
+    createSingleCoinAnimation(fromElement, toElement, index) {
+        // Tạo element coin
+        const coin = document.createElement('div');
+        coin.className = 'flying-coin';
+        coin.textContent = '🪙';
+        coin.style.position = 'absolute';
+        coin.style.zIndex = '1000';
+        coin.style.fontSize = '30px';
+        coin.style.pointerEvents = 'none';
+
+
+        // Lấy vị trí của các element
+        const fromRect = fromElement.getBoundingClientRect();
+        const toRect = toElement.getBoundingClientRect();
+        const cardsGrid = document.getElementById('cards-grid');
+        const gridRect = cardsGrid ? cardsGrid.getBoundingClientRect() : { left: 0, top: 0 };
+
+        // Vị trí bắt đầu (giữa thẻ nguồn) - trừ offset của cards-grid
+        const startX = fromRect.left + fromRect.width / 2 - gridRect.left;
+        const startY = fromRect.top + fromRect.height / 2 - gridRect.top;
+
+        // Vị trí kết thúc (giữa thẻ đích) - trừ offset của cards-grid
+        const endX = toRect.left + toRect.width / 2 - gridRect.left;
+        const endY = toRect.top + toRect.height / 2 - gridRect.top;
+
+        // Thêm vào cards-grid
+        if (cardsGrid) {
+            cardsGrid.appendChild(coin);
+        } else {
+            // Fallback nếu không tìm thấy cards-grid
+            document.body.appendChild(coin);
+        }
+
+        // Animation với RAF
+        let startTime = null;
+        const duration = 800; // 800ms
+
+        const animate = (currentTime) => {
+            if (!startTime) startTime = currentTime;
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Easing function (ease-out)
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+
+            // Tính vị trí hiện tại theo đường thẳng
+            const currentX = startX + (endX - startX) * easeOut;
+            const currentY = startY + (endY - startY) * easeOut;
+
+            // Cập nhật vị trí
+            coin.style.left = `${currentX - 20}px`;
+            coin.style.top = `${currentY - 20}px`;
+
+            // Xoay coin
+            coin.style.transform = `rotate(${progress * 360}deg)`;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Hoàn thành animation
+                if (cardsGrid && cardsGrid.contains(coin)) {
+                    cardsGrid.removeChild(coin);
+                } else if (document.body.contains(coin)) {
+                    document.body.removeChild(coin);
+                }
+            }
+        };
+
+        requestAnimationFrame(animate);
     }
 
 }

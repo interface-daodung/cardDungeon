@@ -15,7 +15,7 @@ class LoadingManager {
         this.isLoading = false;
         
         this.tips = [
-            "💡 Mẹo: Lợi dụng cơ quan phun lửa để tấn công kẻ địch!",
+            "💡 Mẹo: Ghép các thẻ cùng loại để tạo ra thẻ mạnh hơn!",
             "⚔️ Warrior có thể tấn công kẻ địch để bảo vệ bản thân",
             "🛡️ Sử dụng Shield để bảo vệ khỏi sát thương",
             "💰 Thu thập Coin để tăng điểm số",
@@ -24,11 +24,22 @@ class LoadingManager {
             "💣 Boom sẽ nổ sau vài lượt, hãy cẩn thận!",
             "🎁 Treasure chứa nhiều phần thưởng quý giá",
             "☠️ Poison làm giảm HP theo thời gian",
-            "🕳️ Void là một thẻ đặc biệt không có bất kỳ tác dụng nào"
+            "🕳️ Void sẽ nuốt chửng thẻ xung quanh",
+            "🔮 Catalyst có thể biến đổi thẻ thành loại khác",
+            "🏴‍☠️ Eremite là kẻ địch mạnh, hãy cẩn thận!",
+            "🌊 Abyss Lector có sức mạnh đặc biệt",
+            "🐋 Narwhal có thể tấn công từ xa",
+            "🕵️ Operative có khả năng ẩn nấp",
+            "🎯 Ghép 3 thẻ cùng loại để tạo ra thẻ mạnh hơn",
+            "⚡ Sử dụng Trap để bẫy kẻ địch",
+            "🌪️ Quicksand có thể làm chậm kẻ địch",
+            "💎 Bribery có thể mua chuộc kẻ địch",
+            "🌟 Ghép 5 thẻ cùng loại để tạo ra thẻ hiếm!"
         ];
         
         this.currentTipIndex = 0;
         this.tipInterval = null;
+        this.lastTipIndex = -1; // Để tránh hiển thị cùng tip liên tiếp
         
         // Danh sách hình ảnh cần preload
         this.imageList = [
@@ -78,6 +89,7 @@ class LoadingManager {
             'resources/abyssLector1.webp',
             'resources/abyssLector2.webp',
             'resources/apep.webp',
+            'resources/dragon.webp',
             'resources/narwhal.webp',
             'resources/operative.webp',
             'resources/void.webp'
@@ -85,6 +97,76 @@ class LoadingManager {
         
         this.loadedImages = 0;
         this.totalImages = this.imageList.length;
+        
+        // Danh sách scripts cần load
+        this.scriptList = [
+            // Card classes
+            "modules/cards/Card.js",
+            "modules/cards/Fatui0.js",
+            "modules/cards/Fatui1.js",
+            "modules/cards/Fatui2.js",
+            "modules/cards/Fatui3.js",
+            "modules/cards/Food0.js",
+            "modules/cards/Food1.js",
+            "modules/cards/Food2.js",
+            "modules/cards/Food3.js",
+            "modules/cards/Sword0.js",
+            "modules/cards/Sword1.js",
+            "modules/cards/Sword2.js",
+            "modules/cards/Sword3.js",
+            "modules/cards/Sword4.js",
+            "modules/cards/Sword5.js",
+            "modules/cards/Sword6.js",
+            "modules/cards/Coin0.js",
+            "modules/cards/Coin1.js",
+            "modules/cards/Coin2.js",
+            "modules/cards/Coin3.js",
+            "modules/cards/Coin4.js",
+            "modules/cards/Coin5.js",
+            "modules/cards/Coin6.js",
+            "modules/cards/CoinUp0.js",
+            "modules/cards/CoinUp1.js",
+            "modules/cards/CoinUp2.js",
+            "modules/cards/CoinUp3.js",
+            "modules/cards/CoinUp4.js",
+            "modules/cards/CoinUp5.js",
+            "modules/cards/CoinUp6.js",
+            "modules/cards/Warrior.js",
+            "modules/cards/Trap.js",
+            "modules/cards/Poison.js",
+            "modules/cards/Boom.js",
+            "modules/cards/Quicksand.js",
+            "modules/cards/Treasure0.js",
+            "modules/cards/Treasure1.js",
+            "modules/cards/Bribery.js",
+            "modules/cards/Catalyst0.js",
+            "modules/cards/Catalyst1.js",
+            "modules/cards/Catalyst2.js",
+            "modules/cards/Eremite0.js",
+            "modules/cards/Eremite1.js",
+            "modules/cards/AbyssLector0.js",
+            "modules/cards/AbyssLector1.js",
+            "modules/cards/AbyssLector2.js",
+            "modules/cards/Apep.js",
+            "modules/cards/Dragon.js",
+            "modules/cards/Narwhal.js",
+            "modules/cards/Operative.js",
+            "modules/cards/Void.js",
+            "modules/cards/CardFactory.js",
+            
+            // Manager classes
+            "modules/CardManager.js",
+            "modules/GameState.js",
+            "modules/CharacterManager.js",
+            "modules/AnimationManager.js",
+            "modules/UIManager.js",
+            "modules/CombatManager.js",
+            "modules/EventManager.js",
+            "modules/DungeonCardGame.js"
+        ];
+        
+        this.loadedScripts = 0;
+        this.totalScripts = this.scriptList.length;
     }
     
     /**
@@ -110,25 +192,73 @@ class LoadingManager {
     }
     
     /**
-     * Preload tất cả hình ảnh
+     * Load scripts tuần tự
+     * @returns {Promise} Promise khi tất cả scripts đã load xong
+     */
+    async loadScriptsSequentially() {
+        return new Promise((resolve, reject) => {
+            let index = 0;
+            
+            const loadNext = () => {
+                if (index >= this.scriptList.length) {
+                    resolve();
+                    return;
+                }
+                
+                const script = document.createElement("script");
+                script.src = this.scriptList[index];
+                
+                script.onload = () => {
+                    this.loadedScripts++;
+                    const progress = Math.round((this.loadedScripts / this.totalScripts) * 50); // Scripts chiếm 50% progress
+                    this.updateProgress(progress, `Đang tải scripts... (${this.loadedScripts}/${this.totalScripts})`);
+                    index++;
+                    loadNext();
+                };
+                
+                script.onerror = () => {
+                    console.error(`❌ Failed to load script: ${this.scriptList[index]}`);
+                    this.loadedScripts++;
+                    index++;
+                    loadNext(); // Tiếp tục load script tiếp theo
+                };
+                
+                document.head.appendChild(script);
+            };
+            
+            loadNext();
+        });
+    }
+    
+    /**
+     * Preload tất cả hình ảnh vào cache của trình duyệt
      * @returns {Promise} Promise khi tất cả hình ảnh đã load xong
      */
     async preloadImages() {
         const imagePromises = this.imageList.map((src) => {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
+            return new Promise((resolve) => {
+                // Tạo Image object để preload vào cache
+                const preloadImg = new Image();
+                
+                preloadImg.onload = () => {
                     this.loadedImages++;
-                    const progress = Math.round((this.loadedImages / this.totalImages) * 100);
+                    const progress = 50 + Math.round((this.loadedImages / this.totalImages) * 30); // Images chiếm 30% progress (50-80%)
                     this.updateProgress(progress, `Đang tải hình ảnh... (${this.loadedImages}/${this.totalImages})`);
+                    
+                    // Log để debug
+                    console.log(`✅ Preloaded: ${src}`);
+                    
                     resolve();
                 };
-                img.onerror = () => {
-                    console.warn(`Không thể tải hình ảnh: ${src}`);
+                
+                preloadImg.onerror = () => {
+                    console.warn(`❌ Không thể preload hình ảnh: ${src}`);
                     this.loadedImages++;
                     resolve(); // Vẫn resolve để không block loading
                 };
-                img.src = src;
+                
+                // Gán src để trigger load vào cache
+                preloadImg.src = src;
             });
         });
         
@@ -139,56 +269,124 @@ class LoadingManager {
      * Khởi tạo các manager và components
      */
     async initializeComponents() {
-        // Khởi tạo CharacterManager
-        this.updateProgress(10, "Đang khởi tạo Character Manager...");
-        await this.delay(100);
-        
-        // Khởi tạo GameState
-        this.updateProgress(20, "Đang khởi tạo Game State...");
-        await this.delay(100);
-        
-        // Khởi tạo CardManager
-        this.updateProgress(30, "Đang khởi tạo Card Manager...");
-        await this.delay(100);
-        
-        // Khởi tạo AnimationManager
-        this.updateProgress(40, "Đang khởi tạo Animation Manager...");
-        await this.delay(100);
-        
-        // Khởi tạo UIManager
-        this.updateProgress(50, "Đang khởi tạo UI Manager...");
-        await this.delay(100);
-        
-        // Khởi tạo CombatManager
-        this.updateProgress(60, "Đang khởi tạo Combat Manager...");
-        await this.delay(100);
-        
-        // Khởi tạo EventManager
-        this.updateProgress(70, "Đang khởi tạo Event Manager...");
-        await this.delay(100);
+        try {
+            // Khởi tạo CharacterManager (không cần dependencies)
+            this.updateProgress(80, "Đang khởi tạo Character Manager...");
+            if (typeof CharacterManager !== 'undefined') {
+                window.characterManager = new CharacterManager();
+                console.log("✅ CharacterManager initialized");
+            } else {
+                throw new Error("CharacterManager not loaded");
+            }
+            
+            // Khởi tạo GameState với CharacterManager
+            this.updateProgress(82, "Đang khởi tạo Game State...");
+            if (typeof GameState !== 'undefined') {
+                window.gameState = new GameState(window.characterManager);
+                console.log("✅ GameState initialized");
+            } else {
+                throw new Error("GameState not loaded");
+            }
+            
+            // Khởi tạo CardManager (không cần dependencies)
+            this.updateProgress(84, "Đang khởi tạo Card Manager...");
+            if (typeof CardManager !== 'undefined') {
+                window.cardManager = new CardManager();
+                console.log("✅ CardManager initialized");
+            } else {
+                throw new Error("CardManager not loaded");
+            }
+            
+            // Khởi tạo AnimationManager với CardManager và CharacterManager
+            this.updateProgress(86, "Đang khởi tạo Animation Manager...");
+            if (typeof AnimationManager !== 'undefined') {
+                window.animationManager = new AnimationManager(window.cardManager, window.characterManager);
+                console.log("✅ AnimationManager initialized");
+            } else {
+                throw new Error("AnimationManager not loaded");
+            }
+            
+            // Khởi tạo UIManager với GameState và CharacterManager
+            this.updateProgress(88, "Đang khởi tạo UI Manager...");
+            if (typeof UIManager !== 'undefined') {
+                window.uiManager = new UIManager(window.gameState, window.characterManager);
+                console.log("✅ UIManager initialized");
+            } else {
+                throw new Error("UIManager not loaded");
+            }
+            
+            // Khởi tạo CombatManager với CharacterManager, CardManager và AnimationManager
+            this.updateProgress(90, "Đang khởi tạo Combat Manager...");
+            if (typeof CombatManager !== 'undefined') {
+                window.combatManager = new CombatManager(window.characterManager, window.cardManager, window.animationManager);
+                console.log("✅ CombatManager initialized");
+            } else {
+                throw new Error("CombatManager not loaded");
+            }
+            
+            // Khởi tạo EventManager với tất cả dependencies
+            this.updateProgress(92, "Đang khởi tạo Event Manager...");
+            if (typeof EventManager !== 'undefined') {
+                window.eventManager = new EventManager(
+                    window.gameState, 
+                    window.cardManager, 
+                    window.characterManager, 
+                    window.combatManager, 
+                    window.animationManager, 
+                    window.uiManager
+                );
+                console.log("✅ EventManager initialized");
+            } else {
+                throw new Error("EventManager not loaded");
+            }
+            
+            // Setup các dependencies giữa các manager
+            this.updateProgress(94, "Đang thiết lập dependencies...");
+            
+            // Set eventManager cho AnimationManager để có thể setup events sau combat
+            if (window.animationManager && typeof window.animationManager.setEventManager === 'function') {
+                window.animationManager.setEventManager(window.eventManager);
+                console.log("✅ AnimationManager -> EventManager dependency set");
+            }
+            
+            // Set animationManager cho CharacterManager để có thể gọi triggerGameOver
+            if (window.characterManager && typeof window.characterManager.setAnimationManager === 'function') {
+                window.characterManager.setAnimationManager(window.animationManager);
+                console.log("✅ CharacterManager -> AnimationManager dependency set");
+            }
+            
+        } catch (error) {
+            console.error("❌ Error initializing components:", error);
+            throw error;
+        }
     }
     
     /**
-     * Tạo thẻ và setup game
+     * Setup các manager và chuẩn bị cho game
      */
     async setupGame() {
-        this.updateProgress(80, "Đang tạo thẻ và setup game...");
-        await this.delay(200);
-        
-        this.updateProgress(90, "Đang thiết lập events...");
-        await this.delay(200);
-        
-        this.updateProgress(95, "Đang sẵn sàng game...");
-        await this.delay(100);
-    }
-    
-    /**
-     * Delay helper function
-     * @param {number} ms - Thời gian delay (milliseconds)
-     * @returns {Promise} Promise
-     */
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        try {
+            this.updateProgress(95, "Đang thiết lập các manager...");
+            
+            // Kiểm tra tất cả manager đã được khởi tạo
+            if (!window.characterManager || !window.gameState || !window.cardManager || 
+                !window.animationManager || !window.uiManager || !window.combatManager || 
+                !window.eventManager) {
+                throw new Error("Một số manager chưa được khởi tạo");
+            }
+            
+            this.updateProgress(98, "Đang chuẩn bị game...");
+            
+            // Log thành công
+            console.log("✅ Tất cả managers đã được khởi tạo thành công");
+            console.log("✅ Sẵn sàng tạo game instance");
+            
+            this.updateProgress(99, "Đang sẵn sàng game...");
+            
+        } catch (error) {
+            console.error("❌ Error setting up managers:", error);
+            throw error;
+        }
     }
     
     /**
@@ -198,7 +396,7 @@ class LoadingManager {
         this.showNextTip();
         this.tipInterval = setInterval(() => {
             this.showNextTip();
-        }, 2000);
+        }, 1000);
     }
     
     /**
@@ -216,17 +414,15 @@ class LoadingManager {
      */
     showNextTip() {
         if (this.loadingTips && this.loadingTips.querySelector('p')) {
-            this.loadingTips.querySelector('p').textContent = this.tips[this.currentTipIndex];
-            this.currentTipIndex = (this.currentTipIndex + 1) % this.tips.length;
+            // Chọn tip ngẫu nhiên, tránh hiển thị cùng tip liên tiếp
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * this.tips.length);
+            } while (randomIndex === this.lastTipIndex && this.tips.length > 1);
+            
+            this.lastTipIndex = randomIndex;
+            this.loadingTips.querySelector('p').textContent = this.tips[randomIndex];
         }
-    }
-    
-    /**
-     * Thêm mẹo mới
-     * @param {string} tip - Mẹo mới
-     */
-    addTip(tip) {
-        this.tips.push(tip);
     }
     
     /**
@@ -289,20 +485,24 @@ class LoadingManager {
     }
     
     /**
-     * Loading thực sự - Load tài nguyên và khởi tạo game
+     * Loading thực sự - Load scripts, tài nguyên và khởi tạo game
      */
     async realLoad() {
         this.startLoading();
         
         try {
-            // Bước 1: Preload tất cả hình ảnh
-            this.updateProgress(0, "Đang tải hình ảnh...");
+            // Bước 1: Load tất cả scripts tuần tự
+            this.updateProgress(0, "Đang tải scripts...");
+            await this.loadScriptsSequentially();
+            
+            // Bước 2: Preload tất cả hình ảnh
+            this.updateProgress(50, "Đang tải hình ảnh...");
             await this.preloadImages();
             
-            // Bước 2: Khởi tạo các components
+            // Bước 3: Khởi tạo các components
             await this.initializeComponents();
             
-            // Bước 3: Setup game
+            // Bước 4: Setup game
             await this.setupGame();
             
             this.completeLoading();
@@ -310,47 +510,6 @@ class LoadingManager {
         } catch (error) {
             this.showError('Lỗi khi tải tài nguyên: ' + error.message);
             console.error('❌ Lỗi loading:', error);
-        }
-    }
-    
-    /**
-     * Loading nhanh - Chỉ preload hình ảnh quan trọng
-     */
-    async quickLoad() {
-        this.startLoading();
-        
-        try {
-            // Chỉ preload một số hình ảnh cơ bản
-            const essentialImages = [
-                'resources/warrior.webp',
-                'resources/fatui0.webp',
-                'resources/food0.webp',
-                'resources/sword0.webp',
-                'resources/coin0.webp'
-            ];
-            
-            this.updateProgress(0, "Đang tải hình ảnh cơ bản...");
-            const imagePromises = essentialImages.map((src) => {
-                return new Promise((resolve) => {
-                    const img = new Image();
-                    img.onload = resolve;
-                    img.onerror = resolve; // Không block nếu lỗi
-                    img.src = src;
-                });
-            });
-            
-            await Promise.all(imagePromises);
-            
-            this.updateProgress(50, "Đang khởi tạo game...");
-            await this.delay(200);
-            
-            this.updateProgress(100, "Hoàn tất!");
-            await this.delay(100);
-            
-            this.completeLoading();
-            
-        } catch (error) {
-            this.showError('Lỗi khi tải tài nguyên: ' + error.message);
         }
     }
 }

@@ -7,10 +7,10 @@ class Sword6 extends Card {
             "Kiếm Tế Lễ", 
             "weapon", 
             "resources/sword6.webp", 
-            "Vũ khí loại 6",
             "sword6"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 12); // Độ bền 1-16
+        this.blessed = 'Mystic Heaven';//✨ 🔆 🌀 👁️ 
     }
 
     /**

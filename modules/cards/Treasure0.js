@@ -7,10 +7,9 @@ class Treasure0 extends Card {
             "Mỏ Vàng", 
             "treasure", 
             "resources/treasure0.webp", 
-            "Mỏ Vàng",
             "treasure0"
         );
-        this.score =  Math.floor(Math.random() * 9) + 1; // Điểm số nhận được từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm số nhận được từ 1-9
         this.durability = 5; // Độ bền của kho báu
     }
 

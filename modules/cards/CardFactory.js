@@ -53,74 +53,76 @@ class CardFactory {
             'Apep': Apep,
             'Narwhal': Narwhal,
             'Operative': Operative,
-            'Void': Void
+            'Void': Void,
+            'Dragon': Dragon // Thêm Dragon vào đây
         };
 
         // Hệ thống Category-based - Dễ quản lý và mở rộng
         this.cardCategories = {
             enemies: {
-                weight: 40, // 40% tổng số thẻ
+                weight: 30, // 30% tổng số thẻ
                 cards: {
-                    'Fatui0': 12.5, // 12.5% trong nhóm enemies (5% tổng)
-                    'Fatui1': 12.5, // 12.5% trong nhóm enemies (5% tổng)
-                    'Fatui2': 12.5, // 12.5% trong nhóm enemies (5% tổng)
-                    'Fatui3': 12.5, // 12.5% trong nhóm enemies (5% tổng)
-                    'Eremite0': 7.5,  // 7.5% trong nhóm enemies (3% tổng)
-                    'Eremite1': 7.5,  // 7.5% trong nhóm enemies (3% tổng)
-                    'AbyssLector0': 2.5, // 2.5% trong nhóm enemies (1% tổng)
-                    'AbyssLector1': 2.5, // 2.5% trong nhóm enemies (1% tổng)
-                    'AbyssLector2': 2.5, // 2.5% trong nhóm enemies (1% tổng)
-                    'Apep': 12.5,    // 12.5% trong nhóm enemies (5% tổng)
-                    'Narwhal': 5,     // 5% trong nhóm enemies (2% tổng)
-                    'Operative': 10   // 10% trong nhóm enemies (4% tổng)
+                    'Fatui0': 10, // 10% trong nhóm enemies (3.00% tổng)
+                    'Fatui1': 10, // 10% trong nhóm enemies (3.00% tổng)
+                    'Fatui2': 10, // 10% trong nhóm enemies (3.00% tổng)
+                    'Fatui3': 9.9, // 9.9% trong nhóm enemies (2.97% tổng)
+                    'Eremite0': 8, // 8.2% trong nhóm enemies (2.46% tổng)
+                    'Eremite1': 8, // 8% trong nhóm enemies (2.40% tổng)
+                    'AbyssLector0': 2.5, // 2.5% trong nhóm enemies (0.75% tổng)
+                    'AbyssLector1': 2.5, // 2.5% trong nhóm enemies (0.75% tổng)
+                    'AbyssLector2': 2.5, // 2.5% trong nhóm enemies (0.75% tổng)
+                    'Apep': 12.5, // 12.5% trong nhóm enemies (3.75% tổng)
+                    'Narwhal': 7.6, // 7.6% trong nhóm enemies (2.28% tổng)
+                    'Operative': 10, // 10% trong nhóm enemies (3.00% tổng)
+                    'Dragon': 6.5, // 6.5% trong nhóm enemies (1.95% tổng)
                 }
             },
             food: {
                 weight: 10, // 10% tổng số thẻ
                 cards: {
-                    'Food0': 20, // 20% trong nhóm food (2% tổng)
-                    'Food1': 20, // 20% trong nhóm food (2% tổng)
-                    'Food2': 20, // 20% trong nhóm food (2% tổng)
-                    'Poison': 30, // 30% trong nhóm food (3% tổng)
-                    'Quicksand': 10 // 10% trong nhóm food (1% tổng)
+                    'Food0': 20, // 20% trong nhóm food (2.00% tổng)
+                    'Food1': 25, // 26% trong nhóm food (2.60% tổng)
+                    'Food2': 25, // 25% trong nhóm food (2.50% tổng)
+                    'Poison': 20, // 20% trong nhóm food (2.00% tổng)
+                    'Quicksand': 10, // 10% trong nhóm food (1.00% tổng)
                 }
             },
             weapons: {
-                weight: 10, // 10% tổng số thẻ
+                weight: 20, // 20% tổng số thẻ
                 cards: {
-                    'Sword0': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword1': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword2': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword3': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword4': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword5': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Sword6': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Catalyst0': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Catalyst1': 10, // 10% trong nhóm weapons (1% tổng)
-                    'Catalyst2': 10  // 10% trong nhóm weapons (1% tổng)
+                    'Sword0': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword1': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword2': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword3': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword4': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword5': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Sword6': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Catalyst0': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Catalyst1': 10, // 10% trong nhóm weapons (2.00% tổng)
+                    'Catalyst2': 10, // 10% trong nhóm weapons (2.00% tổng)
                 }
             },
             coins: {
                 weight: 25, // 25% tổng số thẻ
                 cards: {
-                    'Coin': 100 // 100% trong nhóm coins (25% tổng) - sẽ được thay thế bằng Coin động
+                    'Coin': 100, // 100% trong nhóm coins (25.00% tổng)
                 }
             },
             traps: {
                 weight: 10, // 10% tổng số thẻ
                 cards: {
-                    'Trap': 90, // 90% trong nhóm traps (9% tổng)
-                    'Boom': 10  // 10% trong nhóm traps (1% tổng)
+                    'Trap': 90, // 90% trong nhóm traps (9.00% tổng)
+                    'Boom': 10, // 10% trong nhóm traps (1.00% tổng)
                 }
             },
             treasures: {
                 weight: 5, // 5% tổng số thẻ
                 cards: {
-                    'Treasure0': 20, // 20% trong nhóm treasures (1% tổng)
-                    'Treasure1': 40, // 40% trong nhóm treasures (2% tổng)
-                    'Bribery': 40    // 40% trong nhóm treasures (2% tổng)
+                    'Treasure0': 27, // 27.5% trong nhóm treasures (1.38% tổng)
+                    'Treasure1': 40, // 40% trong nhóm treasures (2.00% tổng)
+                    'Bribery': 33, // 33.1% trong nhóm treasures (1.66% tổng)
                 }
-            }
+            },
         };
 
         // Cache để tối ưu hiệu suất
@@ -137,10 +139,10 @@ class CardFactory {
         }
 
         const cardWeights = {};
-        
+
         for (const [categoryName, category] of Object.entries(this.cardCategories)) {
             const categoryWeight = category.weight;
-            
+
             for (const [cardName, cardPercentage] of Object.entries(category.cards)) {
                 // Tính trọng số thực tế = (tỷ lệ trong nhóm * trọng số nhóm) / 100
                 const actualWeight = (cardPercentage * categoryWeight) / 100;
@@ -161,7 +163,7 @@ class CardFactory {
         const cardWeights = this._calculateCardWeights();
         const random = Math.random() * 100;
         let cumulativeWeight = 0;
-        
+
         for (const [cardType, weight] of Object.entries(cardWeights)) {
             cumulativeWeight += weight;
             if (random <= cumulativeWeight) {
@@ -173,7 +175,7 @@ class CardFactory {
                 return card;
             }
         }
-        
+
         // Fallback về null nếu có lỗi
         return null;
     }
@@ -198,10 +200,10 @@ class CardFactory {
     createDynamicCoin(characterManager) {
         // Lấy elementCoin từ Warrior
         const elementCoin = characterManager.getCharacterElementCoin();
-        
+
         // Tạo Coin class tương ứng với elementCoin
         const coinClassName = `Coin${elementCoin}`;
-                
+
         if (this.cardClasses[coinClassName]) {
             const coin = new this.cardClasses[coinClassName]();
             return coin;
@@ -220,29 +222,29 @@ class CardFactory {
     createDynamicCoinUp(characterManager, score = null) {
         // Lấy elementCoin từ Warrior
         const elementCoin = characterManager.getCharacterElementCoin();
-        
+
         // Tạo CoinUp class tương ứng với elementCoin
         const coinUpClassName = `CoinUp${elementCoin}`;
 
         if (this.cardClasses[coinUpClassName]) {
             const coinUp = new this.cardClasses[coinUpClassName]();
-            
+
             // Set điểm nếu được truyền vào
             if (score !== null) {
                 coinUp.score = score;
             }
-            
+
             return coinUp;
         }
-        
+
         // Fallback về CoinUp0 nếu không tìm thấy class tương ứng
         const fallbackCoinUp = new CoinUp0();
-            
+
         // Set điểm nếu được truyền vào
         if (score !== null) {
             fallbackCoinUp.score = score;
         }
-        
+
         return fallbackCoinUp;
     }
 
@@ -261,7 +263,7 @@ class CardFactory {
     createVoid() {
         return new Void();
     }
-//--------------nhưng hàm có thể sau này xóa nếu ko dùng đến ---------------------------
+    //--------------nhưng hàm có thể sau này xóa nếu ko dùng đến ---------------------------
     /**
      * Lấy danh sách tất cả loại thẻ
      * @returns {Array} Danh sách tên thẻ
@@ -283,7 +285,7 @@ class CardFactory {
 
         // Thêm thẻ vào category
         this.cardCategories[categoryName].cards[cardName] = percentage;
-        
+
         // Reset cache để tính toán lại
         this._cachedCardWeights = null;
     }
@@ -299,7 +301,7 @@ class CardFactory {
             weight: weight,
             cards: cards
         };
-        
+
         // Reset cache để tính toán lại
         this._cachedCardWeights = null;
     }

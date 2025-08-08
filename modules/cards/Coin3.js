@@ -7,10 +7,9 @@ class Coin3 extends Card {
             "Mảnh Vỡ Nguyên Tố Lôi", 
             "coin", 
             "resources/coin3.webp", 
-            "Coin loại 3",
             "coin3"
         );
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm từ 1-9
     }
 
     /**

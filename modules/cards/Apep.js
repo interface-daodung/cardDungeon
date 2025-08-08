@@ -7,11 +7,10 @@ class Apep extends Card {
             "Kẻ Thủ Hộ Của Ốc Đảo Apep", 
             "enemy", 
             "resources/apep.webp", 
-            "Boss quái vật Apep",
             "apep"
         );
-        this.hp = Math.floor(Math.random() * 7) + 3; // HP từ 3-9
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
+        this.hp = this.GetRandom(3, 9); // HP từ 3-9
+        this.score = this.GetRandom(1, 9); // Điểm từ 1-9
     }
 
     /**
@@ -21,7 +20,7 @@ class Apep extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Boss gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
         
@@ -31,8 +30,8 @@ class Apep extends Card {
         return {
             type: 'enemy',
             hp: this.hp,
-            score: score,
-            effect: `Character bị mất ${this.hp} HP, nhận ${score} điểm`
+            score: this.score,
+            effect: `Character bị mất ${this.hp} HP, nhận ${this.score} điểm`
         };
     }
 
@@ -41,8 +40,17 @@ class Apep extends Card {
      * @param {CharacterManager} characterManager - Manager quản lý character (optional)
      * @returns {Object} Thông tin kết quả
      */
-    killByWeaponEffect(characterManager = null) {
+    killByWeaponEffect(characterManager = null, cardManager = null) {
         // Apep khi bị giết bởi vũ khí sẽ tạo ra thẻ Food3 cố định
+
+        const foodCard = cardManager.cardFactory.createCard('Food3');
+                        foodCard.id = this.id;
+                        foodCard.position = { 
+                            row: Math.floor(this.id / 3), 
+                            col: this.id % 3 
+                        };
+                        cardManager.updateCard(this.id, foodCard);
+
         return {
             type: 'enemy_killed_by_weapon',
             reward: {

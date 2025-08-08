@@ -7,10 +7,9 @@ class Coin5 extends Card {
             "Mảnh Vỡ Nguyên Tố Phong", 
             "coin", 
             "resources/coin5.webp", 
-            "Coin loại 5",
             "coin5"
         );
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm từ 1-9
     }
 
     /**
@@ -20,7 +19,7 @@ class Coin5 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số
         gameState.addScore(this.score);
         
@@ -49,12 +48,9 @@ class Coin5 extends Card {
      * Tạo thẻ CoinUp5 với score gấp đôi
      */
     upCoinEffect() {
-        console.log(`🎯 Coin5 upCoinEffect được gọi, score hiện tại: ${this.score}`);
-        
         // Tạo thẻ CoinUp5 với score gấp đôi
         const coinUp5 = new CoinUp5();
         coinUp5.score = this.score * 2;
-        console.log(`🎯 Tạo CoinUp5 với score: ${coinUp5.score}`);
         
         return {
             type: 'coin_upgrade',

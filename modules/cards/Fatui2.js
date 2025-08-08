@@ -7,11 +7,10 @@ class Fatui2 extends Card {
             "Fatui - Thiếu Nữ Kính", 
             "enemy", 
             "resources/fatui2.webp", 
-            "Fatui loại 2",
             "fatui2"
         );
-        this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(1, 9); // HP từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm khi tiêu diệt
     }
 
     /**
@@ -21,7 +20,7 @@ class Fatui2 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Quái vật gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
         

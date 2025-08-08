@@ -7,11 +7,11 @@ class Catalyst2 extends Card {
             "Quản Đốc Vàng Ròng", 
             "weapon", 
             "resources/catalyst2.webp", 
-            "Catalyst loại 2",
             "catalyst2"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 12); // Độ bền 1-16
         this.score = 4; // Điểm số nhận được
+        this.blessed = 'Ocean';
     }
 
     /**
@@ -21,7 +21,7 @@ class Catalyst2 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm vũ khí cho character
         characterManager.addWeaponToCharacter(this);
         

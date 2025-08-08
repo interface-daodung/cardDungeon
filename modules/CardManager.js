@@ -124,44 +124,6 @@ class CardManager {
         return null;
     }
 
-    /**
-     * Tìm thẻ cần di chuyển khi Warrior di chuyển (hiệu ứng domino)
-     * Khi Warrior di chuyển, thẻ phía sau sẽ bị đẩy theo
-     * @param {number} fromIndex - Vị trí bắt đầu của Warrior
-     * @param {number} toIndex - Vị trí đích của Warrior
-     * @returns {Object|null} Thông tin thẻ cần di chuyển hoặc null
-     */
-    findCardToMove(fromIndex, toIndex) {
-        // Tính toán vị trí
-        const fromPos = { row: Math.floor(fromIndex / 3), col: fromIndex % 3 };
-        const toPos = { row: Math.floor(toIndex / 3), col: toIndex % 3 };
-        
-        // Xác định hướng di chuyển
-        let direction = '';
-        if (toPos.row < fromPos.row) direction = 'up';
-        else if (toPos.row > fromPos.row) direction = 'down';
-        else if (toPos.col < fromPos.col) direction = 'left';
-        else if (toPos.col > fromPos.col) direction = 'right';
-        
-        // Tìm thẻ cần di chuyển theo hướng
-        for (let i = 0; i < this.cards.length; i++) {
-            const card = this.cards[i];
-            if (card && card.type !== 'character' && i !== toIndex) {
-                const cardPos = { row: Math.floor(i / 3), col: i % 3 };
-                let shouldMove = false;
-                
-                // Kiểm tra xem thẻ có nên di chuyển theo hướng không
-                switch (direction) {
-                    case 'up': shouldMove = cardPos.row > fromPos.row && cardPos.col === fromPos.col; break;
-                    case 'down': shouldMove = cardPos.row < fromPos.row && cardPos.col === fromPos.col; break;
-                    case 'left': shouldMove = cardPos.col > fromPos.col && cardPos.row === fromPos.row; break;
-                    case 'right': shouldMove = cardPos.col < fromPos.col && cardPos.row === fromPos.row; break;
-                }
-                
-                if (shouldMove) return { card, fromIndex: i };
-            }
-        }
-        return null;
-    }
+
 
 } 

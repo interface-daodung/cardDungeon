@@ -7,10 +7,9 @@ class Poison extends Card {
             "Súp Huyền Bí", 
             "food", 
             "resources/poison.webp", 
-            "Chất độc",
             "poison"
         );
-        this.poisonDuration = Math.floor(Math.random() * 9) + 2; // Độc kéo dài 2-10 lượt
+        this.poisonDuration = this.GetRandom(3, 12); // Độc kéo dài 2-10 lượt
         this.heal = this.poisonDuration;  
     }
 

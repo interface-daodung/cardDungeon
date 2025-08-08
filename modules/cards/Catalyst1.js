@@ -7,11 +7,11 @@ class Catalyst1 extends Card {
             "Mảnh Chương Tế Lễ", 
             "weapon", 
             "resources/catalyst1.webp", 
-            "Catalyst loại 1",
             "catalyst1"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 12); // Độ bền 1-16
         this.score = 3; // Điểm số nhận được
+        this.blessed = 'Mystic Heaven';
     }
 
     /**
@@ -21,7 +21,7 @@ class Catalyst1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm vũ khí cho character
         characterManager.addWeaponToCharacter(this);
         

@@ -7,7 +7,6 @@ class Void extends Card {
             "Trống", 
             "coin", // Phân loại là coin nhưng không cộng điểm
             "resources/void.webp", 
-            "Thẻ trống không có tác dụng",
             "void"
         );
         this.score = 0; // Không cộng điểm

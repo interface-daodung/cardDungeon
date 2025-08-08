@@ -1,16 +1,17 @@
-// Fatui0.js - Thẻ quái vật Fatui0
-// Chức năng: Quái vật cơ bản với HP ngẫu nhiên
+// Dragon.js - Thẻ quái vật Dragon
+// Chức năng: Quái vật rồng bị nguyền rủa
 
-class Fatui0 extends Card {
+class Dragon extends Card {
     constructor() {
         super(
-            "Fatui - Thuật Sĩ Cicin Lôi", 
-            "enemy", 
-            "resources/fatui0.webp", 
-            "fatui0"
+            "Ác Long Bị Nguyền Rủa", // name
+            "enemy", // type
+            "resources/dragon.webp", // image
+            "dragon" // nameId
         );
-        this.hp = this.GetRandom(1, 9); // HP từ 1-9
-        this.score = this.GetRandom(1, 9); // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(8, 16); // HP từ 8-15
+        this.score = this.GetRandom(6, 12); // Điểm khi tiêu diệt
+        //this.curse = false;
     }
 
     /**
@@ -21,28 +22,20 @@ class Fatui0 extends Card {
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
     cardEffect(characterManager = null, gameState = null, cardManager = null) {
-        
         // Character bị mất HP bằng với HP của quái vật
         characterManager.damageCharacterHP(this.hp);
-        
+
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
-        
-        const result = {
+
+        return {
             score: this.score,
             type: this.type,
             hp: this.hp,
             effect: `Character bị mất ${this.hp} HP, nhận ${this.score} điểm`
         };
-        
-        return result;
     }
 
-    /**
-     * Hiệu ứng khi thẻ bị giết bởi vũ khí
-     * @param {CharacterManager} characterManager - Manager quản lý character (optional)
-     * @returns {Object} Thông tin kết quả
-     */
     /**
      * Lấy thông tin hiển thị cho dialog
      * @returns {Object} Thông tin để hiển thị
@@ -51,8 +44,8 @@ class Fatui0 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.</i>`,
+            description: `<strong>${this.type}</strong> - HP: <span class="hp-text">${this.hp}</span><br><i>Ác Long cổ đại bị nguyền rủa bởi Huyền Thiên, vĩnh viễn chìm trong đau đớn và thù hận, không bao giờ được siêu thoát.</i>`,
             hp: this.hp
         };
     }
-} 
+}

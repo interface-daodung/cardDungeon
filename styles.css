@@ -19,7 +19,7 @@ body {
     display: flex;
     flex-direction: column;
     padding: 10px;
-    gap: 10px;
+    gap: 4px;
 }
 
 /* Header */
@@ -52,7 +52,7 @@ body {
     font-size: 0.9rem;
     font-weight: bold;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 4px;
 }
 
 /* Main Game Area */
@@ -70,8 +70,8 @@ body {
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 2px;
+    /* grid-template-rows: repeat(3, 1fr); */ 
+    gap: 4px;
     width: 100%;
     max-width: 280px; /* Giảm max-width để phù hợp với game-main 340px */
     /* Remove aspect-ratio: 1 to allow rectangular cards */
@@ -81,7 +81,7 @@ body {
 /* Card Styles - Tỷ lệ 9:16 (chiều rộng : chiều cao) */
 .card {
     width: 100%;
-    aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+    aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -139,6 +139,24 @@ body {
     border-color: #ddd;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     position: relative;
+}
+
+.card.enemy .repayment-receipt-display {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid #FF9800;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .card.enemy .hp-display {
@@ -263,7 +281,7 @@ body {
 }
 
 .card.shrinking {
-    animation: shrinkAndFade 2s ease-in-out forwards;
+    animation: shrinkAndFade 1s ease-in-out forwards;
     pointer-events: none;
 }
 
@@ -821,7 +839,7 @@ body {
 /* Game Controls */
 .game-controls {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     justify-content: center;
     flex-wrap: wrap;
     padding: 12px;
@@ -1142,11 +1160,11 @@ body {
     
     .cards-grid {
         max-width: 300px; /* Duy trì max-width cho tablet */
-        gap: 6px;
+        gap: 4px;
     }
     
     .card {
-        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
 }
 
@@ -1161,11 +1179,11 @@ body {
     
     .cards-grid {
         max-width: 300px; /* Duy trì max-width cho desktop */
-        gap: 8px;
+        gap: 4px;
     }
     
     .card {
-        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
 }
 
@@ -1194,12 +1212,12 @@ body {
     }
     
     .cards-grid {
-        gap: 3px;
+        gap: 4px;
         max-width: 280px;
     }
     
     .card {
-        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
     }
     
     .game-controls {
@@ -1221,7 +1239,7 @@ body {
     }
     
     .card {
-        aspect-ratio: 9/16; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
         border-width: 1px;
     }
     
@@ -1483,6 +1501,114 @@ body {
     
     .loading-content {
         padding: 15px;
+    }
+}
+
+/* Character arrows styling - Mũi tên riêng cho character */
+.card.character .character-arrow {
+    position: absolute;
+    color: #ddd42c99; /* Màu vàng */
+    font-size: 24px; /* To hơn trap arrow (24px) */
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    z-index: 10; /* Cao hơn card (z-index: 1) */
+}
+
+.card.character .character-arrow.top-center {
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg) scaleX(0.4);
+    animation: arrowBounceTop 0.5s ease-in-out infinite;
+}
+
+.card.character .character-arrow.bottom-center {
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg) scaleX(0.4);
+    animation: arrowBounceBottom 0.5s ease-in-out infinite;
+}
+
+.card.character .character-arrow.left-center {
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg) scaleX(0.4);
+    animation: arrowBounceLeft 0.5s ease-in-out infinite;
+}
+
+.card.character .character-arrow.right-center {
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg) scaleX(0.4);
+    animation: arrowBounceRight 0.5s ease-in-out infinite;
+}
+
+/* Animation cho debt collection */
+.card.enemy.debt-collection {
+    border: 3px solid #FFD700 !important;
+    box-shadow: 
+        0 0 10px #FFD700,
+        0 0 20px #FFD700,
+        0 0 30px #FFD700,
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
+    animation: debt-collection-pulse 0.5s ease-in-out infinite;
+    z-index: 100;
+}
+
+.card.coin.debt-collection {
+    border: 3px solid #FFD700 !important;
+    box-shadow: 
+        0 0 10px #FFD700,
+        0 0 20px #FFD700,
+        0 0 30px #FFD700,
+        0 4px 15px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
+    animation: debt-collection-pulse 0.5s ease-in-out infinite;
+    z-index: 100;
+}
+
+@keyframes debt-collection-pulse {
+    0% {
+        box-shadow: 
+            0 0 10px #FFD700,
+            0 0 20px #FFD700,
+            0 0 30px #FFD700,
+            0 4px 15px rgba(0, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 0 15px #FFD700,
+            0 0 30px #FFD700,
+            0 0 45px #FFD700,
+            0 4px 15px rgba(0, 0, 0, 0.3),
+            inset 0 0 30px rgba(255, 215, 0, 0.5);
+    }
+    100% {
+        box-shadow: 
+            0 0 10px #FFD700,
+            0 0 20px #FFD700,
+            0 0 30px #FFD700,
+            0 4px 15px rgba(0, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* Animation cho coin bay */
+.flying-coin {
+    position: absolute;
+    z-index: 1000;
+    font-size: 20px;
+    pointer-events: none;
+    animation: coin-spin 0.8s linear infinite;
+}
+
+@keyframes coin-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }
 

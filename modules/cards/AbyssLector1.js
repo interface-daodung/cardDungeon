@@ -7,12 +7,11 @@ class AbyssLector1 extends Card {
             "Học Sĩ Vực Sâu - Tử Lôi", 
             "enemy", 
             "resources/abyssLector1.webp", 
-            "Abyss Lector loại 1",
             "abyssLector1"
         );
-        this.hp = Math.floor(Math.random() * 9) + 5; // HP từ 1-9        
+        this.hp = this.GetRandom(4, 13); // HP từ 5-13
         this.shield = 1; // Shield của quái vật
-        this.score = Math.floor(Math.random() * 10) + 3; // Điểm từ 3-12
+        this.score = this.GetRandom(6, 9); // Điểm từ 3-12
     }
 
     /**
@@ -22,7 +21,7 @@ class AbyssLector1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Quái vật gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
         
@@ -44,20 +43,43 @@ class AbyssLector1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    killByWeaponEffect(characterManager, gameState) {
+    killByWeaponEffect(characterManager = null, cardManager = null) {
         // Chỉ có hiệu ứng khi shield = 1
         if (this.shield === 1) {
             // Tạo thẻ AbyssLector1 mới với HP ngẫu nhiên và shield = 0
             const newAbyssLector = new AbyssLector1();
-            newAbyssLector.hp = Math.floor(Math.random() * 3) + 1; // HP từ 1-3
+            newAbyssLector.hp = this.GetRandom(1, 3); // HP từ 1-3
             newAbyssLector.shield = 0; // Không có shield
-            
+            newAbyssLector.id = this.id;
+            newAbyssLector.position = { 
+                            row: Math.floor(this.id / 3), 
+                            col: this.id % 3 
+                        };
+                        cardManager.updateCard(this.id, newAbyssLector);
+
             return {
                 type: 'enemy_killed_by_weapon',
                 reward: {
                     type: 'abysslector',
                     card: newAbyssLector,
                     effect: `Tạo AbyssLector1 mới - HP: ${newAbyssLector.hp}`
+                }
+            };
+        } else {
+            const coinCard = cardManager.cardFactory.createDynamicCoin(characterManager);
+
+            coinCard.id = this.id;
+            coinCard.position = {
+                row: Math.floor(this.id / 3),
+                col: this.id % 3
+            };
+            cardManager.updateCard(this.id, coinCard);
+
+            return {
+                type: 'enemy_killed_by_weapon',
+                reward: {
+                    type: 'Coin',
+                    effect: `${this.name} bị giết! Nhận được coin`
                 }
             };
         }

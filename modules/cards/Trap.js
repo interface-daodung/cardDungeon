@@ -1,5 +1,5 @@
 // Trap.js - Th? b?y
-// Ch?c nang: Th? b?y g�y h?i cho ngu?i choi
+// Ch?c nang: Th? b?y gy h?i cho ngu?i choi
 
 class Trap extends Card {
     constructor() {
@@ -7,34 +7,33 @@ class Trap extends Card {
             "Co Quan Phun Lửa", 
             "trap", 
             "resources/trap.webp", 
-            "Co Quan Phun Lửa",
             "trap"
         );
-        this.damage = Math.floor(Math.random() * 7) + 1; // S�t thuong c?a b?y t? 1-7
+        this.damage = this.GetRandom(1, 7); // St thuong c?a b?y t? 1-7
         
-        // Kh?i t?o thu?c t�nh arrow v?i logic ng?u nhi�n
+        // Kh?i t?o thu?c tnh arrow v?i logic ng?u nhin
         this.initializeArrows();
     }
     
     /**
-     * Kh?i t?o c�c thu?c t�nh arrow theo t? l? ng?u nhi�n
+     * Kh?i t?o cc thu?c tnh arrow theo t? l? ng?u nhin
      */
     initializeArrows() {
-        // X�c d?nh s? lu?ng arrow hi?n th?
+        // Xc d?nh s? lu?ng arrow hi?n th?
         const random = Math.random() * 100;
         let arrowCount;
         
         if (random < 50) {
-            arrowCount = 2; // 50% c� 2 arrow
+            arrowCount = 2; // 50% c 2 arrow
         } else if (random < 75) {
-            arrowCount = 3; // 25% c� 3 arrow
+            arrowCount = 3; // 25% c 3 arrow
         } else if (random < 99) {
-            arrowCount = 1; // 24% c� 1 arrow
+            arrowCount = 1; // 24% c 1 arrow
         } else {
-            arrowCount = 4; // 1% c� 4 arrow
+            arrowCount = 4; // 1% c 4 arrow
         }
         
-        // T?o m?ng c�c hu?ng c� th?
+        // T?o m?ng cc hu?ng c th?
         const directions = ['arrowTop', 'arrowBottom', 'arrowLeft', 'arrowRight'];
         
         // Kh?i t?o t?t c? arrow = 0
@@ -45,29 +44,121 @@ class Trap extends Card {
         
         // Random ch?n arrowCount hu?ng d? set = 1
         for (let i = 0; i < arrowCount; i++) {
-            const randomIndex = Math.floor(Math.random() * directions.length);
+            const randomIndex = this.GetRandom(0, directions.length - 1);
             const direction = directions[randomIndex];
             this[direction] = 1;
             
-            // X�a hu?ng d� ch?n d? tr�nh tr�ng l?p
+            // Xóa hướng đã chọn để không bị trùng
             directions.splice(randomIndex, 1);
         }
     }
 
     /**
+     * Tìm các thẻ liền kề bị chỉ bởi arrow của trap
+     * @param {number} trapIndex - Index của trap
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     * @returns {Array} Mảng index của các thẻ bị chỉ
+     */
+    findAdjacentTargets(trapIndex, cardManager) {
+        const targets = [];
+        const trapPos = { row: Math.floor(trapIndex / 3), col: trapIndex % 3 };
+        
+        if (this.arrowTop && trapPos.row > 0) {
+            const targetIndex = (trapPos.row - 1) * 3 + trapPos.col;
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (this.arrowBottom && trapPos.row < 2) {
+            const targetIndex = (trapPos.row + 1) * 3 + trapPos.col;
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (this.arrowLeft && trapPos.col > 0) {
+            const targetIndex = trapPos.row * 3 + (trapPos.col - 1);
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        if (this.arrowRight && trapPos.col < 2) {
+            const targetIndex = trapPos.row * 3 + (trapPos.col + 1);
+            if (cardManager.getCard(targetIndex)) {
+                targets.push(targetIndex);
+            }
+        }
+        
+        return targets;
+    }
+
+    /**
+     * Xử lý damage cho thẻ bị chỉ bởi trap
+     * @param {Card} targetCard - Thẻ bị chỉ
+     * @param {HTMLElement} targetElement - Element của thẻ
+     * @param {number} damage - Lượng damage
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     * @param {number} targetIndex - Index của thẻ
+     * @param {AnimationManager} animationManager - Manager quản lý animation
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     */
+    processTrapDamageToCard(targetCard, targetElement, damage, cardManager, targetIndex, animationManager, characterManager) {
+        if (targetCard.type === 'character') {
+            characterManager.damageCharacterHP(damage);
+        } else if (targetCard.takeDamageEffect) {
+            targetCard.takeDamageEffect(targetElement, damage, 'trap', characterManager, cardManager);
+            // Các xử lý hiển thị, update, death... giữ nguyên phía sau
+        } else {
+            // fallback cũ nếu chưa có takeDamageEffect
+            
+        }
+    }
+
+    /**
+     * Xử lý khi enemy chết do trap damage
+     * @param {number} enemyIndex - Index của enemy
+     * @param {Card} enemyCard - Enemy card
+     * @param {CardManager} cardManager - Manager quản lý thẻ
+     * @param {AnimationManager} animationManager - Manager quản lý animation
+     */
+    // handleEnemyDeathByTrap(enemyIndex, enemyCard, cardManager, animationManager) {
+    //     const enemyElement = document.querySelector(`[data-index="${enemyIndex}"]`);
+    //     if (enemyElement) {
+    //         enemyElement.classList.add('monster-dying');
+    //     }
+        
+    //     if (typeof enemyCard.killByWeaponEffect === 'function') {
+    //         const killResult = enemyCard.killByWeaponEffect(animationManager.characterManager, null);
+            
+    //         if (killResult && killResult.reward) {
+    //             setTimeout(() => {
+    //                 animationManager.createRewardCard(enemyIndex, killResult.reward, cardManager);
+    //             }, 600);
+    //         } else {
+    //             setTimeout(() => {
+    //                 animationManager.createDefaultCoin(enemyIndex, cardManager);
+    //             }, 600);
+    //         }
+    //     } else {
+    //         setTimeout(() => {
+    //             animationManager.createDefaultCoin(enemyIndex, cardManager);
+    //         }, 600);
+    //     }
+    // }
+
+    /**
      * Hi?u ?ng khi th? b? an
-     * @param {CharacterManager} characterManager - Manager qu?n l� character
-     * @param {GameState} gameState - Manager qu?n l� game state
-     * @param {CardManager} cardManager - Manager qu?n l� th? (optional)
-     * @returns {Object} Th�ng tin k?t qu?
+     * @param {CharacterManager} characterManager - Manager qu?n l character
+     * @param {GameState} gameState - Manager qu?n l game state
+     * @param {CardManager} cardManager - Manager qu?n l th? (optional)
+     * @returns {Object} Thng tin k?t qu?
      */
     cardEffect(characterManager, gameState, cardManager = null) {
-        // Ki?m tra xem character c� b? ch? b?i arrow kh�ng
+        // Ki?m tra xem character c b? ch? b?i arrow khng
         const characterIndex = cardManager ? cardManager.findCharacterIndex() : null;
         const isCharacterTargeted = this.isCharacterTargetedByArrow(characterIndex, cardManager);
         
         if (isCharacterTargeted) {
-            // Character b? ch? b?i arrow - g�y s�t thuong
+            // Character b? ch? b?i arrow - gy st thuong
             //characterManager.damageCharacterHP(this.damage);
             
             return {
@@ -78,11 +169,11 @@ class Trap extends Card {
                 characterDamaged: true
             };
         } else {
-            // Character kh�ng b? ch? b?i arrow - kh�ng g�y s�t thuong
+            // Character khng b? ch? b?i arrow - khng gy st thuong
             return {
                 type: 'trap',
                 damage: 0,
-                message: `B?y kh�ng ho?t d?ng!`,
+                message: `B?y khng ho?t d?ng!`,
                 shouldTriggerAnimation: true,
                 characterDamaged: false
             };
@@ -90,9 +181,9 @@ class Trap extends Card {
     }
     
     /**
-     * Ki?m tra xem character c� b? ch? b?i arrow kh�ng
+     * Ki?m tra xem character c b? ch? b?i arrow khng
      * @param {number} characterIndex - Index c?a character
-     * @param {CardManager} cardManager - Manager qu?n l� th?
+     * @param {CardManager} cardManager - Manager qu?n l th?
      * @returns {boolean} True n?u character b? ch? b?i arrow
      */
     isCharacterTargetedByArrow(characterIndex, cardManager) {
@@ -103,24 +194,24 @@ class Trap extends Card {
         
         // Ki?m tra t?ng hu?ng arrow
         if (this.arrowTop && trapPos.row > characterPos.row && trapPos.col === characterPos.col) {
-            return true; // Arrow ch? l�n tr�n v� character ? tr�n trap
+            return true; // Arrow ch? ln trn v character ? trn trap
         }
         if (this.arrowBottom && trapPos.row < characterPos.row && trapPos.col === characterPos.col) {
-            return true; // Arrow ch? xu?ng du?i v� character ? du?i trap
+            return true; // Arrow ch? xu?ng du?i v character ? du?i trap
         }
         if (this.arrowLeft && trapPos.col > characterPos.col && trapPos.row === characterPos.row) {
-            return true; // Arrow ch? sang tr�i v� character ? b�n tr�i trap
+            return true; // Arrow ch? sang tri v character ? bn tri trap
         }
         if (this.arrowRight && trapPos.col < characterPos.col && trapPos.row === characterPos.row) {
-            return true; // Arrow ch? sang ph?i v� character ? b�n ph?i trap
+            return true; // Arrow ch? sang ph?i v character ? bn ph?i trap
         }
         
         return false;
     }
 
     /**
-     * L?y th�ng tin hi?n th? cho dialog
-     * @returns {Object} Th�ng tin d? hi?n th?
+     * L?y thng tin hi?n th? cho dialog
+     * @returns {Object} Thng tin d? hi?n th?
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();
@@ -132,7 +223,7 @@ class Trap extends Card {
     }
     
     /**
-     * Xoay c�c arrow theo chi?u kim d?ng h?
+     * Xoay cc arrow theo chi?u kim d?ng h?
      * Top ? Right ? Bottom ? Left ? Top
      */
     transformationAgency() {
@@ -143,10 +234,10 @@ class Trap extends Card {
             this.arrowLeft
         ];
 
-        // Xoay m?ng 1 bu?c v? b�n ph?i (kim d?ng h?)
+        // Xoay m?ng 1 bu?c v? bn ph?i (kim d?ng h?)
         const rotated = directions.map((_, i) => directions[(i + 3) % 4]);
 
-        // G�n l?i v�o c�c thu?c t�nh
+        // Gn l?i vo cc thu?c tnh
         this.arrowTop = rotated[0];
         this.arrowRight = rotated[1];
         this.arrowBottom = rotated[2];

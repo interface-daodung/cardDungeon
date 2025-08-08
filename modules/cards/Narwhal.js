@@ -4,14 +4,13 @@
 class Narwhal extends Card {
     constructor() {
         super(
-            "Thôn Tinh Kình Ngư", 
-            "enemy", 
-            "resources/narwhal.webp", 
-            "boss Narwhal",
+            "Thôn Tinh Kình Ngư",
+            "enemy",
+            "resources/narwhal.webp",
             "narwhal"
         );
-        this.hp = Math.floor(Math.random() * 8) + 8; // HP từ 1-9
-        this.score = Math.floor(Math.random() * 11) + 6; // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(8, 16); // HP từ 8-15
+        this.score = this.GetRandom(2, 18); // Điểm khi tiêu diệt
     }
 
     /**
@@ -21,13 +20,13 @@ class Narwhal extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Quái vật gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
-        
+
         // Cộng điểm khi ăn enemy
         gameState.addScore(this.score);
-        
+
         return {
             type: 'enemy',
             hp: this.hp,
@@ -44,24 +43,52 @@ class Narwhal extends Card {
      * @param {number} currentIndex - Vị trí hiện tại của thẻ
      * @returns {Object} Thông tin kết quả
      */
-    attackByWeaponEffect(cards, currentIndex) {
+    attackByWeaponEffect(cards, currentIndex, cardManager, animationManager) {
         // Tìm vị trí khác không phải character để đổi chỗ
         const availablePositions = [];
         for (let i = 0; i < cards.length; i++) {
+            console.log(`i=${i}, card=`, cards[i]);
             if (i !== currentIndex && cards[i] && cards[i].type !== 'character') {
                 availablePositions.push(i);
             }
         }
-        
+        console.log(`  ------availablePositions --${availablePositions[0]}---------   `)
         if (availablePositions.length > 0) {
             // Chọn vị trí ngẫu nhiên để đổi chỗ
-            const randomIndex = availablePositions[Math.floor(Math.random() * availablePositions.length)];
-            
+            const randomIndex = availablePositions[this.GetRandom(0, availablePositions.length - 1)];
+
             // Đổi chỗ 2 thẻ
-            const temp = cards[currentIndex];
-            cards[currentIndex] = cards[randomIndex];
-            cards[randomIndex] = temp;
-            
+            [cards[currentIndex], cards[randomIndex]] = [cards[randomIndex], cards[currentIndex]];
+
+            // Cập nhật lại id và vị trí cho cả hai thẻ
+            for (const i of [currentIndex, randomIndex]) {
+                const card = cards[i];
+                if (card) {
+                    card.id = i;
+                    card.position = {
+                        row: Math.floor(i / 3),
+                        col: i % 3
+                    };
+                }
+            }
+
+           // console.log(`  ------availablePositions --${!animationManager.flipCards}---------   `)
+
+            console.log('Gọi flipCards với:', currentIndex, randomIndex, animationManager);
+            cardManager.setAllCards(cards);
+
+            // Thêm hiệu ứng flip cho cả 2 thẻ
+            animationManager.flipCards(
+                currentIndex,
+                randomIndex,
+                () => {
+                    // Callback sau khi animation hoàn thành
+                    animationManager.updateEntireGrid();
+                    //this.setupCardEventsAfterCombat();
+                    //animationManager.eventManager.setupCardEvents();
+                }
+            );
+
             return {
                 type: 'enemy_attacked_by_weapon',
                 effect: `Narwhal đổi vị trí với thẻ khác!`,
@@ -69,7 +96,7 @@ class Narwhal extends Card {
                 oldPosition: currentIndex
             };
         }
-        
+
         return null; // Không có vị trí nào để đổi
     }
 

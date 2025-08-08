@@ -11,7 +11,6 @@ class Warrior extends Card {
             "Kamisato Ayato", 
             "character", 
             "resources/warrior.webp", 
-            "Nhân vật chính",
             "warrior"
         );
         this.hp = Warrior.DEFAULT_HP; // HP ban đầu từ Warrior

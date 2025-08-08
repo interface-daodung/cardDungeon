@@ -7,7 +7,6 @@ class CoinUp1 extends Card {
             "Cộng Hưởng Nguyên Tố: Thủy Trị Liệu", 
             "coin", 
             "resources/coinUp1.webp", 
-            "Coin nâng cấp loại 1",
             "coinUp1"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
@@ -20,7 +19,7 @@ class CoinUp1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số 
         gameState.addScore(this.score);
         

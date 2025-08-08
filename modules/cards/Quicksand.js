@@ -7,7 +7,6 @@ class Quicksand extends Card {
             "Quicksand", 
             "trap", 
             "resources/quicksand.webp", 
-            "Cát Lún",
             "quicksand"
         );
         this.damage = 2; // S�t thuong c?a c�t l�n

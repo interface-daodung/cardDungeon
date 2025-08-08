@@ -7,7 +7,6 @@ class Treasure1 extends Card {
             "Kho Báu Dưới Đáy Biển", 
             "treasure", 
             "resources/treasure1.webp", 
-            "Kho Báu Dưới Đáy Biển",
             "treasure1"
         );
         this.score = 0; // Điểm số nhận được
@@ -30,13 +29,13 @@ class Treasure1 extends Card {
             } else if (random < 0.85) {
                 // 35% - Food0-2
                 const foodTypes = ['Food0', 'Food1', 'Food2'];
-                const randomFood = foodTypes[Math.floor(Math.random() * foodTypes.length)];
+                const randomFood = foodTypes[this.GetRandom(0, foodTypes.length - 1)];
                 rewardType = 'food';
                 rewardCard = cardManager.cardFactory.createCard(randomFood);
             } else {
                 // 15% - Weapon ngẫu nhiên
                 const weaponTypes = ['Sword0', 'Sword1', 'Sword2', 'Sword3', 'Sword4', 'Sword5', 'Sword6', 'Catalyst0', 'Catalyst1', 'Catalyst2'];
-                const randomWeapon = weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
+                const randomWeapon = weaponTypes[this.GetRandom(0, weaponTypes.length - 1)];
                 rewardType = 'weapon';
                 rewardCard = cardManager.cardFactory.createCard(randomWeapon);
             }

@@ -7,9 +7,9 @@ class Boom extends Card {
             "Nổ Định Hướng Có Kiểm Soát", 
             "boom", 
             "resources/boom.webp", 
-            "Bom nổ"
+            "boom"
         );
-        this.damage = Math.floor(Math.random() * 9) + 1; // Sát thương của bom
+        this.damage = this.GetRandom(3, 7); // Sát thương của bom
         this.countdown = 5; // Đếm ngược
     }
 
@@ -23,7 +23,7 @@ class Boom extends Card {
      * @param {number} boomIndex - Index của boom card
      * @returns {Object} Thông tin kết quả
      */
-    interactWithCharacter(characterManager, gameState, cardManager, boomIndex) {
+    interactWithCharacter(characterManager = null, gameState = null, cardManager = null, boomIndex = null) {
         // Tìm vị trí character
         const characterIndex = cardManager.findCharacterIndex();
         
@@ -72,7 +72,7 @@ class Boom extends Card {
      * @param {AnimationManager} animationManager - Manager quản lý animation (optional)
      * @returns {Object} Thông tin kết quả
      */
-    explodeEffect(characterManager, gameState, cardManager, boomIndex, animationManager = null) {
+    explodeEffect(characterManager = null, gameState = null, cardManager = null, boomIndex = null, animationManager = null) {
         // Cập nhật vị trí character trước khi kiểm tra
         const cards = cardManager.getAllCards();
         let characterIndex = null;
@@ -93,227 +93,27 @@ class Boom extends Card {
         if (characterIndex !== null && adjacentCards.includes(characterIndex)) {
             characterManager.damageCharacterHP(this.damage);
             // Game over được xử lý trong damageCharacterHP khi HP = 0
-        } else {
-        }
+        }  
         
         // Gây damage cho các thẻ khác (không phải character)
+
+        
         const affectedNonCharacterCards = [];
         for (const cardIndex of adjacentCards) {
             if (cardIndex !== characterIndex) {
                 const card = cardManager.getCard(cardIndex);
-                if (card) {
-                    // Gây damage cho enemy cards
-                    if (card.type === 'enemy' && card.hp !== undefined && card.hp > 0) {
-                        const originalHP = card.hp;
-                        card.hp -= this.damage;
-                        
-                        if (card.hp <= 0) {
-                            card.hp = 0; // Đảm bảo HP không âm
-                            
-                            // Chạy killByWeaponEffect nếu có
-                            if (typeof card.killByWeaponEffect === 'function') {
-                                const killResult = card.killByWeaponEffect(characterManager, gameState);
-                                
-                                // Xử lý kết quả từ killByWeaponEffect
-                                if (killResult && killResult.reward) {
-                                    if (killResult.reward.type === 'coin') {
-                                        // Tạo coin mặc định
-                                        const coinCard = cardManager.cardFactory.createDynamicCoin(characterManager);
-                                        coinCard.id = cardIndex;
-                                        coinCard.position = { 
-                                            row: Math.floor(cardIndex / 3), 
-                                            col: cardIndex % 3 
-                                        };
-                                        cardManager.updateCard(cardIndex, coinCard);
-                                    } else if (killResult.reward.type === 'food3') {
-                                        // Tạo Food3 card
-                                        const foodCard = cardManager.cardFactory.createCard('Food3');
-                                        foodCard.id = cardIndex;
-                                        foodCard.position = { 
-                                            row: Math.floor(cardIndex / 3), 
-                                            col: cardIndex % 3 
-                                        };
-                                        cardManager.updateCard(cardIndex, foodCard);
-                                    }
-                                } else {
-                                    // Tạo coin mặc định nếu không có reward
-                                    const coinCard = cardManager.cardFactory.createDynamicCoin(characterManager);
-                                    coinCard.id = cardIndex;
-                                    coinCard.position = { 
-                                        row: Math.floor(cardIndex / 3), 
-                                        col: cardIndex % 3 
-                                    };
-                                    cardManager.updateCard(cardIndex, coinCard);
-                                }
-                            } else {
-                                // Tạo coin theo mặc định nếu không có killByWeaponEffect
-                                // Tạo coin ngay tại đây và thay thế thẻ
-                                const coinCard = cardManager.cardFactory.createDynamicCoin(characterManager);
-                                coinCard.id = cardIndex;
-                                coinCard.position = { 
-                                    row: Math.floor(cardIndex / 3), 
-                                    col: cardIndex % 3 
-                                };
-                                cardManager.updateCard(cardIndex, coinCard);
-                            }
-                        } else {
-                            // HP chưa về 0, chạy attackByWeaponEffect nếu có
-                            if (typeof card.attackByWeaponEffect === 'function') {
-                                card.attackByWeaponEffect(characterManager, gameState);
-                            }
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'enemy',
-                            damage: this.damage,
-                            remainingHP: card.hp,
-                            wasKilled: originalHP > 0 && card.hp === 0
-                        });
-                    }
-                    // Gây damage cho food cards (Food0-3)
-                    else if (card.type === 'food' && card.heal !== undefined && card.heal > 0) {
-                        const originalHeal = card.heal;
-                        card.heal -= this.damage;
-                        
-                        if (card.heal <= 0) {
-                            card.heal = 0; // Đảm bảo heal không âm
-                            
-                            // Tạo thẻ void thay thế
-                            const voidCard = cardManager.cardFactory.createVoid();
-                            voidCard.id = cardIndex;
-                            voidCard.position = { 
-                                row: Math.floor(cardIndex / 3), 
-                                col: cardIndex % 3 
-                            };
-                            cardManager.updateCard(cardIndex, voidCard);
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'food',
-                            damage: this.damage,
-                            remainingHeal: card.heal,
-                            wasKilled: originalHeal > 0 && card.heal === 0
-                        });
-                    }
-                    // Gây damage cho poison cards
-                    else if (card.type === 'poison' && card.poisonDuration !== undefined && card.poisonDuration > 0) {
-                        const originalPoisonDuration = card.poisonDuration;
-                        const originalHeal = card.heal;
-                        
-                        card.poisonDuration -= this.damage;
-                        card.heal -= this.damage;
-                        
-                        if (card.poisonDuration <= 0 || card.heal <= 0) {
-                            card.poisonDuration = Math.max(0, card.poisonDuration);
-                            card.heal = Math.max(0, card.heal);
-                            
-                            // Tạo thẻ void thay thế
-                            const voidCard = cardManager.cardFactory.createVoid();
-                            voidCard.id = cardIndex;
-                            voidCard.position = { 
-                                row: Math.floor(cardIndex / 3), 
-                                col: cardIndex % 3 
-                            };
-                            cardManager.updateCard(cardIndex, voidCard);
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'poison',
-                            damage: this.damage,
-                            remainingPoisonDuration: card.poisonDuration,
-                            remainingHeal: card.heal,
-                            wasKilled: (originalPoisonDuration > 0 && card.poisonDuration === 0) || (originalHeal > 0 && card.heal === 0)
-                        });
-                    }
-                    // Gây damage cho coin cards
-                    else if (card.type === 'coin' && card.score !== undefined && card.score > 0) {
-                        const originalScore = card.score;
-                        card.score -= this.damage;
-                        
-                        if (card.score <= 0) {
-                            card.score = 0; // Đảm bảo score không âm
-                            
-                            // Tạo thẻ void thay thế
-                            const voidCard = cardManager.cardFactory.createVoid();
-                            voidCard.id = cardIndex;
-                            voidCard.position = { 
-                                row: Math.floor(cardIndex / 3), 
-                                col: cardIndex % 3 
-                            };
-                            cardManager.updateCard(cardIndex, voidCard);
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'coin',
-                            damage: this.damage,
-                            remainingScore: card.score,
-                            wasKilled: originalScore > 0 && card.score === 0
-                        });
-                    }
-                    // Gây damage cho weapon cards (Sword, Catalyst)
-                    else if ((card.type === 'weapon' || card.type === 'sword') && card.durability !== undefined && card.durability > 0) {
-                        const originalDurability = card.durability;
-                        card.durability -= this.damage;
-                        
-                        if (card.durability <= 0) {
-                            card.durability = 0; // Đảm bảo durability không âm
-                            
-                            // Tạo thẻ void thay thế
-                            const voidCard = cardManager.cardFactory.createVoid();
-                            voidCard.id = cardIndex;
-                            voidCard.position = { 
-                                row: Math.floor(cardIndex / 3), 
-                                col: cardIndex % 3 
-                            };
-                            cardManager.updateCard(cardIndex, voidCard);
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'weapon',
-                            damage: this.damage,
-                            remainingDurability: card.durability,
-                            wasKilled: originalDurability > 0 && card.durability === 0
-                        });
-                    }
-                    // Gây damage cho trap cards (không bao gồm Quicksand)
-                    else if (card.nameId === 'trap' && card.damage !== undefined && card.damage > 0) {
-                        const originalDamage = card.damage;
-                        card.damage -= this.damage;
-                        
-                        if (card.damage <= 0) {
-                            card.damage = 0; // Đảm bảo damage không âm
-                            
-                            // Tạo thẻ void thay thế
-                            const voidCard = cardManager.cardFactory.createVoid();
-                            voidCard.id = cardIndex;
-                            voidCard.position = { 
-                                row: Math.floor(cardIndex / 3), 
-                                col: cardIndex % 3 
-                            };
-                            cardManager.updateCard(cardIndex, voidCard);
-                        } else {
-                            // Cập nhật hiển thị damage trên trap
-                            // Có thể cần cập nhật UI hiển thị damage
-                        }
-                        
-                        affectedNonCharacterCards.push({
-                            index: cardIndex,
-                            type: 'trap',
-                            damage: this.damage,
-                            remainingDamage: card.damage,
-                            wasKilled: originalDamage > 0 && card.damage === 0
-                        });
-                    }
-                    // Có thể thêm logic cho các loại thẻ khác ở đây
+                card.takeDamageEffect(document.querySelector(`[data-index="${cardIndex}"]`), this.damage, 'boom', characterManager, cardManager);
+                if (card && card.type !== 'character') {
+                    affectedNonCharacterCards.push({
+                        index: cardIndex,
+                        type: card.type,
+                        damage: this.damage,
+                        remainingHeal: card.heal,
+                        wasKilled: card.hp > 0 && card.hp === 0
+                    });
                 }
             }
         }
-        
         // Tạo thẻ ngẫu nhiên thay thế boom
         const newCard = cardManager.cardFactory.createRandomCard(characterManager);
         newCard.id = boomIndex;
@@ -355,7 +155,9 @@ class Boom extends Card {
             if (pos.row >= 0 && pos.row < 3 && pos.col >= 0 && pos.col < 3) {
                 const index = pos.row * 3 + pos.col;
                 const card = cardManager.getCard(index);
-                if (card && card.type !== 'boom') { // Không bao gồm boom khác
+                // có bao gồm boom khác 
+                //if (card && card.type !== 'boom') { // Không bao gồm boom khác
+                if (card) {
                     adjacentCards.push(index);
                 }
             } else {

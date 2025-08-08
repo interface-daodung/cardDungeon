@@ -7,10 +7,9 @@ class Sword5 extends Card {
             "Kiếm Hút Máu", 
             "weapon", 
             "resources/sword5.webp", 
-            "Vũ khí loại 5",
             "sword5"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 16); // Độ bền 1-16
     }
 
     /**

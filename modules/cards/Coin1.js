@@ -7,10 +7,9 @@ class Coin1 extends Card {
             "Mảnh Vỡ Nguyên Tố Thủy", 
             "coin", 
             "resources/coin1.webp", 
-            "Coin loại 1",
             "coin1"
         );
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm từ 1-9
     }
 
     /**
@@ -20,7 +19,7 @@ class Coin1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số
         gameState.addScore(this.score);
         

@@ -9,22 +9,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadingManager = new LoadingManager();
     
     try {
-        // Bắt đầu quá trình loading thực sự - Load tài nguyên game
+        // Bắt đầu quá trình loading thực sự - Load scripts và tài nguyên game
         await loadingManager.realLoad();
         
-        // ===== KHỞI TẠO GAME =====
-        // Tạo instance game mới với tất cả manager được khởi tạo
-        const game = new DungeonCardGame();
+        // ===== KHỞI TẠO GAME VỚI MANAGERS ĐÃ LOAD =====
+        // Lấy các manager đã được khởi tạo từ LoadingManager
+        const characterManager = window.characterManager;
+        const gameState = window.gameState;
+        const cardManager = window.cardManager;
+        const animationManager = window.animationManager;
+        const uiManager = window.uiManager;
+        const combatManager = window.combatManager;
+        const eventManager = window.eventManager;
+        
+        // Tạo instance game mới với các manager đã load
+        const game = new DungeonCardGame(
+            characterManager,
+            gameState,
+            cardManager,
+            animationManager,
+            uiManager,
+            combatManager,
+            eventManager
+        );
         
         // ===== DEBUG & DEVELOPMENT =====
         // Lưu game vào window để có thể truy cập từ console (debug)
         // Cho phép developer inspect game state trong browser console
-        //window.dungeonCardGame = game;
+        window.dungeonCardGame = game;
         
         // ===== LOG SUCCESS =====
         // Thông báo game đã khởi tạo thành công
         console.log('🎮 CardDungeon Game đã được khởi tạo thành công!');
-        // console.log('💡 Tip: Gõ "dungeonCardGame" trong console để inspect game state');
+        console.log('💡 Tip: Gõ "dungeonCardGame" trong console để inspect game state');
         
     } catch (error) {
         // Hiển thị lỗi nếu có

@@ -7,10 +7,9 @@ class Sword1 extends Card {
             "Tây Phong Kiếm", 
             "weapon", 
             "resources/sword1.webp", 
-            "Vũ khí mạnh",
             "sword1"
         );
-        this.durability = Math.floor(Math.random() * 8) + 10; // Độ bền 10-18
+        this.durability = this.GetRandom(8, 10); // Độ bền 8-10
 
     }
 
@@ -34,6 +33,25 @@ class Sword1 extends Card {
     }
 
     /**
+     * Hiệu ứng khi bán vũ khí
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {GameState} gameState - Manager quản lý game state
+     * @returns {Object} Thông tin kết quả bán vũ khí
+     */
+    sellWeaponEffect(characterManager, gameState) {
+        // Heal HP bằng độ bền của vũ khí
+        const healAmount = this.durability;
+        characterManager.healCharacterHP(healAmount, 0); // Heal ngay lập tức
+        
+        return {
+            type: 'weapon_sold',
+            healAmount: healAmount,
+            effect: `Character được heal ${healAmount} HP từ phước lành của Tây Phong Kiếm`,
+            sellValue: this.durability
+        };
+    }
+
+    /**
      * Lấy thông tin hiển thị cho dialog
      * @returns {Object} Thông tin để hiển thị
      */
@@ -41,8 +59,7 @@ class Sword1 extends Card {
         const baseInfo = super.getDisplayInfo();
         return {
             ...baseInfo,
-            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Tây Phong Kiếm là vũ khí nghi thức của Đội Kỵ Sĩ Tây Phong. Sắc bén và nhẹ nhàng, nó là biểu tượng của sự dũng cảm và danh dự.</i>`,
-            durability: this.durability
+            description: `<strong>${this.type}</strong> - Durability: <span class="durability-text">${this.durability}</span><br><i>Tây Phong Kiếm, biểu tượng danh dự của kỵ sĩ. Dâng lên Giáo Hội Tây Phong, người trao có thể nhận lại một phước lành làm dịu đi vết thương.</i>`,            durability: this.durability
         };
     }
 } 

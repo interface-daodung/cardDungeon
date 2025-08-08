@@ -7,13 +7,12 @@ class Bribery extends Card {
             "hối lộ", 
             "treasure", 
             "resources/bribery.webp", 
-            "Hối lộ",
             "bribery"
         ); 
         this.score = 0; // Điểm số nhận được
         this.durability = 1; // Độ bền của hối lộ
     }
-    interactWithCharacter(characterManager, gameState, cardManager) {
+    interactWithCharacter(characterManager = null, gameState = null, cardManager = null) {
         // Giảm độ bền của hối lộ
         this.durability -= 1;
 

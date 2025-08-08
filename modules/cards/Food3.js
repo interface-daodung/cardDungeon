@@ -1,5 +1,5 @@
-// Food3.js - Th? th?c an lo?i 3
-// Ch?c nang: Th?c an h?i ph?c HP
+// Food3.js - Thẻ thức ăn Sinh Mệnh Sinh Sôi
+// Chức năng: Thức ăn hồi phục HP
 
 class Food3 extends Card {
     constructor() {
@@ -7,36 +7,35 @@ class Food3 extends Card {
             "Sinh Mệnh Sinh Sôi", 
             "food", 
             "resources/food3.webp", 
-            "Th?c an lo?i 3",
             "food3"
         );
-        this.heal = Math.floor(Math.random() * 9) + 1; // H?i ph?c 1-9 HP
+        this.heal = this.GetRandom(6, 9); // Hồi phục 1-9 HP
     }
 
     /**
-     * Hi?u ?ng khi th? b? an
-     * @param {CharacterManager} characterManager - Manager qu?n l� character
-     * @param {GameState} gameState - Manager qu?n l� game state
-     * @returns {Object} Th�ng tin k?t qu?
+     * Hiệu ứng khi thẻ bị ăn
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {GameState} gameState - Manager quản lý game state
+     * @returns {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager = null) {
-        // H?i ph?c HP cho character
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
+        // Hồi phục HP cho character
         characterManager.healCharacterHP(this.heal);
-        // lo?i b? d?c
+        // Loại bỏ độc
         const currentPoison = characterManager.getPoisoned();
         if (currentPoison > 0) {
-            characterManager.setPoisoned(0); // Lo?i b? d?c
+            characterManager.setPoisoned(0); // Loại bỏ độc
         }
         return {
             type: 'food',
             heal: this.heal,
-            message: `H?i ph?c ${this.heal} HP!`
+            message: `Hồi phục ${this.heal} HP!`
         };
     }
 
     /**
-     * L?y th�ng tin hi?n th? cho dialog
-     * @returns {Object} Th�ng tin d? hi?n th?
+     * Lấy thông tin hiển thị cho dialog
+     * @returns {Object} Thông tin để hiển thị
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();

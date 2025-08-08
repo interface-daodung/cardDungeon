@@ -55,8 +55,8 @@ class CharacterManager {
         this.characterHP = Math.max(0, Math.min(Warrior.DEFAULT_HP, this.characterHP - damage));
         
         // Hiển thị popup damage
-        if (damage > 0) {
-            this.showHpChangePopup(-damage,delay);
+        if (damage > 0 && this.animationManager) {
+            this.animationManager.showHpChangePopup(-damage,delay);
         }
         
         // Kiểm tra game over nếu HP = 0
@@ -80,7 +80,9 @@ class CharacterManager {
         this.characterHP = Math.min(Warrior.DEFAULT_HP, this.characterHP + amount);
         
         // Hiển thị heal popup
-        this.showHpChangePopup(amount,delay);
+        if (this.animationManager) {
+            this.animationManager.showHpChangePopup(amount,delay);
+        }
         
         return this.characterHP;
     }
@@ -140,9 +142,9 @@ class CharacterManager {
         
         // Gọi sellWeaponEffect nếu có
         if (this.characterWeaponObject && this.characterWeaponObject.sellWeaponEffect) {
-            const sellEffect = this.characterWeaponObject.sellWeaponEffect();
+            const sellEffect = this.characterWeaponObject.sellWeaponEffect(this, null);
             
-            if (sellEffect && sellEffect.sellValue !== undefined) {
+            if (sellEffect && sellEffect.type === 'weapon_sold') {
                 this.characterWeaponObject = null; // Reset object vũ khí
                 return sellEffect.sellValue;
             }
@@ -171,7 +173,7 @@ class CharacterManager {
         if (this.recovery > 0) {
             this.healCharacterHP(1,100); // Hồi phục 1 HP
             this.recovery--; // Giảm số lượt hồi phục
-            //this.showHpChangePopup(1, 100); // Hiển thị heal ngay lập tức
+            //this.animationManager?.showHpChangePopup(1, 100); // Hiển thị heal ngay lập tức
         }
     }
 
@@ -188,7 +190,7 @@ class CharacterManager {
             }
             this.damageCharacterHP(1,200); // Nhận 1 damage
             this.poisoned--; // Giảm số lượt độc
-            //this.showHpChangePopup(-1, 200); // Hiển thị damage sau 200ms
+            //this.animationManager?.showHpChangePopup(-1, 200); // Hiển thị damage sau 200ms
         }
     }
 
@@ -235,45 +237,6 @@ class CharacterManager {
 
 
     // ===== HIỂN THỊ =====
-
-    /**
-     * Hiển thị popup khi HP thay đổi
-     * @param {number} change - Lượng HP thay đổi (dương = heal, âm = damage)
-     * @param {number} delay - Delay trước khi hiển thị (ms)
-     */
-    showHpChangePopup(change, delay = 0) {
-        const characterElement = document.querySelector('.card.character');
-        if (!characterElement) return;
-        
-        setTimeout(() => {
-            // Tạo popup mới
-            const popup = document.createElement('div');
-            popup.className = 'hp-change-popup';
-            
-            if (change > 0) {
-                // Heal
-                popup.textContent = `+${change}`;
-                popup.style.color = '#27ae60'; // Màu xanh lá
-            } else {
-                // Damage
-                popup.textContent = `${change}`; // đã có dấu âm
-                popup.style.color = '#e74c3c'; // Màu đỏ
-            }
-            
-            popup.style.fontWeight = 'bold';
-            popup.style.position = 'absolute';
-            popup.style.zIndex = '1000';
-            
-            characterElement.appendChild(popup);
-            
-            // Tự động xóa sau 800ms
-            setTimeout(() => {
-                if (popup.parentNode) {
-                    popup.parentNode.removeChild(popup);
-                }
-            }, 800);
-        }, delay);
-    }
 
     // ===== TIỆN ÍCH =====
 

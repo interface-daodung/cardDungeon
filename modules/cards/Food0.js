@@ -1,5 +1,5 @@
-// Food0.js - Th? th?c an co b?n G� N?u Hoa Ng?t 
-// Ch?c nang: H?i ph?c HP ngay l?p t?c
+// Food0.js - Thẻ thức ăn cơ bản Gà Nấu Hoa Ngọt 
+// Chức năng: Hồi phục HP ngay lập tức
 
 class Food0 extends Card {
     constructor() {
@@ -7,33 +7,32 @@ class Food0 extends Card {
             "Gà Nấu Hoa Ngọt", 
             "food", 
             "resources/food0.webp", 
-            "Th?c an h?i ph?c co b?n",
             "food0"
         );
-        this.heal = Math.floor(Math.random() * 6) + 1; // H?i ph?c 1-6 HP
+        this.heal = this.GetRandom(1, 9); // Hồi phục 1-6 HP
     }
 
     /**
-     * Hi?u ?ng khi th? b? an
-     * @param {CharacterManager} characterManager - Manager qu?n l� character
-     * @param {GameState} gameState - Manager qu?n l� game state
-     * @returns {Object} Th�ng tin k?t qu?
+     * Hiệu ứng khi thẻ bị ăn
+     * @param {CharacterManager} characterManager - Manager quản lý character
+     * @param {GameState} gameState - Manager quản lý game state
+     * @returns {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager = null) {
-        // H?i ph?c HP ngay l?p t?c
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
+        // Hồi phục HP ngay lập tức
         characterManager.healCharacterHP(this.heal);
         
         return {
-            score: 0, // Food kh�ng tang di?m
+            score: 0, // Food không tăng điểm
             type: this.type,
             heal: this.heal,
-            effect: `Character h?i ph?c ${this.heal} HP`
+            effect: `Character hồi phục ${this.heal} HP`
         };
     }
 
     /**
-     * L?y th�ng tin hi?n th? cho dialog
-     * @returns {Object} Th�ng tin d? hi?n th?
+     * Lấy thông tin hiển thị cho dialog
+     * @returns {Object} Thông tin để hiển thị
      */
     getDisplayInfo() {
         const baseInfo = super.getDisplayInfo();

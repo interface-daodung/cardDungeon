@@ -7,7 +7,6 @@ class CoinUp4 extends Card {
             "Cộng Hưởng Nguyên Tố: Nham Kiên Cố", 
             "coinUp", 
             "resources/coinUp4.webp", 
-            "Coin tăng điểm loại 4",
             "coinUp4"
         );
         this.score = 0; // Điểm số mặc định (có thể được override)
@@ -20,7 +19,7 @@ class CoinUp4 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số 
         gameState.addScore(this.score);
         

@@ -7,11 +7,10 @@ class Fatui3 extends Card {
             "Fatui - Thuật Sĩ Cicin Băng", 
             "enemy", 
             "resources/fatui3.webp", 
-            "Fatui loại 3",
             "fatui3"
         );
-        this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(1, 9); // HP từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm khi tiêu diệt
     }
 
     /**
@@ -21,7 +20,7 @@ class Fatui3 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Quái vật gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
         

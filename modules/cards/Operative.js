@@ -7,11 +7,10 @@ class Operative extends Card {
             "Fatui - Đặc Vụ Băng",
             "enemy",
             "resources/operative.webp",
-            "thẻ tinh anh Operative",
             "operative"
         );
-        this.hp = Math.floor(Math.random() * 9) + 1; // HP từ 1-9
-        this.score = Math.floor(Math.random() * 9) + 1; // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(1, 9); // HP từ 1-9
+        this.score = this.GetRandom(1, 9); // Điểm khi tiêu diệt
         this.keepHp = 0;
     }
 

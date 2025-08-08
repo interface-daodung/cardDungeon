@@ -7,11 +7,10 @@ class Eremite1 extends Card {
             "Eremite - Người Kể Chuyện Cát Nóng", 
             "enemy", 
             "resources/eremite1.webp", 
-            "Eremite loại 1",
             "eremite1"
         );
-        this.hp = Math.floor(Math.random() * 13) + 4; // HP của quái vật
-        this.score = Math.floor(Math.random() * 8) + 3; // Điểm khi tiêu diệt
+        this.hp = this.GetRandom(6, 12); // HP của quái vật
+        this.score = this.GetRandom(3, 9); // Điểm khi tiêu diệt
     }
 
     /**
@@ -21,7 +20,7 @@ class Eremite1 extends Card {
      * @returns
      * @param {CardManager} cardManager - Manager quản lý thẻ {Object} Thông tin kết quả
      */
-    cardEffect(characterManager, gameState, cardManager) {
+    cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Quái vật gây sát thương cho character
         characterManager.damageCharacterHP(this.hp);
         

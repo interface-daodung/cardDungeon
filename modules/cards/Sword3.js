@@ -7,10 +7,10 @@ class Sword3 extends Card {
             "Dao rọc giấy có lưỡi gãy", 
             "weapon", 
             "resources/sword3.webp", 
-            "Vũ khí loại 3",
             "sword3"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(6, 12); // Độ bền 1-16
+        this.blessed = 'Ocean';//⚓ 🌊 🐋 🐬 🪸 🐚
     }
 
     /**

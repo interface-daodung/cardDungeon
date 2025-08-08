@@ -7,10 +7,9 @@ class Sword4 extends Card {
             "Quyền Trượng Thủy Thần", 
             "weapon", 
             "resources/sword4.webp", 
-            "Quyền Trượng Thủy Thần",
             "sword4"
         );
-        this.durability = Math.floor(Math.random() * 16) + 1; // Độ bền 1-16
+        this.durability = this.GetRandom(8, 12); // Độ bền 1-16
 
     }
 
@@ -39,11 +38,12 @@ class Sword4 extends Card {
      * @param {GameState} gameState - Manager quản lý game state
      * @returns {Object} Thông tin kết quả
      */
-    sellWeaponEffect() {
+    sellWeaponEffect(characterManager, gameState) {
 
         return {
-            type: 'weapon_sell_effect',
-            sellValue: this.durability * 2
+            type: 'weapon_sold',
+            sellValue: this.durability * 2,
+            effect: `Character được bán vũ khí với giá ${this.durability * 2}`
         };
     }
 
