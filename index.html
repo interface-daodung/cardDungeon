@@ -1,92 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dungeon Card Game</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<title>Card Dungeon</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <h1>CardDungeon</h1>
-                <div class="loading-subtitle">Khám phá hầm ngục bí ẩn</div>
-            </div>
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-            </div>
-            <div class="loading-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="loading-text" id="loading-text">Đang tải...</div>
-            </div>
-            <div class="loading-tips" id="loading-tips">
-                <p>💡 Mẹo: Lợi dụng cơ quan phun lửa để tấn công kẻ địch!</p>
-            </div>
-        </div>
+
+  <!-- Icon Xu + điểm -->
+  <div class="score-bar fade-in">
+    <span>🪙</span>
+    <span id="score">0</span>
+  </div>
+
+  <!-- Icon setting -->
+  <div class="settings-btn-wrapper fade-in">
+    <span class="settings-btn">⚙️</span>
+  </div>
+
+  <!-- Tiêu đề game -->
+  <h1 class="game-title fade-in">Card Dungeon</h1>
+
+    <div class="card-wrapper fade-in">
+      <!-- Thẻ bài xòe ra -->
+      <div id="cardCharacter" class="card-container">
+        <div class="card card-left"></div>
+        <div class="card card-center"></div>
+        <div class="card card-right"></div>
+      </div>
     </div>
+    <!-- Menu dưới -->
+  <div class="menu fade-in">
+    <a href="cardLibrary.html" data-label="📚 Thư viện">
+      <img src="item/library.webp" alt="Thư viện">
+      <span class="tooltip-text">📚 Thư viện</span>
+    </a>
+    <a href="map1.html" data-label="🧭 Thám hiểm">
+      <img src="item/compass.webp" alt="Thám hiểm">
+      <span class="tooltip-text">🧭 Thám hiểm</span>
+    </a>
+    <a href="equipments.html" data-label="🗡️ Trang bị">
+      <img src="item/chest.webp" alt="Trang bị">
+      <span class="tooltip-text">🗡️ Trang bị</span>
+    </a>
+  </div>
+  
+<script>
+// Hàm cập nhật background image cho các thẻ card
+function updateCardBackgrounds() {
+  // Lấy nhân vật được chọn từ localStorage, mặc định là 'eula' nếu không có
+  let selectedCharacter = localStorage.getItem('selectedCharacter');
+  if (!selectedCharacter) {
+    selectedCharacter = 'eula';
+  }
+  
+  // Tìm vị trí của nhân vật được chọn trong mảng data
+  const currentIndex = data.findIndex(char => char.id === selectedCharacter);
+  
+  if (currentIndex !== -1) {
+    // Cập nhật card-center với nhân vật được chọn
+    const cardCenter = document.querySelector('.card-center');
+    cardCenter.style.backgroundImage = `url('resources/${selectedCharacter}.webp')`;
+    
+    // Tính toán vị trí của 2 thẻ liền kề
+    const cardLeftIndex = (currentIndex + 1) % data.length;
+    const cardRightIndex = (currentIndex - 1 + data.length) % data.length;
+    
+    // Cập nhật card-left
+    const cardLeft = document.querySelector('.card-right');
+    cardLeft.style.backgroundImage = `url('resources/${data[cardLeftIndex].id}.webp')`;
+    
+    // Cập nhật card-right
+    const cardRight = document.querySelector('.card-left');
+    cardRight.style.backgroundImage = `url('resources/${data[cardRightIndex].id}.webp')`;
+  }
+}
 
-    <div class="game-container">
-        <!-- Header -->
-        <header class="game-header">
-            <h1>Dungeon Card Game</h1>
-            <div class="high-score">High Score: <span id="high-score">0</span></div>
-            <div class="game-stats">
-                <span class="score">Score: <span id="score">0</span></span>
-                <span class="moves">Moves: <span id="moves">0</span></span>
-            </div>
-        </header>
+document.getElementById("cardCharacter").addEventListener("click", function() {
+  window.location.href = "selectCharacter.html"; 
+});
 
-        <!-- Main Game Area - 3x3 Grid -->
-        <main class="game-main">
-            <div class="cards-grid" id="cards-grid">
-                <!-- 3x3 grid of cards will be generated here -->
-            </div>
-        </main>
+// Dữ liệu nhân vật được tạo bởi AI
+const data = [
+  {
+    "id": "eula",
+    "name": "Eula",
+    "character": "Eula",
+    "hp": 12,
+    "elementCoin": 3,
+    "storyText": "Eula là một hiệp sĩ quý tộc của Mondstadt, thuộc dòng họ Lawrence. Cô sở hữu Vision Cryo và sử dụng Claymore làm vũ khí. Mặc dù xuất thân từ gia đình quý tộc, Eula luôn tìm cách chuộc lỗi cho những tội ác mà tổ tiên đã gây ra. Cô là một vũ công tài ba và chiến binh dũng cảm, luôn bảo vệ Mondstadt khỏi những mối đe dọa.",
+    "effectText": "Khi kích hoạt, Eula tạo ra một vụ nổ Cryo mạnh mẽ, gây sát thương lớn cho kẻ địch và làm chậm chúng. Cô cũng có khả năng tăng sức mạnh tấn công khi HP thấp."
+  },
+  {
+    "id": "nahida",
+    "name": "Nahida",
+    "character": "Nahida",
+    "hp": 10,
+    "elementCoin": 4,
+    "storyText": "Nahida là vị thần Dendro của Sumeru, còn được gọi là Lesser Lord Kusanali. Cô là một vị thần trẻ tuổi, thông minh và tò mò về thế giới xung quanh. Nahida có khả năng đọc suy nghĩ và ký ức của người khác, đồng thời có thể tạo ra những giấc mơ và ảo ảnh. Cô luôn tìm cách bảo vệ Sumeru và người dân của mình.",
+    "effectText": "Nahida có thể tạo ra các phản ứng Dendro mạnh mẽ, tăng sát thương cho đồng đội và làm suy yếu kẻ địch. Cô cũng có khả năng chữa lành và tăng sức mạnh cho nhóm."
+  },
+  {
+    "id": "zhongli",
+    "name": "Zhongli",
+    "character": "Zhongli",
+    "hp": 15,
+    "elementCoin": 2,
+    "storyText": "Zhongli là vị thần Geo của Liyue, còn được gọi là Morax. Ông là một trong những vị thần cổ xưa nhất của Teyvat, đã sống hàng nghìn năm. Zhongli có kiến thức sâu rộng về lịch sử và văn hóa, đồng thời sở hữu sức mạnh Geo khổng lồ. Ông luôn bảo vệ Liyue và người dân của mình, mặc dù đôi khi phải hy sinh bản thân.",
+    "effectText": "Zhongli tạo ra một lá chắn Geo mạnh mẽ, bảo vệ đồng đội khỏi sát thương. Ông cũng có thể gây sát thương lớn với các kỹ năng Geo và làm chậm kẻ địch."
+  },
+  {
+    "id": "venti",
+    "name": "Venti",
+    "character": "Venti",
+    "hp": 9,
+    "elementCoin": 5,
+    "storyText": "Venti là vị thần Anemo của Mondstadt, còn được gọi là Barbatos. Ông là một vị thần tự do, yêu thích rượu và âm nhạc. Venti có khả năng bay lượn và điều khiển gió, đồng thời có thể tạo ra những giai điệu ma thuật. Mặc dù đôi khi lười biếng, ông luôn bảo vệ Mondstadt và người dân của mình.",
+    "effectText": "Venti có thể tạo ra các cơn gió mạnh, đẩy kẻ địch ra xa và tăng tốc độ di chuyển cho đồng đội. Ông cũng có khả năng tạo ra các phản ứng Anemo mạnh mẽ."
+  },
+  {
+    "id": "raiden",
+    "name": "Raiden",
+    "character": "Raiden",
+    "hp": 14,
+    "elementCoin": 3,
+    "storyText": "Raiden Shogun là vị thần Electro của Inazuma, còn được gọi là Ei. Cô là một vị thần mạnh mẽ và nghiêm khắc, luôn tìm cách bảo vệ Inazuma khỏi những mối đe dọa. Raiden sở hữu sức mạnh Electro khổng lồ và có thể tạo ra những cơn bão điện. Cô cũng có khả năng điều khiển thời gian và không gian.",
+    "effectText": "Raiden có thể tạo ra các cơn bão điện mạnh mẽ, gây sát thương lớn cho kẻ địch. Cô cũng có khả năng tăng sức mạnh tấn công cho đồng đội và làm chậm kẻ địch."
+  },
+  {
+    "id": "mavuika",
+    "name": "Mavuika",
+    "character": "Mavuika",
+    "hp": 13,
+    "elementCoin": 4,
+    "storyText": "Mavuika là một nhân vật bí ẩn với sức mạnh Pyro đáng sợ. Cô có khả năng điều khiển lửa và tạo ra những vụ nổ nhiệt mạnh mẽ. Mavuika luôn tìm cách thử thách những đối thủ mạnh mẽ và không ngại sử dụng sức mạnh của mình để đạt được mục tiêu. Cô là một chiến binh dũng cảm và kiên cường.",
+    "effectText": "Mavuika có thể tạo ra các vụ nổ Pyro mạnh mẽ, gây sát thương lớn cho kẻ địch. Cô cũng có khả năng tăng sức mạnh tấn công khi HP thấp và tạo ra các phản ứng Pyro mạnh mẽ."
+  },
+  {
+    "id": "furina",
+    "name": "Furina",
+    "character": "Furina",
+    "hp": 11,
+    "elementCoin": 4,
+    "storyText": "Furina là một nhân vật Hydro với sức mạnh điều khiển nước đáng kinh ngạc. Cô có thể tạo ra những cơn sóng mạnh mẽ và điều khiển dòng chảy của nước. Furina luôn tìm cách bảo vệ những người yếu thế và sử dụng sức mạnh của mình để làm điều thiện. Cô là một nhân vật thông minh và nhân từ.",
+    "effectText": "Furina có thể tạo ra các cơn sóng Hydro mạnh mẽ, đẩy kẻ địch ra xa và làm chậm chúng. Cô cũng có khả năng chữa lành đồng đội và tạo ra các phản ứng Hydro mạnh mẽ."
+  }
+];
 
-        <!-- Game Controls -->
-        <div class="game-controls">
-            <button class="btn btn-primary" id="new-game">New Game</button>
-            <button class="btn btn-warning" id="sell-weapon" style="display: none;">Sell Weapon</button>
-        </div>
+// Gọi hàm cập nhật background khi trang load
+document.addEventListener('DOMContentLoaded', function() {
+  updateCardBackgrounds();
+});
+</script>
 
-        <!-- Card Info Dialog -->
-        <div id="card-info-dialog" class="card-info-dialog">
-            <div class="card-info-content">
-                <div class="card-info-header">
-                    <h3 id="card-info-title">Thông tin thẻ</h3>
-                    <button class="close-btn" id="close-card-info">&times;</button>
-                </div>
-                <div class="card-info-body">
-                    <div class="card-info-image">
-                        <img id="card-info-img" src="" alt="Card">
-                    </div>
-                    <div class="card-info-details">
-                        <h4 id="card-info-name">Card Name</h4>
-                        <p id="card-info-effect">Card Effect</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Game Over Dialog -->
-        <div id="game-over-dialog" class="game-over-dialog">
-            <div class="game-over-content">
-                <h2 class="game-over-title">GAME OVER</h2>
-                <p class="game-over-message">Warrior đã hết HP! Bạn có muốn chơi lại không?</p>
-                <button class="game-over-button" id="restart-game">Chơi Lại</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chỉ load LoadingManager và script chính -->
-    <!-- LoadingManager sẽ tự động load tất cả scripts khác -->
-    <script src="modules/LoadingManager.js"></script>
-    <script src="script.js"></script>
 </body>
-</html> 
+</html>

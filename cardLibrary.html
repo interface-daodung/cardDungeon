@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thư Viện Thẻ - Card Dungeon</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="cardLibrary-page">
+  <!-- Icon Xu + điểm -->
+  <div class="score-bar fade-in">
+    <span>🪙</span>
+    <span id="score">0</span>
+  </div>
+
+  <!-- Icon setting -->
+  <div class="settings-btn-wrapper fade-in">
+    <span class="settings-btn">⚙️</span>
+  </div>
+
+  <div class="book-container fade-in">
+    <!-- Bên trái - Lưới thẻ -->
+    <div class="left-panel">
+      <h2 class="left-title">📚 Thư Viện Thẻ</h2>
+      <div class="card-grid" id="cardGrid">
+        <!-- Thẻ sẽ được tạo bằng JavaScript -->
+      </div>
+    </div>
+
+    <!-- Bên phải - Thông tin thẻ -->
+    <div class="right-panel">
+      <h2 class="right-title">📖 Chi Tiết Thẻ</h2>
+      <div class="card-info">
+        <div class="card-info-placeholder" id="cardInfoPlaceholder">
+          Chọn một thẻ để xem thông tin chi tiết
+        </div>
+        <div class="card-info-content" id="cardInfoContent">
+          <div class="card-header">
+            <h3 class="card-name" id="cardName">Tên Thẻ</h3>
+            <span class="card-type" id="cardType">Loại</span>
+          </div>
+          <img class="card-image-large" id="cardImageLarge" src="" alt="Thẻ">
+          <div class="card-description" id="cardDescription">
+            Mô tả thẻ sẽ hiển thị ở đây...
+          </div>
+          <div class="card-stats" id="cardStats">
+            <!-- Thống kê thẻ sẽ được tạo động -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nút quay lại -->
+  <a href="index.html" class="back-btn">Quay lại</a>
+
+  <script>
+    // Dữ liệu thẻ inline để tránh lỗi CORS
+    let cardData = [];
+
+    // Biến toàn cục
+    let selectedCardId = null;
+    let currentCards = [];
+
+    // Khởi tạo trang
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeCardLibrary();
+    });
+
+    // Khởi tạo thư viện thẻ
+    async function initializeCardLibrary() {
+      await loadCardsFromJSON();
+      renderCardGrid();
+      setupEventListeners();
+      initializeScoreAndSettings();
+    }
+
+    // Load thẻ từ file JSON hoặc dữ liệu inline
+    async function loadCardsFromJSON() {
+      try {
+        // Thử load từ JSON file
+        const response = await fetch('./cardLibraryData.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        cardData = data.cards;
+        currentCards = [...cardData];
+        console.log('Đã load thành công', currentCards.length, 'thẻ từ JSON');
+      } catch (error) {
+        console.error('Lỗi khi load dữ liệu thẻ từ JSON, sử dụng dữ liệu inline:', error);
+        // Fallback: sử dụng dữ liệu inline
+        cardData = getInlineCardData();
+        currentCards = [...cardData];
+      }
+    }
+
+    // Dữ liệu thẻ inline để tránh lỗi CORS
+    function getInlineCardData() {
+      return [
+        {
+            "id": "sword0",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword0.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền thấp"
+        },
+        {
+            "id": "sword1",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword1.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền trung bình"
+        },
+        {
+            "id": "sword2",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword2.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền cao"
+        },
+        {
+            "id": "sword3",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword3.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền rất cao"
+        },
+        {
+            "id": "sword4",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword4.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền cực cao"
+        },
+        {
+            "id": "sword5",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword5.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền tối đa"
+        },
+        {
+            "id": "sword6",
+            "name": "Thiên Không Kiếm",
+            "type": "weapon",
+            "image": "resources/sword6.webp",
+            "description": "Thiên Không Kiếm toát ra lời chúc phúc của thần gió. Khi sử dụng để tiêu diệt quái vật, nó sẽ tạo ra những mảnh vỡ nguyên tố quý giá.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí với độ bền tuyệt đối"
+        },
+        {
+            "id": "catalyst0",
+            "name": "Catalyst",
+            "type": "weapon",
+            "image": "resources/catalyst0.webp",
+            "description": "Catalyst là vũ khí phép thuật mạnh mẽ, có thể gây sát thương nguyên tố cho kẻ địch.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí phép thuật với độ bền thấp"
+        },
+        {
+            "id": "catalyst1",
+            "name": "Catalyst",
+            "type": "weapon",
+            "image": "resources/catalyst1.webp",
+            "description": "Catalyst là vũ khí phép thuật mạnh mẽ, có thể gây sát thương nguyên tố cho kẻ địch.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí phép thuật với độ bền trung bình"
+        },
+        {
+            "id": "catalyst2",
+            "name": "Catalyst",
+            "type": "weapon",
+            "image": "resources/catalyst2.webp",
+            "description": "Catalyst là vũ khí phép thuật mạnh mẽ, có thể gây sát thương nguyên tố cho kẻ địch.",
+            "durability": "8-16",
+            "effect": "Cung cấp vũ khí phép thuật với độ bền cao"
+        },
+        {
+            "id": "coin0",
+            "name": "Mảnh Vỡ Nguyên Tố Băng",
+            "type": "coin",
+            "image": "resources/coin0.webp",
+            "description": "Mảnh vỡ nguyên tố băng chứa đựng sức mạnh của vùng đất lạnh giá. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin1",
+            "name": "Mảnh Vỡ Nguyên Tố Lửa",
+            "type": "coin",
+            "image": "resources/coin1.webp",
+            "description": "Mảnh vỡ nguyên tố lửa chứa đựng sức mạnh của vùng đất nóng bỏng. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin2",
+            "name": "Mảnh Vỡ Nguyên Tố Nước",
+            "type": "coin",
+            "image": "resources/coin2.webp",
+            "description": "Mảnh vỡ nguyên tố nước chứa đựng sức mạnh của vùng đất ẩm ướt. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin3",
+            "name": "Mảnh Vỡ Nguyên Tố Gió",
+            "type": "coin",
+            "image": "resources/coin3.webp",
+            "description": "Mảnh vỡ nguyên tố gió chứa đựng sức mạnh của vùng đất thoáng đãng. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin4",
+            "name": "Mảnh Vỡ Nguyên Tố Đất",
+            "type": "coin",
+            "image": "resources/coin4.webp",
+            "description": "Mảnh vỡ nguyên tố đất chứa đựng sức mạnh của vùng đất vững chắc. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin5",
+            "name": "Mảnh Vỡ Nguyên Tố Sấm",
+            "type": "coin",
+            "image": "resources/coin5.webp",
+            "description": "Mảnh vỡ nguyên tố sấm chứa đựng sức mạnh của vùng đất sấm sét. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coin6",
+            "name": "Mảnh Vỡ Nguyên Tố Cỏ",
+            "type": "coin",
+            "image": "resources/coin6.webp",
+            "description": "Mảnh vỡ nguyên tố cỏ chứa đựng sức mạnh của vùng đất xanh tươi. Khi thu thập đủ 3 mảnh, chúng sẽ hợp nhất thành một viên ngọc quý giá hơn.",
+            "score": "1-9",
+            "effect": "Cung cấp điểm số cơ bản"
+        },
+        {
+            "id": "coinUp0",
+            "name": "Cộng Hưởng Nguyên Tố: Băng Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp0.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Băng Vụn Vỡ là mảnh vỡ nguyên tố băng đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp1",
+            "name": "Cộng Hưởng Nguyên Tố: Lửa Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp1.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Lửa Vụn Vỡ là mảnh vỡ nguyên tố lửa đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp2",
+            "name": "Cộng Hưởng Nguyên Tố: Nước Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp2.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Nước Vụn Vỡ là mảnh vỡ nguyên tố nước đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp3",
+            "name": "Cộng Hưởng Nguyên Tố: Gió Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp3.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Gió Vụn Vỡ là mảnh vỡ nguyên tố gió đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp4",
+            "name": "Cộng Hưởng Nguyên Tố: Đất Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp4.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Đất Vụn Vỡ là mảnh vỡ nguyên tố đất đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp5",
+            "name": "Cộng Hưởng Nguyên Tố: Sấm Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp5.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Sấm Vụn Vỡ là mảnh vỡ nguyên tố sấm đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "coinUp6",
+            "name": "Cộng Hưởng Nguyên Tố: Cỏ Vụn Vỡ",
+            "type": "coinUp",
+            "image": "resources/coinUp6.webp",
+            "description": "Cộng Hưởng Nguyên Tố: Cỏ Vụn Vỡ là mảnh vỡ nguyên tố cỏ đã được nâng cấp. Chứa đựng sức mạnh tinh khiết hơn và giá trị cao hơn.",
+            "score": "2-18",
+            "effect": "Cung cấp điểm số gấp đôi so với coin thường"
+        },
+        {
+            "id": "food0",
+            "name": "Gà Nấu Hoa Ngọt",
+            "type": "food",
+            "image": "resources/food0.webp",
+            "description": "Gà Nấu Hoa Ngọt là món ăn truyền thống được chế biến từ thịt gà và các loại gia vị thơm ngon. Món ăn này có khả năng hồi phục sức khỏe ngay lập tức.",
+            "heal": "1-9",
+            "effect": "Hồi phục HP ngay lập tức"
+        },
+        {
+            "id": "food1",
+            "name": "Gà Nấu Hoa Ngọt",
+            "type": "food",
+            "image": "resources/food1.webp",
+            "description": "Gà Nấu Hoa Ngọt là món ăn truyền thống được chế biến từ thịt gà và các loại gia vị thơm ngon. Món ăn này có khả năng hồi phục sức khỏe ngay lập tức.",
+            "heal": "1-9",
+            "effect": "Hồi phục HP ngay lập tức"
+        },
+        {
+            "id": "food2",
+            "name": "Gà Nấu Hoa Ngọt",
+            "type": "food",
+            "image": "resources/food2.webp",
+            "description": "Gà Nấu Hoa Ngọt là món ăn truyền thống được chế biến từ thịt gà và các loại gia vị thơm ngon. Món ăn này có khả năng hồi phục sức khỏe ngay lập tức.",
+            "heal": "1-9",
+            "effect": "Hồi phục HP ngay lập tức"
+        },
+        {
+            "id": "food3",
+            "name": "Gà Nấu Hoa Ngọt",
+            "type": "food",
+            "image": "resources/food3.webp",
+            "description": "Gà Nấu Hoa Ngọt là món ăn truyền thống được chế biến từ thịt gà và các loại gia vị thơm ngon. Món ăn này có khả năng hồi phục sức khỏe ngay lập tức.",
+            "heal": "1-9",
+            "effect": "Hồi phục HP ngay lập tức"
+        },
+        {
+            "id": "poison",
+            "name": "Thuốc Độc",
+            "type": "food",
+            "image": "resources/poison.webp",
+            "description": "Thuốc độc là một loại thực phẩm nguy hiểm có thể gây hại cho người sử dụng.",
+            "heal": "0",
+            "effect": "Gây hại cho người sử dụng"
+        },
+        {
+            "id": "fatui0",
+            "name": "Fatui - Thuật Sĩ Cicin Lôi",
+            "type": "enemy",
+            "image": "resources/fatui0.webp",
+            "description": "Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "fatui1",
+            "name": "Fatui - Thuật Sĩ Cicin Lôi",
+            "type": "enemy",
+            "image": "resources/fatui1.webp",
+            "description": "Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "fatui2",
+            "name": "Fatui - Thuật Sĩ Cicin Lôi",
+            "type": "enemy",
+            "image": "resources/fatui2.webp",
+            "description": "Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "fatui3",
+            "name": "Fatui - Thuật Sĩ Cicin Lôi",
+            "type": "enemy",
+            "image": "resources/fatui3.webp",
+            "description": "Thuật Sĩ Cicin Lôi là thành viên của tổ chức Fatui. Sử dụng ma thuật sấm sét để tấn công kẻ địch và bảo vệ lợi ích của tổ chức.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "eremite0",
+            "name": "Eremite",
+            "type": "enemy",
+            "image": "resources/eremite0.webp",
+            "description": "Eremite là những kẻ lang thang sa mạc, sử dụng vũ khí và ma thuật để tấn công kẻ địch.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "eremite1",
+            "name": "Eremite",
+            "type": "enemy",
+            "image": "resources/eremite1.webp",
+            "description": "Eremite là những kẻ lang thang sa mạc, sử dụng vũ khí và ma thuật để tấn công kẻ địch.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "warrior",
+            "name": "Chiến Binh",
+            "type": "enemy",
+            "image": "resources/warrior.webp",
+            "description": "Chiến Binh là những kẻ địch mạnh mẽ, sử dụng vũ khí và kỹ năng chiến đấu để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "operative",
+            "name": "Đặc Vụ",
+            "type": "enemy",
+            "image": "resources/operative.webp",
+            "description": "Đặc Vụ là những kẻ địch tinh nhuệ, sử dụng các kỹ thuật đặc biệt để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "abyssLector0",
+            "name": "Abyss Lector",
+            "type": "enemy",
+            "image": "resources/abyssLector0.webp",
+            "description": "Abyss Lector là những kẻ địch mạnh mẽ từ vực sâu, sử dụng ma thuật bóng tối để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "abyssLector1",
+            "name": "Abyss Lector",
+            "type": "enemy",
+            "image": "resources/abyssLector1.webp",
+            "description": "Abyss Lector là những kẻ địch mạnh mẽ từ vực sâu, sử dụng ma thuật bóng tối để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "abyssLector2",
+            "name": "Abyss Lector",
+            "type": "enemy",
+            "image": "resources/abyssLector2.webp",
+            "description": "Abyss Lector là những kẻ địch mạnh mẽ từ vực sâu, sử dụng ma thuật bóng tối để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "dragon",
+            "name": "Rồng",
+            "type": "enemy",
+            "image": "resources/dragon.webp",
+            "description": "Rồng là những sinh vật huyền thoại mạnh mẽ, sử dụng sức mạnh và ma thuật để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "apep",
+            "name": "Apep",
+            "type": "enemy",
+            "image": "resources/apep.webp",
+            "description": "Apep là một con rắn khổng lồ từ thần thoại Ai Cập, sử dụng sức mạnh và ma thuật để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "narwhal",
+            "name": "Narwhal",
+            "type": "enemy",
+            "image": "resources/narwhal.webp",
+            "description": "Narwhal là một sinh vật biển mạnh mẽ, sử dụng sừng và sức mạnh để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "mavuika",
+            "name": "Mavuika",
+            "type": "enemy",
+            "image": "resources/mavuika.webp",
+            "description": "Mavuika là một kẻ địch mạnh mẽ, sử dụng các kỹ thuật đặc biệt để tấn công.",
+            "hp": "1-9",
+            "score": "1-9",
+            "effect": "Gây sát thương cho character khi bị ăn"
+        },
+        {
+            "id": "boom",
+            "name": "Nổ Định Hướng Có Kiểm Soát",
+            "type": "boom",
+            "image": "resources/boom.webp",
+            "description": "Nổ Định Hướng Có Kiểm Soát là một loại bom nguy hiểm có thể gây sát thương cho character và các thẻ xung quanh.",
+            "damage": "3-7",
+            "countdown": "5",
+            "effect": "Gây sát thương cho character và các thẻ xung quanh"
+        },
+        {
+            "id": "trap",
+            "name": "Cơ Quan Phun Lửa",
+            "type": "trap",
+            "image": "resources/trap.webp",
+            "description": "Cơ Quan Phun Lửa là bẫy nguy hiểm được chế tạo từ thuốc nổ. Khi kích hoạt, nó sẽ phun lửa gây sát thương cho kẻ địch.",
+            "damage": "1-7",
+            "effect": "Gây sát thương cho character khi bị chỉ bởi arrow"
+        },
+        {
+            "id": "treasure0",
+            "name": "Mỏ Vàng",
+            "type": "treasure",
+            "image": "resources/treasure0.webp",
+            "description": "Mỏ Vàng là kho báu quý giá chứa đựng vàng và đá quý. Có thể tương tác để thu thập điểm, nhưng sẽ bị hủy hoại sau nhiều lần sử dụng.",
+            "score": "1-9",
+            "durability": "5",
+            "effect": "Cung cấp điểm số khi tương tác, có độ bền giới hạn"
+        },
+        {
+            "id": "treasure1",
+            "name": "Mỏ Vàng",
+            "type": "treasure",
+            "image": "resources/treasure1.webp",
+            "description": "Mỏ Vàng là kho báu quý giá chứa đựng vàng và đá quý. Có thể tương tác để thu thập điểm, nhưng sẽ bị hủy hoại sau nhiều lần sử dụng.",
+            "score": "1-9",
+            "durability": "5",
+            "effect": "Cung cấp điểm số khi tương tác, có độ bền giới hạn"
+        },
+        {
+            "id": "quicksand",
+            "name": "Cát Lún",
+            "type": "trap",
+            "image": "resources/quicksand.webp",
+            "description": "Cát Lún là một loại bẫy nguy hiểm có thể nuốt chửng kẻ địch.",
+            "damage": "1-5",
+            "effect": "Gây sát thương cho character khi bị mắc kẹt"
+        },
+        {
+            "id": "void",
+            "name": "Trống",
+            "type": "coin",
+            "image": "resources/void.webp",
+            "description": "Thẻ Trống là một thẻ đặc biệt không có bất kỳ tác dụng nào. Được tạo ra để lấp đầy không gian trống trên bàn chơi.",
+            "score": "0",
+            "effect": "Không có tác dụng gì"
+        },
+        {
+            "id": "bribery",
+            "name": "Hối Lộ",
+            "type": "special",
+            "image": "resources/bribery.webp",
+            "description": "Hối Lộ là một thẻ đặc biệt có thể thay đổi hành vi của kẻ địch.",
+            "effect": "Thay đổi hành vi của kẻ địch"
+        }
+    ];
+    }
+
+    // Render lưới thẻ
+    function renderCardGrid() {
+      const grid = document.getElementById('cardGrid');
+      grid.innerHTML = '';
+
+      if (currentCards.length === 0) {
+        grid.innerHTML = '<div class="no-cards">Không có thẻ nào để hiển thị</div>';
+        return;
+      }
+
+      currentCards.forEach(card => {
+        const cardElement = createCardElement(card);
+        grid.appendChild(cardElement);
+      });
+    }
+
+    // Tạo element thẻ
+    function createCardElement(card) {
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card-item';
+      cardDiv.dataset.cardId = card.id;
+      
+      cardDiv.innerHTML = `
+        <div class="card-bg"></div>
+        <img class="card-image" src="${card.image}" alt="${card.name}" onerror="this.src='resources/void.webp'">
+        <div class="card-overlay">
+          <div>${card.name}</div>
+          <div style="font-size: 10px; color: #87CEEB;">${card.type}</div>
+        </div>
+      `;
+
+      return cardDiv;
+    }
+
+    // Thiết lập event listeners
+    function setupEventListeners() {
+      // Click vào thẻ
+      document.addEventListener('click', function(e) {
+        const cardItem = e.target.closest('.card-item');
+        if (cardItem) {
+          const cardId = cardItem.dataset.cardId;
+          selectCard(cardId);
+        }
+      });
+
+      // Click ngoài để bỏ chọn
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.card-item') && !e.target.closest('.card-info')) {
+          deselectCard();
+        }
+      });
+    }
+
+    // Chọn thẻ
+    function selectCard(cardId) {
+      // Bỏ chọn thẻ cũ
+      if (selectedCardId) {
+        const oldCard = document.querySelector(`[data-card-id="${selectedCardId}"]`);
+        if (oldCard) oldCard.classList.remove('selected');
+      }
+
+      // Chọn thẻ mới
+      selectedCardId = cardId;
+      const newCard = document.querySelector(`[data-card-id="${cardId}"]`);
+      if (newCard) newCard.classList.add('selected');
+
+      // Hiển thị thông tin thẻ
+      displayCardInfo(cardId);
+    }
+
+    // Bỏ chọn thẻ
+    function deselectCard() {
+      if (selectedCardId) {
+        const oldCard = document.querySelector(`[data-card-id="${selectedCardId}"]`);
+        if (oldCard) oldCard.classList.remove('selected');
+        selectedCardId = null;
+      }
+
+      // Ẩn thông tin thẻ
+      hideCardInfo();
+    }
+
+    // Hiển thị thông tin thẻ
+    function displayCardInfo(cardId) {
+      const card = currentCards.find(c => c.id === cardId);
+      if (!card) return;
+
+      // Ẩn placeholder
+      document.getElementById('cardInfoPlaceholder').style.display = 'none';
+      
+      // Hiển thị nội dung
+      const content = document.getElementById('cardInfoContent');
+      content.classList.add('active');
+
+      // Cập nhật thông tin
+      document.getElementById('cardName').textContent = card.name;
+      document.getElementById('cardType').textContent = card.type;
+      document.getElementById('cardImageLarge').src = card.image;
+      document.getElementById('cardDescription').innerHTML = card.description;
+
+      // Cập nhật thống kê
+      updateCardStats(card);
+    }
+
+    // Ẩn thông tin thẻ
+    function hideCardInfo() {
+      document.getElementById('cardInfoPlaceholder').style.display = 'block';
+      document.getElementById('cardInfoContent').classList.remove('active');
+    }
+
+    // Cập nhật thống kê thẻ
+    function updateCardStats(card) {
+      const statsContainer = document.getElementById('cardStats');
+      statsContainer.innerHTML = '';
+
+      // Tạo stats từ các thuộc tính của card
+      const stats = {};
+      
+      if (card.durability) stats.durability = card.durability;
+      if (card.score) stats.score = card.score;
+      if (card.heal) stats.heal = card.heal;
+      if (card.hp) stats.hp = card.hp;
+      if (card.damage) stats.damage = card.damage;
+      if (card.countdown) stats.countdown = card.countdown;
+      if (card.effect) stats.effect = card.effect;
+
+      Object.entries(stats).forEach(([key, value]) => {
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+        statItem.innerHTML = `
+          <span class="stat-label">${formatStatLabel(key)}:</span>
+          <span class="stat-value">${value}</span>
+        `;
+        statsContainer.appendChild(statItem);
+      });
+    }
+
+    // Format label thống kê
+    function formatStatLabel(key) {
+      const labels = {
+        durability: 'Độ Bền',
+        damage: 'Sát Thương',
+        effect: 'Hiệu Ứng',
+        hp: 'Máu',
+        score: 'Điểm',
+        heal: 'Hồi Phục',
+        countdown: 'Đếm Ngược',
+        energy: 'Năng Lượng',
+        value: 'Giá Trị',
+        rarity: 'Độ Hiếm',
+        reward: 'Phần Thưởng'
+      };
+      return labels[key] || key;
+    }
+
+    // Xử lý score và settings
+    function initializeScoreAndSettings() {
+      // Load score từ localStorage hoặc set mặc định
+      const savedScore = localStorage.getItem('gameScore') || 0;
+      document.getElementById('score').textContent = savedScore;
+
+      // Xử lý click settings button
+      const settingsBtn = document.querySelector('.settings-btn');
+      if (settingsBtn) {
+        settingsBtn.addEventListener('click', function() {
+          // TODO: Mở menu settings
+          alert('Menu Settings sẽ được mở ở đây!');
+        });
+      }
+    }
+
+    // Hàm cập nhật score
+    function updateScore(newScore) {
+      document.getElementById('score').textContent = newScore;
+      localStorage.setItem('gameScore', newScore);
+    }
+
+    // Hàm tăng score
+    function addScore(points) {
+      const currentScore = parseInt(document.getElementById('score').textContent) || 0;
+      const newScore = currentScore + points;
+      updateScore(newScore);
+    }
+
+    // Hàm thêm thẻ mới
+    function addNewCard(cardData) {
+      currentCards.push(cardData);
+      renderCardGrid();
+    }
+
+    // Hàm cập nhật thẻ
+    function updateCard(cardId, newData) {
+      const index = currentCards.findIndex(c => c.id === cardId);
+      if (index !== -1) {
+        currentCards[index] = { ...currentCards[index], ...newData };
+        renderCardGrid();
+        
+        // Cập nhật thông tin nếu đang hiển thị
+        if (selectedCardId === cardId) {
+          displayCardInfo(cardId);
+        }
+      }
+    }
+
+    // Hàm lọc thẻ theo type
+    function filterCardsByType(type) {
+      if (type === 'all') {
+        currentCards = [...cardData];
+      } else {
+        currentCards = cardData.filter(card => card.type === type);
+      }
+      renderCardGrid();
+    }
+
+    // Hàm tìm kiếm thẻ
+    function searchCards(query) {
+      if (!query) {
+        currentCards = [...cardData];
+      } else {
+        const lowerQuery = query.toLowerCase();
+        currentCards = cardData.filter(card => 
+          card.name.toLowerCase().includes(lowerQuery) ||
+          card.description.toLowerCase().includes(lowerQuery) ||
+          card.type.toLowerCase().includes(lowerQuery)
+        );
+      }
+      renderCardGrid();
+    }
+  </script>
+</body>
+</html>

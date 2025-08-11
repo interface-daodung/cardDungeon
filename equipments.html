@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Game Inventory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="equipments-page">
+
+  <!-- Icon Xu + điểm -->
+  <div class="score-bar fade-in">
+    <span>🪙</span>
+    <span id="score">0</span>
+  </div>
+
+  <!-- Icon setting -->
+  <div class="settings-btn-wrapper fade-in">
+    <span class="settings-btn">⚙️</span>
+  </div>
+
+
+  <div class="container">
+    <!-- Lưới 15 ô -->
+    <div class="grid">
+      <!-- Ví dụ 15 ô item giống nhau -->
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/hp.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/infuseDendro.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/damage.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/teleportation.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/key.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/WeaponUp.webp" alt="Item" class="darken" />
+      </div>
+
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/foodUp.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/repair.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/Cooldown.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/blackHole.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/Bow.webp" alt="Item" class="darken" />
+      </div>
+
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/Catalyst.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/Sword.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/resPyro.webp" alt="Item" class="darken" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="item/resCryo.webp" alt="Item" class="darken" />
+      </div>
+    </div>
+
+    <!-- 3 ô trang bị lớn -->
+    <div class="equipments">
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="" alt="Equipment 1" style="display: none;" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="" alt="Equipment 2" style="display: none;" />
+      </div>
+      <div class="item">
+        <div class="item-bg"></div>
+        <img src="" alt="Equipment 3" style="display: none;" />
+      </div>
+    </div>
+
+    <!-- Nút quay lại -->
+    <!-- <a href="menu game.html" class="back-btn">Quay lại</a> -->
+  </div>
+  <a href="index.html" class="back-btn">Quay lại</a>
+
+<!-- Dialog cha -->
+<div class="item-dialog-wrapper" id="itemDialogWrapper" style="display:none;">
+  <!-- Dialog chính -->
+  <div class="item-dialog">
+    <h2 id="dialogItemName">Tên Item</h2>
+    <div class="dialog-content">
+      <img id="dialogItemIcon" src="" alt="icon" class="dialog-icon">
+      <p id="dialogItemDesc">Mô tả item...</p>
+    </div>
+  </div>
+
+  <!-- Thanh nút điều khiển -->
+  <div class="dialog-actions">
+    <button id="btnUpgrade">Nâng cấp</button>
+    <button id="btnSelect">Lựa chọn</button>
+  </div>
+</div>
+
+    <script>
+  // Lấy danh sách item trong lưới và trang bị
+  const gridItems = document.querySelectorAll('.grid .item');
+  const equipmentSlots = document.querySelectorAll('.equipments .item');
+
+  // Mảng lưu vị trí đang được trang bị (index item grid)
+  let equippedIndices = [];
+
+  // Hàm kiểm tra số item đang trang bị
+  function equippedCount() {
+    return equippedIndices.length;
+  }
+
+  // Xử lý click item trong lưới
+  gridItems.forEach((item, idx) => {
+    item.addEventListener('click', () => {
+      if (equippedCount() >= 3) return; // Đủ 3 rồi, không thêm nữa
+      if (equippedIndices.includes(idx)) return; // Item này đã trang bị rồi
+
+      // Tìm ô trang bị trống (không có ảnh)
+      let emptySlot = null;
+      for (const slot of equipmentSlots) {
+        const img = slot.querySelector('img');
+        if (img.style.display === 'none' || img.src === '') {
+          emptySlot = slot;
+          break;
+        }
+      }
+      if (!emptySlot) return; // Không còn slot trống
+
+      // Lấy ảnh và số lượng từ item grid
+      const imgGrid = item.querySelector('img');
+      const countGrid = item.querySelector('.item-count');
+
+      // Hiển thị ảnh item vào slot trống, show ảnh và số lượng
+      const imgEquip = emptySlot.querySelector('img');
+      const countEquip = emptySlot.querySelector('.item-count');
+
+      imgEquip.src = imgGrid.src;
+      imgEquip.style.display = 'block';
+
+      if (countEquip) {
+        countEquip.textContent = countGrid ? countGrid.textContent : '';
+        countEquip.style.display = 'block';
+      }
+
+      // Ẩn ảnh trong item grid để đánh dấu đã chọn
+      imgGrid.style.display = 'none';
+      if (countGrid) countGrid.style.display = 'none';
+
+      // Lưu index item đã trang bị
+      equippedIndices.push(idx);
+    });
+  });
+
+  // Xử lý click ô trang bị để trả item về lưới
+  equipmentSlots.forEach(slot => {
+    slot.addEventListener('click', () => {
+      const imgEquip = slot.querySelector('img');
+      const countEquip = slot.querySelector('.item-count');
+
+      if (imgEquip.style.display === 'none' || imgEquip.src === '') return; // slot trống, không làm gì
+
+      // Tìm item grid tương ứng để hiện lại ảnh
+      const idx = Array.from(gridItems).findIndex(item => {
+        return item.querySelector('img').src === imgEquip.src && item.querySelector('img').style.display === 'none';
+      });
+
+      if (idx !== -1) {
+        const itemGrid = gridItems[idx];
+        const imgGrid = itemGrid.querySelector('img');
+        const countGrid = itemGrid.querySelector('.item-count');
+        imgGrid.style.display = 'block';
+        if (countGrid) countGrid.style.display = 'block';
+
+        // Xóa khỏi mảng đã trang bị
+        equippedIndices = equippedIndices.filter(i => i !== idx);
+      }
+
+      // Xóa ảnh và số lượng trong slot trang bị (ẩn slot)
+      imgEquip.src = '';
+      imgEquip.style.display = 'none';
+      if (countEquip) {
+        countEquip.textContent = '';
+        countEquip.style.display = 'none';
+      }
+    });
+  });
+</script> 
+<!-- <script>
+let equippedIndices = []; // lưu index item trong lưới đang được trang bị
+let selectedItemIndex = null; // index item hiện đang mở dialog
+let selectedFromEquip = false; // true nếu mở từ ô trang bị
+
+// Lấy phần tử dialog
+const dialogWrapper = document.getElementById('itemDialogWrapper');
+const dialogName = document.getElementById('dialogItemName');
+const dialogIcon = document.getElementById('dialogItemIcon');
+const dialogDesc = document.getElementById('dialogItemDesc');
+const btnUpgrade = document.getElementById('btnUpgrade');
+const btnSelect = document.getElementById('btnSelect');
+
+// Lấy item trong lưới và ô trang bị
+const gridItems = document.querySelectorAll('.grid .item');
+const equipmentSlots = document.querySelectorAll('.equipments .item');
+console.log(gridItems);
+console.log(equipmentSlots);
+
+// Hàm mở dialog
+function openItemDialog(name, iconSrc, desc, index, fromEquip) {
+  dialogName.textContent = name;
+  dialogIcon.src = iconSrc;
+  dialogDesc.textContent = desc;
+  selectedItemIndex = index;
+  selectedFromEquip = fromEquip;
+
+  // Xử lý hiển thị nút
+  if (fromEquip) {
+    btnSelect.textContent = 'Bỏ chọn';
+    btnSelect.style.display = 'inline-block';
+  } else {
+    if (equippedIndices.length >= 3) {
+      btnSelect.style.display = 'none';
+    } else {
+      btnSelect.textContent = 'Lựa chọn';
+      btnSelect.style.display = 'inline-block';
+    }
+  }
+
+  dialogWrapper.style.display = 'flex';
+}
+
+// Đóng dialog khi click ngoài
+dialogWrapper.addEventListener('click', (e) => {
+  if (e.target === dialogWrapper) {
+    dialogWrapper.style.display = 'none';
+  }
+});
+
+// Click nút Nâng cấp
+btnUpgrade.addEventListener('click', () => {
+  alert('Nâng cấp item: ' + dialogName.textContent);
+});
+
+// Click nút Lựa chọn / Bỏ chọn
+btnSelect.addEventListener('click', () => {
+  if (selectedFromEquip) {
+    // Bỏ chọn
+    const gridItem = gridItems[selectedItemIndex];
+    gridItem.querySelector('img').style.display = 'block';
+    const countGrid = gridItem.querySelector('.item-count');
+    if (countGrid) {
+      countGrid.style.display = 'block';
+    }
+    equipmentSlots.forEach(slot => {
+      if (slot.querySelector('img').src === dialogIcon.src) {
+        slot.querySelector('img').src = '';
+        slot.querySelector('img').style.display = 'none';
+        slot.querySelector('.item-count').style.display = 'none';
+      }
+    });
+    equippedIndices = equippedIndices.filter(i => i !== selectedItemIndex);
+  } else {
+    // Lựa chọn
+    if (equippedIndices.length < 3 && !equippedIndices.includes(selectedItemIndex)) {
+      const emptySlot = Array.from(equipmentSlots).find(slot => {
+        return slot.querySelector('img').style.display === 'none' || slot.querySelector('img').src === '';
+      });
+      if (emptySlot) {
+        const gridItem = gridItems[selectedItemIndex];
+        const imgGrid = gridItem.querySelector('img');
+        const countGrid = gridItem.querySelector('.item-count');
+
+        emptySlot.querySelector('img').src = imgGrid.src;
+        emptySlot.querySelector('img').style.display = 'block';
+        if (countGrid) {
+          emptySlot.querySelector('.item-count').textContent = countGrid.textContent;
+          emptySlot.querySelector('.item-count').style.display = 'block';
+        }
+
+        imgGrid.style.display = 'none';
+        countGrid.style.display = 'none';
+        equippedIndices.push(selectedItemIndex);
+      }
+    }
+  }
+  dialogWrapper.style.display = 'none';
+});
+
+// Gán sự kiện click mở dialog cho item trong lưới
+gridItems.forEach((item, idx) => {
+  item.addEventListener('click', () => {
+    const img = item.querySelector('img');
+    if (img.style.display === 'none') return; // đã trang bị, không cho chọn nữa
+    openItemDialog('Item ' + (idx+1), img.src, 'Mô tả của item ' + (idx+1), idx, false);
+  });
+});
+
+// Gán sự kiện click mở dialog cho item trong trang bị
+equipmentSlots.forEach((slot, idx) => {
+  slot.addEventListener('click', () => {
+    const img = slot.querySelector('img');
+    if (img.style.display === 'none' || img.src === '') return;
+    const gridIndex = equippedIndices[idx] ?? equippedIndices.find(i => gridItems[i].querySelector('img').src === img.src);
+    openItemDialog('Item Equip', img.src, 'Mô tả trang bị', gridIndex, true);
+  });
+});
+</script> -->
+
+</body>
+</html>

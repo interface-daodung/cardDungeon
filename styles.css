@@ -1,87 +1,670 @@
-﻿/* Reset and base styles */
+/* ========================================
+   STYLES.CSS - CSS CHUNG CHO CARD DUNGEON
+   ======================================== */
+
+/* ========================================
+   CSS CHUNG CHO TẤT CẢ CÁC TRANG
+   ======================================== */
+
+/* Reset CSS */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Body và HTML chung */
+html,
 body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    overflow-x: hidden;
+    background: url('dungeonBackground.jpg') no-repeat center center;
+    background-size: cover;
 }
 
-/* Game Container - Mobile First Design */
-.game-container {
-    max-width: 100vw;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    gap: 4px;
+/* Animation fade-in chung */
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.8s forwards;
 }
 
-/* Header */
-.game-header {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.game-header h1 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.high-score {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.game-stats {
-    display: flex;
-    justify-content: space-around;
-    font-size: 0.9rem;
-    font-weight: bold;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-/* Main Game Area */
-.game-main {
-    flex: 1;
+/* Icon Xu + điểm chung */
+.score-bar {
+    position: absolute;
+    top: 20px;
+    left: 30px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 10px;
-    max-width: 340px; /* Giới hạn chiều rộng để hiển thị cả 9 thẻ */
-    margin: 0 auto; /* Căn giữa */
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    animation-delay: 0.4s;
+    z-index: 10;
 }
 
-/* Cards Grid - 3x3 Layout with rectangular cards */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* grid-template-rows: repeat(3, 1fr); */ 
-    gap: 4px;
+
+
+/* Icon setting chung */
+.settings-btn-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 10;
+    animation-delay: 0.4s;
+}
+
+.settings-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    
+    /* transition: transform 0.2s ease; */
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+/* 
+.settings-btn:hover {
+    transform: rotate(20deg) scale(1.1);
+} */
+
+/* ========================================
+   CSS RIÊNG CHO INDEX.HTML
+   ======================================== */
+
+/* Tiêu đề game */
+.game-title {
+    position: absolute;
+    top: 40px;
     width: 100%;
-    max-width: 280px; /* Giảm max-width để phù hợp với game-main 340px */
-    /* Remove aspect-ratio: 1 to allow rectangular cards */
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: orange;
+    -webkit-text-stroke: 2px #b8860b;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    animation-delay: 0.2s;
+}
+
+/* Card wrapper cho index */
+.card-wrapper {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Vùng chứa thẻ bài cho index */
+.card-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 250px;
+    perspective: 1000px;
+    animation-delay: 0.6s;
+}
+
+.card {
+    position: fixed;
+    width: 204.167px;
+    aspect-ratio: 7 / 12;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.card-left {
+    transform: rotate(-18deg) translateX(-60px);
+    top: 20px;
+    z-index: 1;
+}
+
+.card-center {
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.card-right {
+    transform: rotate(18deg) translateX(60px);
+    top: 20px;
+    z-index: 2;
+}
+
+/* Hover bung ra cho index */
+.card-container:hover .card-left {
+    transform: rotate(-28deg) translateX(-100px);
+    left: 0px;
+}
+
+.card-container:hover .card-center {
+    transform: translateX(-50%) scale(1.05);
+}
+
+.card-container:hover .card-right {
+    transform: rotate(28deg) translateX(100px);
+    right: 0px;
+}
+
+/* Menu dưới cho index */
+.menu {
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.menu a {
+    display: inline-block;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.menu a img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.menu a:hover {
+    transform: scale(1.1);
+}
+
+/* Tooltip cho index */
+.tooltip-text {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(45deg, #800080, #ff3366);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.menu a:hover .tooltip-text {
+    opacity: 1;
+}
+
+/* ========================================
+   CSS RIÊNG CHO SELECTCHARACTER.HTML
+   ======================================== */
+
+/* Card container cho select character */
+.card-container {
+    position: absolute;
+    width: 204.167px;
+    height: calc(204.167px * 12 / 7);
+    margin: 0 auto;
     perspective: 1000px;
 }
 
-/* Card Styles - Tỷ lệ 9:16 (chiều rộng : chiều cao) */
-.card {
+/* Nút điều hướng */
+.nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    padding: 5px 10px;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+    border-radius: 6px;
+}
+
+.prev {
+    left: -80px;
+}
+
+.next {
+    right: -80px;
+}
+
+/* Main wrapper cho select character */
+.main-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100vh;
+}
+
+.side {
+    min-width: 250px;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    overflow-y: auto;
+    max-height: 80vh;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.left-side {
+    text-align: left;
+    font-size: 20px;
+}
+
+.right-side {
+    text-align: left;
+    font-size: 20px;
+}
+
+.name-side {
+    text-align: center;
+    font-size: 30px;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+}
+
+.center-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    min-width: 400px;
+    min-height: 500px;
+    padding: 30px;
+}
+
+.section-title {
+    position: absolute;
+    top: 5%;
     width: 100%;
-    aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: orange;
+    -webkit-text-stroke: 2px #b8860b;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+}
+
+.back-btn {
+    position: absolute;
+    margin-top: 30%;
+    display: inline-block;
+    padding: 10px 18px;
+    background: linear-gradient(45deg, #800080, #ff3366);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.back-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.update-text {
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid gold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(45deg, #800080, #ff3366);
+    color: #ffff8f;
+}
+
+.element-coin-text,
+.effect-text {
+    color: #FFD700;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.right-side div {
+    margin-bottom: 10px;
+    color: black;
+}
+
+/* ========================================
+   CSS RIÊNG CHO EQUIPMENTS.HTML
+   ======================================== */
+
+/* Body full màn hình, không cuộn cho equipments */
+body.equipments-page,
+html.equipments-page {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background: url('dungeonBackground.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container chính cho equipments */
+.container {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    padding: 25px 30px 60px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 70%;
+    max-width: 800px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Lưới 15 ô: 3 hàng 5 cột */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 70px);
+    grid-template-rows: repeat(3, 70px);
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+/* 3 ô trang bị lớn hơn */
+.equipments {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.equipments .item {
+    width: 140px;
+    height: 140px;
+}
+
+/* Item chung */
+.item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.item-bg {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background-color: #d3d3d333;
+    border-radius: 15px;
+    z-index: 0;
+}
+
+.item img {
+    position: relative;
+    z-index: 1;
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 8px;
+    user-select: none;
+    pointer-events: none;
+}
+
+.item-count {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+    z-index: 2;
+    pointer-events: none;
+    text-shadow: 1px 1px 1px white;
+}
+
+/* Hover phóng to */
+.item:hover {
+    transform: scale(1.1);
+}
+
+/* Nút quay lại dưới cùng */
+.back-btn {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 18px;
+    background: linear-gradient(45deg, #800080, #ff3366);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+}
+
+.back-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Ảnh item trong .equipments to hơn */
+.equipments .item img {
+    max-width: 140px;
+    max-height: 140px;
+}
+
+.equipments .item-bg {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+}
+
+/* Item dialog cho equipments */
+.item-dialog-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.item-dialog {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+}
+
+.item-dialog h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.dialog-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.dialog-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.dialog-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.dialog-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Tiêu đề cho equipments */
+.title {
+    color: #FFD700;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Nút điều khiển cho equipments */
+.controls {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, #f44336, #da190b);
+    color: white;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   CSS RIÊNG CHO CARDLIBRARY.HTML
+   ======================================== */
+
+/* Body full màn hình, không cuộn cho cardLibrary */
+body.cardLibrary-page,
+html.cardLibrary-page {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background: url('dungeonBackground.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container chính dạng sách */
+.book-container {
+    width: 90%;
+    height: 85%;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    display: flex;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+/* Bên trái - Lưới thẻ */
+.left-panel {
+    width: 60%;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(139, 69, 19, 0.9), rgba(160, 82, 45, 0.9));
+    border-right: 3px solid #8B4513;
+    overflow-y: auto;
+}
+
+.left-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.left-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+    background: rgba(139, 69, 19, 0.8);
+    border-radius: 4px;
+}
+
+/* Tiêu đề bên trái */
+.left-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Lưới thẻ 4 cột */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 20px;
+    max-width: 100%;
+}
+
+/* Thẻ đơn lẻ */
+.card-item {
+    width: 100%;
+    aspect-ratio: 7/12;
     background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -100,1525 +683,224 @@ body {
     transform-style: preserve-3d;
 }
 
-.card:hover {
+.card-item:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-.card.dragging {
-    transform: scale(1.1);
-    z-index: 1000;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+.card-item.selected {
+    transform: scale(1.05);
+    border-color: #FFD700;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
 }
 
-.card.character {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.character .card-badge {
+.card-bg {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    width: 32px;     /* hoặc điều chỉnh theo ý bạn */
-    height: 32px;
-    pointer-events: none; /* để không cản click vào card */
-    z-index: 2;       /* đảm bảo nằm trên nền card */
-}
-
-.card.character .hp-display {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF0000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.enemy {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.enemy .repayment-receipt-display {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.enemy .hp-display {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF0000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Shield styling for AbyssLector0 - Red */
-.card.shield-active-red {
-    border: 3px solid #ff3c34;
-    box-shadow: 
-        0 0 10px #ff3c34,
-        0 0 20px #ff3c34,
-        0 0 30px #ff3c34,
-        0 4px 15px rgba(0, 0, 0, 0.3);
-    animation: shieldPulseRed 2s ease-in-out infinite;
-}
-
-@keyframes shieldPulseRed {
-    0%, 100% {
-        box-shadow: 
-            0 0 10px #ff3c34,
-            0 0 20px #ff3c34,
-            0 0 30px #ff3c34,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow: 
-            0 0 15px #ff3c34,
-            0 0 25px #ff3c34,
-            0 0 35px #ff3c34,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-}
-
-/* Shield styling for AbyssLector1 - Purple */
-.card.shield-active-purple {
-    border: 3px solid #2a0649;
-    box-shadow: 
-        0 0 10px #2a0649,
-        0 0 20px #2a0649,
-        0 0 30px #2a0649,
-        0 4px 15px rgba(0, 0, 0, 0.3);
-    animation: shieldPulsePurple 2s ease-in-out infinite;
-}
-
-@keyframes shieldPulsePurple {
-    0%, 100% {
-        box-shadow: 
-            0 0 10px #2a0649,
-            0 0 20px #2a0649,
-            0 0 30px #2a0649,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow: 
-            0 0 15px #2a0649,
-            0 0 25px #2a0649,
-            0 0 35px #2a0649,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-}
-
-/* Shield styling for AbyssLector2 - Blue */
-.card.shield-active-blue {
-    border: 3px solid #137eda;
-    box-shadow: 
-        0 0 10px #137eda,
-        0 0 20px #137eda,
-        0 0 30px #137eda,
-        0 4px 15px rgba(0, 0, 0, 0.3);
-    animation: shieldPulseBlue 2s ease-in-out infinite;
-}
-
-@keyframes shieldPulseBlue {
-    0%, 100% {
-        box-shadow: 
-            0 0 10px #137eda,
-            0 0 20px #137eda,
-            0 0 30px #137eda,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-    50% {
-        box-shadow: 
-            0 0 15px #137eda,
-            0 0 25px #137eda,
-            0 0 35px #137eda,
-            0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-}
-
-/* Game Over Animation */
-@keyframes shrinkAndFade {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-        visibility: visible;
-    }
-    50% {
-        transform: scale(0.5);
-        opacity: 0.5;
-        visibility: visible;
-    }
-    100% {
-        transform: scale(0);
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-.card.shrinking {
-    animation: shrinkAndFade 1s ease-in-out forwards;
-    pointer-events: none;
-}
-
-/* Monster Death Animation */
-@keyframes monsterDeath {
-    0% { transform: scale(1); opacity: 1; filter: brightness(1); }
-    50% { transform: scale(1.2); opacity: 0.8; filter: brightness(1.5); }
-    100% { transform: scale(0); opacity: 0; filter: brightness(0); }
-}
-.card.monster-dying { animation: monsterDeath 0.6s ease-in-out forwards; pointer-events: none; }
-
-/* Combat Animation */
-@keyframes combatShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
-}
-@keyframes damagePopup {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
-}
-
-@keyframes hpChangePopup {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
-}
-
-.card.combat-attacking {
-    border-color: #FF0000 !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-    animation: combatShake 0.3s ease-in-out;
-}
-
-.card.combat-defending {
-    border-color: #FF0000 !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-    animation: combatShake 0.3s ease-in-out;
-}
-
-/* Treasure interaction animations */
-.card.treasure-interacting {
-    border-color: #FFD700 !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8) !important;
-    animation: combatShake 0.3s ease-in-out;
-}
-
-.card.treasure-being-interacted {
-    border-color: #FFD700 !important;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.8) !important;
-    animation: combatShake 0.3s ease-in-out;
-}
-
-
-
-.damage-popup {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #FF0000;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    pointer-events: none;
-    animation: damagePopup 0.8s ease-out forwards;
-}
-
-.hp-change-popup {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    pointer-events: none;
-    animation: hpChangePopup 0.8s ease-out forwards;
-}
-
-/* Game Over Dialog */
-.game-over-dialog {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+    z-index: 1;
 }
 
-.game-over-dialog.show {
-    display: flex;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-.game-over-content {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    max-width: 400px;
-    width: 90%;
-}
-
-.game-over-title {
-    color: white;
-    font-size: 2.5em;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.game-over-message {
-    color: white;
-    font-size: 1.2em;
-    margin-bottom: 30px;
-    line-height: 1.5;
-}
-
-.game-over-button {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.1em;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.game-over-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(45deg, #45a049, #4CAF50);
-}
-
-.card.coin {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.food {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.food .heal-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(76, 175, 80, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #4CAF50;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.sword {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.sword .durability-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.weapon {
-    border-color: #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.card.weapon .durability-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Trap card styling */
-.card.trap {
-    border-color: #8e44ad;
-    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
-    position: relative;
-}
-
-.card.trap:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
-}
-
-/* Trap damage display */
-.card.trap .damage-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF0000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Trap arrows styling */
-.card.trap .trap-arrow {
-    position: absolute;
-    color: #FF8C00; /* Màu cam nổi bật */
-    font-size: 24px; /* Tăng kích thước từ 18px lên 24px */
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    z-index: 2;
-}
-
-/* Trap activation animation */
-.card.trap-activating {
-    border-color: #FF0000 !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-    animation: trapActivation 0.6s ease-in-out;
-}
-
-@keyframes trapActivation {
-    0% {
-        transform: scale(1);
-        border-color: #8e44ad;
-        box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
-    }
-    25% {
-        transform: scale(1.1);
-        border-color: #FF0000;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
-    }
-    50% {
-        transform: scale(0.9);
-        border-color: #FF0000;
-        box-shadow: 0 0 25px rgba(255, 0, 0, 1);
-    }
-    75% {
-        transform: scale(1.05);
-        border-color: #FF0000;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
-    }
-    100% {
-        transform: scale(1);
-        border-color: #8e44ad;
-        box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
-    }
-}
-
-/* Adjacent cards targeted by trap arrows */
-.card.trap-targeted {
-    border-color: #FF0000 !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-    animation: trapTargetShake 0.6s ease-in-out;
-}
-
-@keyframes trapTargetShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
-}
-
-/* Animation cho mũi tên di chuyển lên xuống */
-@keyframes arrowBounceTop {
-    0%, 100% {
-        transform: translateX(-50%) rotate(-90deg) scaleX(0.4) translateX(0px);
-    }
-    50% {
-        transform: translateX(-50%) rotate(-90deg) scaleX(0.4) translateX(-8px);
-    }
-}
-
-@keyframes arrowBounceBottom {
-    0%, 100% {
-        transform: translateX(-50%) rotate(90deg) scaleX(0.4) translateX(0px);
-    }
-    50% {
-        transform: translateX(-50%) rotate(90deg) scaleX(0.4) translateX(-8px);
-    }
-}
-
-@keyframes arrowBounceLeft {
-    0%, 100% {
-        transform: translateY(-50%) rotate(180deg) scaleX(0.4) translateX(0px);
-    }
-    50% {
-        transform: translateY(-50%) rotate(180deg) scaleX(0.4) translateX(-8px);
-    }
-}
-
-@keyframes arrowBounceRight {
-    0%, 100% {
-        transform: translateY(-50%) rotate(0deg) scaleX(0.4) translateX(0px);
-    }
-    50% {
-        transform: translateY(-50%) rotate(0deg) scaleX(0.4) translateX(-8px);
-    }
-}
-
-.card.trap .trap-arrow.top-center {
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-90deg) scaleX(0.4);
-    animation: arrowBounceTop 2s ease-in-out infinite;
-}
-
-.card.trap .trap-arrow.bottom-center {
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg) scaleX(0.4);
-    animation: arrowBounceBottom 2s ease-in-out infinite;
-}
-
-.card.trap .trap-arrow.left-center {
-    left: -6px;
-    top: 50%;
-    transform: translateY(-50%) rotate(180deg) scaleX(0.4);
-    animation: arrowBounceLeft 2s ease-in-out infinite;
-}
-
-.card.trap .trap-arrow.right-center {
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%) rotate(0deg) scaleX(0.4);
-    animation: arrowBounceRight 2s ease-in-out infinite;
-}
-
-/* Boom card styling */
-.card.boom {
-    position: relative;
-}
-
-/* Boom explosion animation */
-.card.boom-exploding {
-    border-color: #FF0000 !important;
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-    animation: boomExplosion 0.5s ease-in-out;
-}
-
-@keyframes boomExplosion {
-    0% {
-        transform: scale(1);
-        border-color: #FF0000;
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-    }
-    25% {
-        transform: scale(1.1);
-        border-color: #FF0000;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
-    }
-    50% {
-        transform: scale(0.9);
-        border-color: #FF0000;
-        box-shadow: 0 0 25px rgba(255, 0, 0, 1);
-    }
-    75% {
-        transform: scale(1.05);
-        border-color: #FF0000;
-        box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
-    }
-    100% {
-        transform: scale(1);
-        border-color: #FF0000;
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-    }
-}
-
-.card.boom .damage-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF0000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.boom .countdown-display {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Treasure card display positioning */
-.card.treasure .durability-display {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.treasure .score-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 215, 0, 0.9);
-    color: #000;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FFD700;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.character .weapon-display {
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-    background: rgba(255, 152, 0, 0.9);
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FF9800;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.card.coin .score-display {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background: rgba(255, 215, 0, 0.9);
-    color: #000;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #FFD700;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-
-
-
-
-/* Card Images - Maintain aspect ratio */
 .card-image {
+    position: relative;
+    z-index: 2;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    padding: 4px;
     border-radius: 6px;
 }
 
-/* Valid drop target */
-.card.valid-target {
-    border-color: #FF9800;
-    box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
-    animation: pulse-target 1s infinite;
-}
-
-@keyframes pulse-target {
-    0%, 100% {
-        box-shadow: 0 0 15px rgba(255, 152, 0, 0.6);
-    }
-    50% {
-        box-shadow: 0 0 25px rgba(255, 152, 0, 0.8);
-    }
-}
-
-/* Game Controls */
-.game-controls {
-    display: flex;
-    gap: 4px;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Instructions */
-.instructions {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 8px;
-    text-align: center;
-    color: white;
-    font-size: 0.85rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Buttons */
-.btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    min-width: 80px;
-}
-
-.btn-primary {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-}
-
-.btn-danger {
-    background: linear-gradient(45deg, #f44336, #d32f2f);
-    color: white;
-    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
-}
-
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
-}
-
-.btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #212529;
-    margin-left: 10px;
-}
-
-.btn-warning:hover {
-    background-color: #e0a800;
-    border-color: #d39e00;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-}
-
-/* Animation for card movement */
-@keyframes cardMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(var(--move-x), var(--move-y)); }
-}
-
-@keyframes eatEffect {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(0); opacity: 0; }
-}
-
-@keyframes reverseMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(var(--reverse-x), var(--reverse-y)); }
-}
-
-@keyframes appearEffect {
-    0% { transform: scale(0); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* NEW: Dual card movement animation */
-@keyframes dualCardMove {
-    0% { 
-        transform: translate(0, 0) scale(1);
-    }
-    50% {
-        transform: translate(var(--dual-move-x), var(--dual-move-y)) scale(1.1);
-    }
-    100% { 
-        transform: translate(var(--dual-move-x), var(--dual-move-y)) scale(1);
-    }
-}
-
-@keyframes dualCardReverse {
-    0% { 
-        transform: translate(0, 0) scale(1);
-    }
-    50% {
-        transform: translate(var(--dual-reverse-x), var(--dual-reverse-y)) scale(1.1);
-    }
-    100% { 
-        transform: translate(var(--dual-reverse-x), var(--dual-reverse-y)) scale(1);
-    }
-}
-
-/* Animation container for dual movement */
-.dual-movement-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.card.sliding {
-    transition: transform 0.5s ease-in-out;
-    z-index: 1000;
-}
-
-.card.eating {
-    animation: eatEffect 0.5s ease-in-out forwards;
-    z-index: 999;
-}
-
-.card.reverse-moving {
-    animation: reverseMove 0.5s ease-in-out forwards;
-    z-index: 998;
-}
-
-.card.reverse-moving-simultaneous {
-    transition: transform 0.5s ease-in-out;
-    z-index: 998;
-}
-
-.card.appearing {
-    animation: appearEffect 0.2s ease-in-out forwards;
-    z-index: 997;
-}
-
-/* NEW: Dual movement classes */
-.card.dual-moving {
-    animation: dualCardMove 0.5s ease-in-out forwards;
-    z-index: 1000;
-}
-
-.card.dual-reverse {
-    animation: dualCardReverse 0.5s ease-in-out forwards;
-    z-index: 999;
-}
-
-/* Enhanced eating effect for dual movement */
-.card.dual-eating {
-    animation: eatEffect 0.8s ease-in-out forwards;
-    z-index: 998;
-}
-
-/* Loading animation */
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
-}
-
-.loading {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-/* Card Info Dialog */
-.card-info-dialog {
-    position: fixed;
-    top: 0;
+.card-overlay {
+    position: absolute;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(5px);
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 8px;
+    font-size: 11px;
+    text-align: center;
+    z-index: 3;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
 }
 
-.card-info-dialog.show {
+.card-item:hover .card-overlay {
+    transform: translateY(0);
+}
+
+/* Bên phải - Thông tin thẻ */
+.right-panel {
+    width: 40%;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(25, 25, 112, 0.9), rgba(72, 61, 139, 0.9));
     display: flex;
-    animation: fadeIn 0.3s ease-in-out;
+    flex-direction: column;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* Tiêu đề bên phải */
+.right-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #FFD700;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Khu vực hiển thị thông tin thẻ */
+.card-info {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.card-info-placeholder {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+    margin-top: 50px;
 }
 
 .card-info-content {
-    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-    border-radius: 20px;
-    padding: 0;
-    max-width: 90%;
-    width: 350px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    transform: scale(0.9);
-    animation: slideIn 0.3s ease-out forwards;
-    overflow: hidden;
+    display: none;
 }
 
-@keyframes slideIn {
-    to {
-        transform: scale(1);
-    }
+.card-info-content.active {
+    display: block;
 }
 
-.card-info-header {
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-info-header h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
-}
-
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.card-info-body {
-    padding: 20px;
-}
-
-.card-info-image {
+.card-header {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-.card-info-image img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 10px;
-    border: 3px solid #ddd;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.card-info-details {
-    color: #333;
-}
-
-.card-info-details p {
+.card-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #FFD700;
     margin-bottom: 10px;
-    font-size: 1rem;
-    line-height: 1.5;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-.card-info-details strong {
-    color: #667eea;
-    font-weight: bold;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
-    .game-container {
-        max-width: 480px;
-        margin: 0 auto;
-        min-height: 100vh;
-        padding: 20px;
-    }
-    
-    .game-main {
-        max-width: 340px; /* Duy trì chiều rộng cho tablet */
-    }
-    
-    .game-header h1 {
-        font-size: 2rem;
-    }
-    
-    .game-stats {
-        font-size: 1rem;
-    }
-    
-    .btn {
-        padding: 12px 20px;
-        font-size: 0.9rem;
-        min-width: 100px;
-    }
-    
-    .cards-grid {
-        max-width: 300px; /* Duy trì max-width cho tablet */
-        gap: 4px;
-    }
-    
-    .card {
-        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
-    }
-}
-
-@media (min-width: 1024px) {
-    .game-container {
-        max-width: 600px;
-    }
-    
-    .game-main {
-        max-width: 340px; /* Duy trì chiều rộng cho desktop */
-    }
-    
-    .cards-grid {
-        max-width: 300px; /* Duy trì max-width cho desktop */
-        gap: 4px;
-    }
-    
-    .card {
-        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
-    }
-}
-
-/* Landscape orientation for mobile */
-@media (orientation: landscape) and (max-height: 600px) {
-    .game-container {
-        padding: 5px;
-        gap: 5px;
-    }
-    
-    .game-header {
-        padding: 8px;
-    }
-    
-    .game-header h1 {
-        font-size: 1.2rem;
-        margin-bottom: 5px;
-    }
-    
-    .game-stats {
-        font-size: 0.8rem;
-    }
-    
-    .game-main {
-        padding: 5px;
-    }
-    
-    .cards-grid {
-        gap: 4px;
-        max-width: 280px;
-    }
-    
-    .card {
-        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
-    }
-    
-    .game-controls {
-        padding: 8px;
-    }
-    
-    .btn {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-        min-width: 70px;
-    }
-}
-
-/* Small mobile screens */
-@media (max-width: 360px) {
-    .cards-grid {
-        gap: 2px;
-        max-width: 280px;
-    }
-    
-    .card {
-        aspect-ratio: 7/12; /* Tỷ lệ 9:16 - chiều cao gấp 16/9 lần chiều rộng */
-        border-width: 1px;
-    }
-    
-    .card-image {
-        padding: 3px;
-    }
-    
-    .btn {
-        padding: 8px 12px;
-        font-size: 0.75rem;
-        min-width: 60px;
-    }
-}
-
-/* Card info dialog text styling */
-.hp-text {
-    color: #ff4444 !important;
-    font-weight: bold;
-}
-
-.damage-text {
-    color: #e74c3c !important;
-    font-weight: bold;
-}
-
-.score-text {
-    color: #f39c12 !important;
-    font-weight: bold;
-}
-
-.durability-text {
-    color: #ffaa00 !important;
-    font-weight: bold;
-}
-
-.heal-text {
-    color: #27ae60 !important;
-    font-weight: bold;
-}
-
-.poison-text {
-    color: #8e44ad !important;
-    font-weight: bold;
-}
-
-.effect-text {
-    color: #3498db !important;
-    font-weight: bold;
-}
-
-.recovery-text {
-    color: #27ae60 !important;
-    font-weight: bold;
-}
-
-.recovery-icon {
-    font-size: 1.1em;
-    margin-right: 2px;
-}
-
-.poison-icon {
-    font-size: 1.1em;
-    margin-right: 2px;
-}
-
-/* Flip animation for card swapping */
-.card.flipping {
-    animation: flipCard 0.6s ease-in-out forwards;
-    transform-style: preserve-3d;
-    perspective: 1000px;
-}
-
-@keyframes flipCard {
-    0% {
-        transform: rotateY(0deg);
-    }
-    50% {
-        transform: rotateY(90deg);
-    }
-    100% {
-        transform: rotateY(0deg);
-    }
-}
-
-/* Force shrinking animation to work on all screen sizes */
-/* .card.shrinking {
-    animation: shrinkAndFade 1s ease-in-out forwards !important;
-    pointer-events: none !important;
-    transform: scale(1) !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-} */
-
-/* ===== COWARDLY EFFECT CHO OPERATIVE CARDS ===== */
-.card.cowardly {
-    position: relative;
-}
-
-.card.cowardly::before {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    right: 3px;
-    bottom: 3px;
-    background: linear-gradient(to bottom, rgba(128, 0, 128, 0.6), rgba(128, 0, 128, 0.3));
-    /* border-radius: 8px; */
-    z-index: 5;
-    pointer-events: none;
-}
-
-.card.cowardly::after {
-    content: "😰";
-    position: absolute;
-    top: 12%;
-    left: 50%;
-    transform: translateX(-50%);
+.card-type {
     font-size: 16px;
-    z-index: 10;
-    pointer-events: none;
-    animation: cowardlyShake 2s ease-in-out infinite;
+    color: #87CEEB;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
 }
 
-@keyframes cowardlyShake {
-    0%, 100% {
-        transform: translateX(-50%) translateY(0);
-    }
-    25% {
-        transform: translateX(-50%) translateY(-2px);
-    }
-    75% {
-        transform: translateX(-50%) translateY(2px);
-    }
+.card-image-large {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    display: block;
+    border-radius: 15px;
+    border: 3px solid #FFD700;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    object-fit: cover;
+    object-position: top center;
 }
 
-/* Loading Screen Styles - Optimized for Performance */
-.loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    transition: opacity 0.3s ease-out;
-}
-
-.loading-screen.fade-out {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.loading-content {
-    text-align: center;
+.card-description {
     color: white;
-    max-width: 400px;
-    padding: 20px;
-}
-
-.loading-logo h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(45deg, #ffd700, #ffed4e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: bold;
-    letter-spacing: 2px;
-}
-
-.loading-subtitle {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 30px;
-    font-style: italic;
-}
-
-.loading-spinner {
-    margin: 30px 0;
-}
-
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #ffd700;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-progress {
-    margin: 20px 0;
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #ffd700, #ffed4e);
-    width: 0%;
-    transition: width 0.2s ease;
-    border-radius: 4px;
-}
-
-.loading-text {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-size: 14px;
     margin-bottom: 20px;
-    font-weight: 500;
 }
 
-.loading-tips {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+.card-stats {
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     padding: 15px;
-    margin-top: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
 }
 
-.loading-tips p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.4;
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: white;
 }
 
-/* Responsive loading screen */
-@media (max-width: 480px) {
-    .loading-logo h1 {
-        font-size: 2rem;
+.stat-label {
+    color: #87CEEB;
+    font-weight: bold;
+}
+
+.stat-value {
+    color: #FFD700;
+    font-weight: bold;
+}
+
+/* Nút quay lại cho cardLibrary */
+.back-btn {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #800080, #ff3366);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    z-index: 10;
+}
+
+.back-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Responsive cho cardLibrary */
+@media (max-width: 1200px) {
+    .book-container {
+        width: 95%;
+        height: 90%;
     }
-    
-    .loading-subtitle {
-        font-size: 1rem;
+
+    .card-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
     }
-    
-    .spinner {
-        width: 50px;
-        height: 50px;
+}
+
+@media (max-width: 768px) {
+    .book-container {
+        flex-direction: column;
+        height: 95%;
     }
-    
-    .loading-content {
+
+    .left-panel,
+    .right-panel {
+        width: 100%;
+        height: 50%;
+    }
+
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
         padding: 15px;
     }
 }
 
-/* Character arrows styling - Mũi tên riêng cho character */
-.card.character .character-arrow {
-    position: absolute;
-    color: #ddd42c99; /* Màu vàng */
-    font-size: 24px; /* To hơn trap arrow (24px) */
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    z-index: 10; /* Cao hơn card (z-index: 1) */
-}
-
-.card.character .character-arrow.top-center {
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-90deg) scaleX(0.4);
-    animation: arrowBounceTop 0.5s ease-in-out infinite;
-}
-
-.card.character .character-arrow.bottom-center {
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg) scaleX(0.4);
-    animation: arrowBounceBottom 0.5s ease-in-out infinite;
-}
-
-.card.character .character-arrow.left-center {
-    left: -6px;
-    top: 50%;
-    transform: translateY(-50%) rotate(180deg) scaleX(0.4);
-    animation: arrowBounceLeft 0.5s ease-in-out infinite;
-}
-
-.card.character .character-arrow.right-center {
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%) rotate(0deg) scaleX(0.4);
-    animation: arrowBounceRight 0.5s ease-in-out infinite;
-}
-
-/* Animation cho debt collection */
-.card.enemy.debt-collection {
-    border: 3px solid #FFD700 !important;
-    box-shadow: 
-        0 0 10px #FFD700,
-        0 0 20px #FFD700,
-        0 0 30px #FFD700,
-        0 4px 15px rgba(0, 0, 0, 0.3),
-        inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
-    animation: debt-collection-pulse 0.5s ease-in-out infinite;
-    z-index: 100;
-}
-
-.card.coin.debt-collection {
-    border: 3px solid #FFD700 !important;
-    box-shadow: 
-        0 0 10px #FFD700,
-        0 0 20px #FFD700,
-        0 0 30px #FFD700,
-        0 4px 15px rgba(0, 0, 0, 0.3),
-        inset 0 0 20px rgba(255, 215, 0, 0.3) !important;
-    animation: debt-collection-pulse 0.5s ease-in-out infinite;
-    z-index: 100;
-}
-
-@keyframes debt-collection-pulse {
-    0% {
-        box-shadow: 
-            0 0 10px #FFD700,
-            0 0 20px #FFD700,
-            0 0 30px #FFD700,
-            0 4px 15px rgba(0, 0, 0, 0.3),
-            inset 0 0 20px rgba(255, 215, 0, 0.3);
+@media (max-width: 480px) {
+    .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 10px;
     }
-    50% {
-        box-shadow: 
-            0 0 15px #FFD700,
-            0 0 30px #FFD700,
-            0 0 45px #FFD700,
-            0 4px 15px rgba(0, 0, 0, 0.3),
-            inset 0 0 30px rgba(255, 215, 0, 0.5);
-    }
-    100% {
-        box-shadow: 
-            0 0 10px #FFD700,
-            0 0 20px #FFD700,
-            0 0 30px #FFD700,
-            0 4px 15px rgba(0, 0, 0, 0.3),
-            inset 0 0 20px rgba(255, 215, 0, 0.3);
+
+    .card-item {
+        aspect-ratio: 7/12;
     }
 }
-
-/* Animation cho coin bay */
-.flying-coin {
-    position: absolute;
-    z-index: 1000;
-    font-size: 20px;
-    pointer-events: none;
-    animation: coin-spin 0.8s linear infinite;
-}
-
-@keyframes coin-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Card Stack Demo</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Icon Xu + điểm -->
+  <div class="score-bar fade-in">
+    <span>🪙</span>
+    <span id="score">0</span>
+  </div>
+
+  <!-- Icon setting -->
+  <div class="settings-btn-wrapper fade-in">
+    <span class="settings-btn">⚙️</span>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="side left-side">
+      <!-- Nội dung bên trái -->
+      <div style="color: #00c1ff;" class="name-side" id="characterName">Eula</div>
+      <p style="color:black;" id="characterStory"></p>
+    </div>
+    <h2 class="section-title">Nhân Vật</h2>
+  <div class="center-area">
+    
+      <div class="card-container">
+      
+        <button class="nav prev">&#9664;</button>
+        <button class="nav next">&#9654;</button>
+
+        <!-- Các thẻ card sẽ được tạo động từ JavaScript -->
+      </div>
+
+    
+    </div>
+    <div class="back-btn" onclick="selectCharacter()">Chọn nhân vật</div>
+    <div class="side right-side">
+          <div><strong>HP:</strong><span class="hp-text" id="characterHP">12/12</span> <span class="update-text">nâng cấp</span></div>
+          <div><strong>Element Coin:</strong><span class="element-coin-text" id="characterElementCoin">0</span></div>
+          <div><strong>Effect:</strong><span class="effect-text" id="characterEffect">đang cập nhật</span></div>
+  </div>
+    </div>
+  </div>
+
+  <script>
+
+const container = document.querySelector('.card-container');
+const cards = Array.from(container.querySelectorAll('.card'));
+const btnPrev = container.querySelector('.prev');
+const btnNext = container.querySelector('.next');
+
+let currentIndex = 0;
+
+// Dữ liệu nhân vật được tạo bởi AI
+const data = [
+  {
+    "id": "eula",
+    "name": "Eula",
+    "character": "Eula",
+    "hp": 12,
+    "elementCoin": 3,
+    "storyText": "Eula là một hiệp sĩ quý tộc của Mondstadt, thuộc dòng họ Lawrence. Cô sở hữu Vision Cryo và sử dụng Claymore làm vũ khí. Mặc dù xuất thân từ gia đình quý tộc, Eula luôn tìm cách chuộc lỗi cho những tội ác mà tổ tiên đã gây ra. Cô là một vũ công tài ba và chiến binh dũng cảm, luôn bảo vệ Mondstadt khỏi những mối đe dọa.",
+    "effectText": "Khi kích hoạt, Eula tạo ra một vụ nổ Cryo mạnh mẽ, gây sát thương lớn cho kẻ địch và làm chậm chúng. Cô cũng có khả năng tăng sức mạnh tấn công khi HP thấp."
+  },
+  {
+    "id": "nahida",
+    "name": "Nahida",
+    "character": "Nahida",
+    "hp": 10,
+    "elementCoin": 4,
+    "storyText": "Nahida là vị thần Dendro của Sumeru, còn được gọi là Lesser Lord Kusanali. Cô là một vị thần trẻ tuổi, thông minh và tò mò về thế giới xung quanh. Nahida có khả năng đọc suy nghĩ và ký ức của người khác, đồng thời có thể tạo ra những giấc mơ và ảo ảnh. Cô luôn tìm cách bảo vệ Sumeru và người dân của mình.",
+    "effectText": "Nahida có thể tạo ra các phản ứng Dendro mạnh mẽ, tăng sát thương cho đồng đội và làm suy yếu kẻ địch. Cô cũng có khả năng chữa lành và tăng sức mạnh cho nhóm."
+  },
+  {
+    "id": "zhongli",
+    "name": "Zhongli",
+    "character": "Zhongli",
+    "hp": 15,
+    "elementCoin": 2,
+    "storyText": "Zhongli là vị thần Geo của Liyue, còn được gọi là Morax. Ông là một trong những vị thần cổ xưa nhất của Teyvat, đã sống hàng nghìn năm. Zhongli có kiến thức sâu rộng về lịch sử và văn hóa, đồng thời sở hữu sức mạnh Geo khổng lồ. Ông luôn bảo vệ Liyue và người dân của mình, mặc dù đôi khi phải hy sinh bản thân.",
+    "effectText": "Zhongli tạo ra một lá chắn Geo mạnh mẽ, bảo vệ đồng đội khỏi sát thương. Ông cũng có thể gây sát thương lớn với các kỹ năng Geo và làm chậm kẻ địch."
+  },
+  {
+    "id": "venti",
+    "name": "Venti",
+    "character": "Venti",
+    "hp": 9,
+    "elementCoin": 5,
+    "storyText": "Venti là vị thần Anemo của Mondstadt, còn được gọi là Barbatos. Ông là một vị thần tự do, yêu thích rượu và âm nhạc. Venti có khả năng bay lượn và điều khiển gió, đồng thời có thể tạo ra những giai điệu ma thuật. Mặc dù đôi khi lười biếng, ông luôn bảo vệ Mondstadt và người dân của mình.",
+    "effectText": "Venti có thể tạo ra các cơn gió mạnh, đẩy kẻ địch ra xa và tăng tốc độ di chuyển cho đồng đội. Ông cũng có khả năng tạo ra các phản ứng Anemo mạnh mẽ."
+  },
+  {
+    "id": "raiden",
+    "name": "Raiden",
+    "character": "Raiden",
+    "hp": 14,
+    "elementCoin": 3,
+    "storyText": "Raiden Shogun là vị thần Electro của Inazuma, còn được gọi là Ei. Cô là một vị thần mạnh mẽ và nghiêm khắc, luôn tìm cách bảo vệ Inazuma khỏi những mối đe dọa. Raiden sở hữu sức mạnh Electro khổng lồ và có thể tạo ra những cơn bão điện. Cô cũng có khả năng điều khiển thời gian và không gian.",
+    "effectText": "Raiden có thể tạo ra các cơn bão điện mạnh mẽ, gây sát thương lớn cho kẻ địch. Cô cũng có khả năng tăng sức mạnh tấn công cho đồng đội và làm chậm kẻ địch."
+  },
+  {
+    "id": "mavuika",
+    "name": "Mavuika",
+    "character": "Mavuika",
+    "hp": 13,
+    "elementCoin": 4,
+    "storyText": "Mavuika là một nhân vật bí ẩn với sức mạnh Pyro đáng sợ. Cô có khả năng điều khiển lửa và tạo ra những vụ nổ nhiệt mạnh mẽ. Mavuika luôn tìm cách thử thách những đối thủ mạnh mẽ và không ngại sử dụng sức mạnh của mình để đạt được mục tiêu. Cô là một chiến binh dũng cảm và kiên cường.",
+    "effectText": "Mavuika có thể tạo ra các vụ nổ Pyro mạnh mẽ, gây sát thương lớn cho kẻ địch. Cô cũng có khả năng tăng sức mạnh tấn công khi HP thấp và tạo ra các phản ứng Pyro mạnh mẽ."
+  },
+  {
+    "id": "furina",
+    "name": "Furina",
+    "character": "Furina",
+    "hp": 11,
+    "elementCoin": 4,
+    "storyText": "Furina là một nhân vật Hydro với sức mạnh điều khiển nước đáng kinh ngạc. Cô có thể tạo ra những cơn sóng mạnh mẽ và điều khiển dòng chảy của nước. Furina luôn tìm cách bảo vệ những người yếu thế và sử dụng sức mạnh của mình để làm điều thiện. Cô là một nhân vật thông minh và nhân từ.",
+    "effectText": "Furina có thể tạo ra các cơn sóng Hydro mạnh mẽ, đẩy kẻ địch ra xa và làm chậm chúng. Cô cũng có khả năng chữa lành đồng đội và tạo ra các phản ứng Hydro mạnh mẽ."
+  }
+];
+
+
+
+// Sắp xếp các thẻ ban đầu
+function renderCards() {
+  window.cards.forEach((card, i) => {
+    let pos = (i - currentIndex + window.cards.length) % window.cards.length;
+    if (pos === 0) {
+      // Thẻ hiện tại
+      card.style.zIndex = window.cards.length;
+      card.style.transform = `translateX(0) scale(1) rotateY(0deg)`;
+      card.style.opacity = 1;
+    } else if (pos === 1) {
+      // Thẻ tiếp theo bên phải
+      card.style.zIndex = window.cards.length - 1;
+      card.style.transform = `translateX(60px) scale(0.9) rotateY(-10deg)`;
+      card.style.opacity = 0.9;
+    } else if (pos === window.cards.length - 1) {
+      // Thẻ trước bên trái
+      card.style.zIndex = window.cards.length - 1;
+      card.style.transform = `translateX(-60px) scale(0.86) rotateY(10deg)`;
+      card.style.opacity = 0.9;
+    } else {
+      // Thẻ ở xa
+      card.style.zIndex = 1;
+      card.style.transform = `translateX(0) scale(0.8) rotateY(0deg)`;
+      card.style.opacity = 0;
+    }
+  });
+  
+  // Cập nhật thông tin nhân vật hiện tại
+  updateCharacterInfo();
+}
+
+// Cập nhật thông tin nhân vật
+function updateCharacterInfo() {
+  const characterData = data[currentIndex];
+  
+  if (characterData) {
+    // Cập nhật tên nhân vật
+    document.getElementById('characterName').textContent = characterData.name;
+    
+    // Cập nhật câu chuyện
+    document.getElementById('characterStory').textContent = characterData.storyText;
+    
+    // Cập nhật HP
+    document.getElementById('characterHP').textContent = `${characterData.hp}/${characterData.hp}`;
+    
+    // Cập nhật Element Coin
+    document.getElementById('characterElementCoin').textContent = characterData.elementCoin;
+    
+    // Cập nhật Effect
+    document.getElementById('characterEffect').textContent = characterData.effectText;
+  }
+}
+
+// Chuyển sang thẻ tiếp theo
+function nextCard() {
+  currentIndex = (currentIndex + 1) % window.cards.length;
+  renderCards();
+}
+
+// Chuyển về thẻ trước
+function prevCard() {
+  currentIndex = (currentIndex - 1 + window.cards.length) % window.cards.length;
+  renderCards();
+}
+
+// Bấm vào thẻ đằng sau để xem
+cards.forEach((card, i) => {
+  card.addEventListener('click', () => {
+    let pos = (i - currentIndex + cards.length) % cards.length;
+    if (pos === 1) {
+      nextCard();
+    } else if (pos === cards.length - 1) {
+      prevCard();
+    }
+  });
+});
+
+btnNext.addEventListener('click', nextCard);
+btnPrev.addEventListener('click', prevCard);
+
+// Hàm chọn nhân vật và lưu vào localStorage
+function selectCharacter() {
+  const characterData = data[currentIndex];
+  
+  if (characterData) {
+    // Lưu thông tin nhân vật được chọn vào localStorage
+    localStorage.setItem('selectedCharacter', characterData.id);
+    
+    // Chuyển về trang index.html
+    window.location.href = 'index.html';
+  }
+}
+
+// Hàm tạo các thẻ card động từ mảng data
+function createCards() {
+  const cardContainer = document.querySelector('.card-container');
+  
+  // Tạo các thẻ card từ mảng data
+  data.forEach((character, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.setAttribute('data-character', character.id);
+    card.style.backgroundImage = `url('resources/${character.id}.webp')`;
+    
+    // Thêm event listener cho mỗi thẻ
+    card.addEventListener('click', () => {
+      let pos = (index - currentIndex + data.length) % data.length;
+      if (pos === 1) {
+        nextCard();
+      } else if (pos === data.length - 1) {
+        prevCard();
+      }
+    });
+    
+    cardContainer.appendChild(card);
+  });
+  
+  // Cập nhật biến cards sau khi tạo xong
+  window.cards = Array.from(cardContainer.querySelectorAll('.card'));
+}
+
+// Hàm khởi tạo trang
+function initializePage() {
+  // Kiểm tra selectedCharacter từ localStorage
+  let selectedCharacter = localStorage.getItem('selectedCharacter');
+  
+  if (selectedCharacter) {
+    // Tìm vị trí của nhân vật được chọn trong mảng data
+    const selectedIndex = data.findIndex(char => char.id === selectedCharacter);
+    if (selectedIndex !== -1) {
+      currentIndex = selectedIndex;
+    } else {
+      // Nếu không tìm thấy, mặc định là eula
+      currentIndex = 0;
+      localStorage.setItem('selectedCharacter', 'eula');
+    }
+  } else {
+    // Nếu không có selectedCharacter, mặc định là eula
+    currentIndex = 0;
+    localStorage.setItem('selectedCharacter', 'eula');
+  }
+  
+  // Tạo các thẻ card
+  createCards();
+  
+  // Render các thẻ card
+  renderCards();
+}
+
+// Khởi tạo ban đầu khi DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  initializePage();
+});
+</script>
+
+</body>
+</html>
