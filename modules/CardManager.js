@@ -25,15 +25,15 @@ class CardManager {
         this.characterManager = characterManager; // Lưu reference đến CharacterManager
         this.cards = []; // Reset mảng thẻ
         const centerIndex = 4; // Vị trí trung tâm (hàng 2, cột 2) - index 4
-        
+        const Character = this.cardFactory.createCharacter();
+        characterManager.setCharacterCard(Character);
         // Tạo 9 thẻ cho grid 3x3
         for (let i = 0; i < 9; i++) {
             if (i === centerIndex) {
                 // Tạo thẻ Character ở giữa
-                const warrior = this.cardFactory.createWarrior();
-                warrior.id = i;
-                warrior.position = { row: Math.floor(i / 3), col: i % 3 };
-                this.cards.push(warrior);
+                Character.id = i;
+                Character.position = { row: Math.floor(i / 3), col: i % 3 };
+                this.cards.push(Character);
             } else {
                 // Tạo thẻ ngẫu nhiên cho các vị trí khác
                 const card = this.cardFactory.createRandomCard(this.characterManager);

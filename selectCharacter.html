@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Card Stack Demo</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -272,9 +273,27 @@ function initializePage() {
   renderCards();
 }
 
+// Hàm cập nhật score từ localStorage
+function updateScoreDisplay() {
+  try {
+    // Lấy giá trị coinScoreGameTotal từ localStorage
+    const coinScoreTotal = localStorage.getItem('coinScoreGameTotal');
+    const scoreValue = coinScoreTotal ? parseInt(coinScoreTotal) : 0;
+    
+    // Cập nhật hiển thị score
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+      scoreElement.textContent = scoreValue.toLocaleString(); // Format số với dấu phẩy
+    }
+  } catch (error) {
+    console.error('Lỗi khi cập nhật score display:', error);
+  }
+}
+
 // Khởi tạo ban đầu khi DOM ready
 document.addEventListener('DOMContentLoaded', function() {
   initializePage();
+  updateScoreDisplay(); // Cập nhật score khi trang load
 });
 </script>
 

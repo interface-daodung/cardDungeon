@@ -440,21 +440,21 @@
             "effect": "Gây sát thương cho character khi bị mắc kẹt"
         },
         {
+            "id": "bribery",
+            "name": "Hối Lộ",
+            "type": "bribery",
+            "image": "resources/bribery.webp",
+            "description": "Hối Lộ là một thẻ đặc biệt có thể thay đổi hành vi của kẻ địch.",
+            "effect": "Thay đổi hành vi của kẻ địch"
+        },
+        {
             "id": "void",
             "name": "Trống",
-            "type": "coin",
+            "type": "void",
             "image": "resources/void.webp",
             "description": "Thẻ Trống là một thẻ đặc biệt không có bất kỳ tác dụng nào. Được tạo ra để lấp đầy không gian trống trên bàn chơi.",
             "score": "0",
             "effect": "Không có tác dụng gì"
-        },
-        {
-            "id": "bribery",
-            "name": "Hối Lộ",
-            "type": "special",
-            "image": "resources/bribery.webp",
-            "description": "Hối Lộ là một thẻ đặc biệt có thể thay đổi hành vi của kẻ địch.",
-            "effect": "Thay đổi hành vi của kẻ địch"
         }
     ]
 }

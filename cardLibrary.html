@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Thư Viện Thẻ - Card Dungeon</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="cardLibrary-page">
@@ -91,7 +92,7 @@
         console.error('Lỗi khi load dữ liệu thẻ từ JSON, sử dụng dữ liệu inline:', error);
         // Fallback: sử dụng dữ liệu inline
         cardData = getInlineCardData();
-        currentCards = [...cardData];
+      currentCards = [...cardData];
       }
     }
 
@@ -674,7 +675,12 @@
       // Cập nhật thông tin
       document.getElementById('cardName').textContent = card.name;
       document.getElementById('cardType').textContent = card.type;
-      document.getElementById('cardImageLarge').src = card.image;
+      
+      // Cập nhật hình ảnh và data-type
+      const cardImageLarge = document.getElementById('cardImageLarge');
+      cardImageLarge.src = card.image;
+      cardImageLarge.setAttribute('data-type', card.type);
+      
       document.getElementById('cardDescription').innerHTML = card.description;
 
       // Cập nhật thống kê
@@ -732,11 +738,27 @@
       return labels[key] || key;
     }
 
+    // Hàm cập nhật score từ localStorage
+    function updateScoreDisplay() {
+      try {
+        // Lấy giá trị coinScoreGameTotal từ localStorage
+        const coinScoreTotal = localStorage.getItem('coinScoreGameTotal');
+        const scoreValue = coinScoreTotal ? parseInt(coinScoreTotal) : 0;
+        
+        // Cập nhật hiển thị score
+        const scoreElement = document.getElementById('score');
+        if (scoreElement) {
+          scoreElement.textContent = scoreValue.toLocaleString(); // Format số với dấu phẩy
+        }
+      } catch (error) {
+        console.error('Lỗi khi cập nhật score display:', error);
+      }
+    }
+
     // Xử lý score và settings
     function initializeScoreAndSettings() {
-      // Load score từ localStorage hoặc set mặc định
-      const savedScore = localStorage.getItem('gameScore') || 0;
-      document.getElementById('score').textContent = savedScore;
+      // Cập nhật score từ coinScoreGameTotal
+      updateScoreDisplay();
 
       // Xử lý click settings button
       const settingsBtn = document.querySelector('.settings-btn');

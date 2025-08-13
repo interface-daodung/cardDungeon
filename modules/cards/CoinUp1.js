@@ -21,7 +21,7 @@ class CoinUp1 extends Card {
      */
     cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số 
-        gameState.addScore(this.score);
+        gameState.addScore(this.score,3);
         
         return {
             type: 'coinUp',

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Card Dungeon</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -32,15 +33,15 @@
     <!-- Menu dưới -->
   <div class="menu fade-in">
     <a href="cardLibrary.html" data-label="📚 Thư viện">
-      <img src="item/library.webp" alt="Thư viện">
+      <img src="resources/item/library.webp" alt="Thư viện">
       <span class="tooltip-text">📚 Thư viện</span>
     </a>
     <a href="map1.html" data-label="🧭 Thám hiểm">
-      <img src="item/compass.webp" alt="Thám hiểm">
+      <img src="resources/item/compass.webp" alt="Thám hiểm">
       <span class="tooltip-text">🧭 Thám hiểm</span>
     </a>
     <a href="equipments.html" data-label="🗡️ Trang bị">
-      <img src="item/chest.webp" alt="Trang bị">
+      <img src="resources/item/chest.webp" alt="Trang bị">
       <span class="tooltip-text">🗡️ Trang bị</span>
     </a>
   </div>
@@ -147,9 +148,27 @@ const data = [
   }
 ];
 
-// Gọi hàm cập nhật background khi trang load
+// Hàm cập nhật score từ localStorage
+function updateScoreDisplay() {
+  try {
+    // Lấy giá trị coinScoreGameTotal từ localStorage
+    const coinScoreTotal = localStorage.getItem('coinScoreGameTotal');
+    const scoreValue = coinScoreTotal ? parseInt(coinScoreTotal) : 0;
+    
+    // Cập nhật hiển thị score
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+      scoreElement.textContent = scoreValue.toLocaleString(); // Format số với dấu phẩy
+    }
+  } catch (error) {
+    console.error('Lỗi khi cập nhật score display:', error);
+  }
+}
+
+// Gọi hàm cập nhật background và score khi trang load
 document.addEventListener('DOMContentLoaded', function() {
   updateCardBackgrounds();
+  updateScoreDisplay();
 });
 </script>
 

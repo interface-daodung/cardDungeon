@@ -10,14 +10,17 @@ class CharacterManager {
     constructor() {
         // ===== KHỞI TẠO TRẠNG THÁI BAN ĐẦU =====
         // Lấy giá trị mặc định từ Warrior class
-        this.characterHP = Warrior.DEFAULT_HP; // HP ban đầu của Character từ Warrior
-        this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Element coin mặc định từ Warrior
+        this.characterCard = null; // Card của Character
+        this.characterHP = Eula.DEFAULT_HP; // HP ban đầu của Character từ Warrior
+        this.elementCoin = Eula.DEFAULT_ELEMENT_COIN; // Element coin mặc định từ Warrior
         this.characterWeaponObject = null; // Object vũ khí hiện tại
         this.recovery = 0; // Số lượt hồi phục còn lại từ thức ăn đặc biệt
         this.poisoned = 0; // Số lượt độc còn lại (0 = không bị độc)
         this.animationManager = null; // Sẽ được set sau khi AnimationManager được tạo
 
     }
+
+
 
     // ===== KHỞI TẠO VÀ RESET =====
 
@@ -30,12 +33,23 @@ class CharacterManager {
     }
 
     /**
+     * Set card của Character
+     * @param {Card} characterCard - Card của Character
+     */
+    setCharacterCard(characterCard) {
+        this.characterCard = characterCard;
+        this.characterHP = characterCard.constructor.DEFAULT_HP;
+        this.elementCoin = characterCard.constructor.DEFAULT_ELEMENT_COIN; // Element coin mặc định từ Warrior
+        console.log(`characterCard: ${this.characterCard} ---------characterHP: ${this.characterHP} ---------elementCoin: ${this.elementCoin}`);
+    }
+    /**
      * Reset trạng thái Character về ban đầu
      * được gọi khi restart game hoặc new game
      */
     reset() {
-        this.characterHP = Warrior.DEFAULT_HP; // Reset HP về giá trị mặc định từ Warrior
-        this.elementCoin = Warrior.DEFAULT_ELEMENT_COIN; // Reset elementCoin về giá trị mặc định từ Warrior
+        this.characterCard = null; // Reset card về null
+        this.characterHP = Eula.DEFAULT_HP; // Reset HP về giá trị mặc định từ Warrior
+        this.elementCoin = Eula.DEFAULT_ELEMENT_COIN; // Reset elementCoin về giá trị mặc định từ Warrior
         this.characterWeaponObject = null; // Reset object vũ khí về null
         this.recovery = 0; // Reset hồi phục về 0
         this.poisoned = 0; // Reset độc về 0
@@ -52,7 +66,7 @@ class CharacterManager {
     damageCharacterHP(damage, delay) {
         const oldHP = this.characterHP;
         // Giới hạn HP từ 0 đến giá trị mặc định từ Warrior, không cho phép âm hoặc vượt quá
-        this.characterHP = Math.max(0, Math.min(Warrior.DEFAULT_HP, this.characterHP - damage));
+        this.characterHP = Math.max(0, Math.min(this.characterCard.constructor.DEFAULT_HP, this.characterHP - damage));
 
         // Hiển thị popup damage
         if (damage > 0 && this.animationManager) {
@@ -77,7 +91,7 @@ class CharacterManager {
      */
     healCharacterHP(amount, delay) {
         // Giới hạn tối đa HP từ Warrior, không cho phép vượt quá
-        this.characterHP = Math.min(Warrior.DEFAULT_HP, this.characterHP + amount);
+        this.characterHP = Math.min(this.characterCard.constructor.DEFAULT_HP, this.characterHP + amount);
 
         // Hiển thị heal popup
         if (this.animationManager) {

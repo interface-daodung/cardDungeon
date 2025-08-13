@@ -4,7 +4,7 @@
 class Eula extends Card {
     // Giá trị mặc định cho Eula
     static DEFAULT_HP = 12;
-    static DEFAULT_ELEMENT_COIN = 1;
+    static DEFAULT_ELEMENT_COIN = 0;
     
     constructor() {
         super(

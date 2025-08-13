@@ -21,7 +21,7 @@ class UIManager {
      */
     updateUI() {
         this.updateScore(); // Cập nhật điểm số
-        this.updateMoves(); // Cập nhật số lượt di chuyển
+        this.updateEquipments(); // Cập nhật số lượt di chuyển
         this.updateHighScore(); // Cập nhật high score
         this.updateSellButtonVisibility(); // Cập nhật hiển thị nút Sell
     }
@@ -35,10 +35,96 @@ class UIManager {
     }
 
     /**
-     * Cập nhật hiển thị số lượt di chuyển
+     * Cập nhật hiển thị equipments
      */
-    updateMoves() {
-        document.getElementById('moves').textContent = this.gameState.getMoves();
+    updateEquipments() {
+        const equipments = this.gameState.getEquipments();
+        console.log('Equipments:', equipments);
+        
+        const equipmentsContainer = document.getElementById('equipments');
+        if (!equipmentsContainer) {
+            console.error('Không tìm thấy element equipments');
+            return;
+        }
+
+        // Lấy các element item hiện có
+        const existingItems = equipmentsContainer.querySelectorAll('.item');
+        
+        if (!equipments || equipments.length === 0) {
+            // Ẩn tất cả items hiện có
+            existingItems.forEach(item => {
+                item.style.display = 'none';
+            });
+            return;
+        }
+
+        // Cập nhật hoặc tạo mới items theo số lượng equipments
+        equipments.forEach((item, index) => {
+            let itemDiv = existingItems[index];
+            console.log(`Cập nhật item và element ${item.name} (${item.constructor.name})`);
+            if (!itemDiv) {
+                console.log(`Tạo mới item và element---------lỗi rồi sao mất element`);
+            }
+
+            // Hiển thị item
+            itemDiv.style.display = 'flex';
+            
+            // Cập nhật thuộc tính
+            itemDiv.dataset.nameId = item.nameId;
+            //itemDiv.dataset.index = index;// không dc dùng .dataset.index vì nó làm mất element
+            
+            // Logic cho cooldown
+            let imgClass = '';
+            let countDisplay = 'none';
+            let countText = '';
+            
+            if (item.cooldown === 0) {
+                // Nếu cooldown = 0: ẩn itemCount, không thêm class darken
+                countDisplay = 'none';
+                countText = '';
+                imgClass = ''; // Không có class darken
+            } else {
+                // Nếu cooldown != 0: hiển thị itemCount, thêm class darken
+                countDisplay = 'block';
+                countText = item.cooldown;
+                imgClass = 'darken';
+            }
+
+            // Cập nhật ảnh
+            const imgElement = itemDiv.querySelector('img');
+            if (imgElement) {
+                imgElement.src = item.img;
+                imgElement.alt = item.name;
+                imgElement.className = imgClass;
+            }
+
+            // Cập nhật item count
+            const countElement = itemDiv.querySelector('.item-count');
+            if (countElement) {
+                countElement.textContent = countText;
+                countElement.style.display = countDisplay;
+            }
+        });
+
+        // Ẩn các items thừa
+        for (let i = equipments.length; i < existingItems.length; i++) {
+            if (existingItems[i]) {
+                existingItems[i].style.display = 'none';
+            }
+        }
+
+        console.log(`Đã cập nhật ${equipments.length} equipments`);
+    }
+
+    /**
+     * Xử lý khi click vào equipment item
+     * @param {Item} item - Item được click
+     * @param {number} index - Index của item
+     */
+    onEquipmentClick(item, index) {
+        console.log(`Click vào equipment: ${item.name} (${item.constructor.name})`);
+        // Có thể thêm logic xử lý click ở đây
+        // Ví dụ: hiển thị thông tin item, sử dụng item, v.v.
     }
 
     /**

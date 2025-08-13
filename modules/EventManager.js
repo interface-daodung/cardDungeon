@@ -27,12 +27,14 @@ class EventManager {
      */
     setupEventListeners() {
         // ===== BUTTON EVENTS =====
-        document.getElementById('new-game').addEventListener('click', () => {
-            this.onNewGame();
-        });
-
         document.getElementById('sell-weapon').addEventListener('click', () => {
             this.onSellWeapon();
+        });
+
+        // ===== MENU BUTTON EVENT =====
+        const menuBtn = document.getElementById('menu-btn').addEventListener('click', () => {
+            console.log('Menu button clicked');
+            window.location.href = 'index.html';
         });
 
         // ===== DIALOG EVENTS =====
@@ -56,6 +58,17 @@ class EventManager {
                 this.uiManager.hideCardInfo(); // Đóng dialog với ESC
             }
         });
+
+        // ===== EQUIPMENT ITEM EVENTS =====
+        // Thêm event listeners cho 3 equipment items
+        for (let i = 0; i < 3; i++) {
+            const itemElement = document.getElementById(`item${i}`);
+            if (itemElement) {
+                itemElement.addEventListener('click', (e) => {
+                    this.combatManager.processUseItemEffect(e.currentTarget.dataset.nameId);
+                });
+            }
+        }
     }
 
     /**
@@ -444,7 +457,7 @@ class EventManager {
             // ===== XỬ LÝ QUICKSAND SHUFFLE SAU KHI ĂN THẺ =====
             if (targetCard && targetCard.nameId === 'quicksand') {
                 setTimeout(() => {
-                    this.performQuicksandShuffleWithFlipEffect();
+                    this.combatManager.ShuffleWithFlipEffect();
                 }, 100);
             }
 
@@ -463,7 +476,7 @@ class EventManager {
     onMoveCompleted() {
         // ===== GIẢM COUNTDOWN CỦA TẤT CẢ BOOM CARDS =====
         this.decreaseBoomCountdown();
-        // ===== TĂNG MOVES KHI WARRIOR DI CHUYỂN =====
+        // ===== TĂNG MOVES KHI nhân vật DI CHUYỂN =====
         this.gameState.incrementMoves();
         // ===== XỬ LÝ HỒI PHỤC VÀ ĐỘC =====
         this.characterManager.processRecovery(); // Xử lý hồi phục trước 
@@ -630,67 +643,7 @@ class EventManager {
         }, 100); // Giảm delay từ 300ms xuống 100ms
     }
 
-    /**
-     * Thực hiện shuffle logic cho Quicksand với flip card effect
-     */
-    performQuicksandShuffleWithFlipEffect() {
-        // Lấy tất cả thẻ hiện tại (đã có thẻ mới được tạo từ moveCharacter)
-        const allCards = this.cardManager.getAllCards();
 
-        // Tạo mảng các vị trí để đổi chỗ ngẫu nhiên
-        const positions = Array.from({ length: allCards.length }, (_, i) => i);
-
-        // Đổi chỗ tất cả thẻ ngẫu nhiên kể cả character (Fisher-Yates shuffle)
-        for (let i = positions.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [positions[i], positions[j]] = [positions[j], positions[i]];
-        }
-
-        // Thực hiện đổi chỗ với hiệu ứng flip card
-        const shuffledCards = [];
-        for (let i = 0; i < allCards.length; i++) {
-            if (allCards[i]) {
-                shuffledCards[positions[i]] = allCards[i];
-                // Cập nhật id và vị trí của thẻ
-                allCards[i].id = positions[i];
-                allCards[i].position = {
-                    row: Math.floor(positions[i] / 3),
-                    col: positions[i] % 3
-                };
-            }
-        }
-
-        // Cập nhật tất cả thẻ
-        this.cardManager.setAllCards(shuffledCards);
-
-        // Thực hiện flip card effect cho toàn bộ thẻ cùng lúc
-        const allCardElements = document.querySelectorAll('.card');
-
-        // Thêm class flip cho tất cả thẻ
-        allCardElements.forEach(element => {
-            element.classList.add('flipping');
-        });
-
-        // Đổi vị trí sau khi bắt đầu flip
-        setTimeout(() => {
-            // Cập nhật tất cả thẻ
-            this.cardManager.setAllCards(shuffledCards);
-
-            // Xóa class flip sau khi animation hoàn thành
-            setTimeout(() => {
-                // Render lại toàn bộ grid với vị trí mới
-                this.animationManager.renderCards();
-
-                // Cập nhật UI
-                this.uiManager.updateUI();
-                this.animationManager.updateCharacterDisplay();
-                //this.uiManager.updateSellButtonVisibility();
-                this.setupCardEvents();
-
-                // Game over được xử lý trong damageCharacterHP khi HP = 0
-            }, 600); // Thời gian flip animation
-        }, 50); // Delay nhỏ để bắt đầu flip trước
-    }
 
     /**
      * Xử lý tương tác với treasure từ xa
@@ -739,7 +692,7 @@ class EventManager {
             }
 
             // ===== CẬP NHẬT CHARACTER DISPLAY =====
-            this.animationManager.updateCharacterDisplay();
+            this.animationManager.updateCardStatus(this.animationManager.cardManager.findCharacterIndex());
 
             // ===== CẬP NHẬT TREASURE DISPLAY =====
             if (interactResult.type === 'treasure_interact') {
@@ -795,7 +748,7 @@ class EventManager {
                         this.setupCardEvents();
 
                         // ===== CẬP NHẬT CHARACTER DISPLAY =====
-                        this.animationManager.updateCharacterDisplay();
+                        this.animationManager.updateCardStatus(this.animationManager.cardManager.findCharacterIndex());
 
                         // ===== GỌI HÀM XỬ LÝ SAU KHI TĂNG MOVE =====
                         this.onMoveCompleted();
@@ -834,7 +787,7 @@ class EventManager {
             // Bán vũ khí và nhận điểm
             const sellValue = this.characterManager.sellWeapon();
             this.gameState.addScore(sellValue);
-            this.animationManager.updateCharacterDisplay();
+            this.animationManager.updateCardStatus(this.animationManager.cardManager.findCharacterIndex());
             this.uiManager.updateUI();
         }
     }

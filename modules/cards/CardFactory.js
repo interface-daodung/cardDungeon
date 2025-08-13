@@ -34,7 +34,6 @@ class CardFactory {
             'CoinUp4': CoinUp4,
             'CoinUp5': CoinUp5,
             'CoinUp6': CoinUp6,
-            'Warrior': Warrior,
             'Trap': Trap,
             'Poison': Poison,
             'Boom': Boom,
@@ -248,13 +247,13 @@ class CardFactory {
         return fallbackCoinUp;
     }
 
-    /**
+    /** code cũ có thể xóa sau này 
      * Tạo Warrior
      * @returns {Warrior} Thẻ Warrior
      */
-    createWarrior() {
-        return new Warrior();
-    }
+    // createWarrior() {
+    //     return new Warrior();
+    // }
 
     /**
      * Tạo Void card (chỉ được tạo bởi hàm cụ thể, không tạo ngẫu nhiên)
@@ -263,6 +262,41 @@ class CardFactory {
     createVoid() {
         return new Void();
     }
+
+    /**
+     * Tạo nhân vật dựa trên localStorage hoặc mặc định là Eula
+     * @returns {Card} Thẻ nhân vật được tạo
+     */
+    createCharacter() {
+        const nameId = localStorage.getItem('selectedCharacter');
+        
+        // Nếu null hoặc không tìm thấy, mặc định là eula
+        if (!nameId) {
+            return new Eula();
+        }
+        
+        // Switch case để tạo nhân vật tương ứng
+        switch (nameId) {
+            case 'eula':
+                return new Eula();
+            case 'nahida':
+                return new Nahida();
+            case 'zhongli':
+                return new Zhongli();
+            case 'venti':
+                return new Venti();
+            case 'raiden':
+                return new Raiden();
+            case 'mavuika':
+                return new Mavuika();
+            case 'furina':
+                return new Furina();
+            default:
+                // Fallback về Eula nếu không tìm thấy
+                return new Eula();
+        }
+    }
+
     //--------------nhưng hàm có thể sau này xóa nếu ko dùng đến ---------------------------
     /**
      * Lấy danh sách tất cả loại thẻ

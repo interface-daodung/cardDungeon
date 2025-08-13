@@ -160,7 +160,7 @@ class CombatManager {
             }
             
             // ===== CẬP NHẬT HIỂN THỊ =====
-            this.animationManager.updateCharacterDisplay(); // Cập nhật hiển thị dụng lực vu khốc
+            this.animationManager.updateCardStatus(characterIndex); // Cập nhật hiển thị dụng lực vu khốc
             
             // ===== CẬP NHẬT NÚT SELL WEAPON =====
             if (this.animationManager.eventManager && this.animationManager.eventManager.uiManager) {
@@ -240,8 +240,8 @@ class CombatManager {
                 }, 600);
             } else {
                 // ===== MONSTER CÒN SỐNG =====
-                this.animationManager.updateMonsterDisplay(monsterIndex); // Cập nhật HP monster
-                this.animationManager.updateCharacterDisplay(); // Cập nhật hiển thị dụng lực vu khốc
+                this.animationManager.updateCardStatus(monsterIndex);
+                this.animationManager.updateCardStatus(characterIndex);// Cập nhật hiển thị dụng lực vu khốc
                 
                 // ===== GỌI attackByWeaponEffect NẾU CÓ =====
                 //if (monster.attackByWeaponEffect) {
@@ -363,4 +363,159 @@ class CombatManager {
         }
         return null;
     }
-} 
+
+    // ===== EQUIPMENT ITEM EFFECTS =====
+
+    /**
+     * Xử lý hiệu ứng khi sử dụng equipment item
+     * @param {string} nameId - ID của item được sử dụng
+     */
+    processUseItemEffect(nameId) {
+        console.log(`Sử dụng equipment item: ${nameId}`);
+        
+        // TODO: Thêm logic xử lý hiệu ứng item
+        // Ví dụ: sử dụng healing potion, weapon upgrade, v.v.
+        
+        // Lấy item từ GameState equipments
+        const gameState = this.animationManager.eventManager ? this.animationManager.eventManager.gameState : null;
+        if (gameState) {
+            const equipments = gameState.getEquipments();
+            const item = equipments.find(eq => eq.nameId === nameId);
+            
+            if (item) {
+                console.log(`Tìm thấy item: ${item.name} (${item.constructor.name})`);
+                if(item.cooldown === 0){
+                    const useResult = item.useItemEffect(this.animationManager);
+                    
+                    // Kiểm tra kết quả sử dụng item
+                    if (useResult === false) {
+                        // Hiển thị thông báo "chưa đủ điều kiện kích hoạt"
+                        this.showItemActivationMessage("Chưa đủ điều kiện kích hoạt item!");
+                        return;
+                    }
+
+                    // sửa ở đây 
+                    this.animationManager.eventManager.uiManager.updateUI();
+                }else{
+                    console.log(`item chưa sẵn sàng`);
+                }
+                
+            } else {
+                console.warn(`Không tìm thấy item với nameId: ${nameId}`);
+            }
+        }
+    }
+
+    /**
+     * Hiển thị thông báo khi item không thể kích hoạt
+     * @param {string} message - Nội dung thông báo
+     */
+    showItemActivationMessage(message) {
+        // Tạo element thông báo
+        const notification = document.createElement('div');
+        notification.className = 'item-activation-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ff6b6b;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            animation: fadeInOut 0.5s ease-in-out;
+        `;
+
+        // Thêm CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+        `;
+
+        // Thêm vào DOM
+        document.head.appendChild(style);
+        document.body.appendChild(notification);
+
+        // Tự động xóa sau 2 giây
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+            if (style.parentNode) {
+                style.parentNode.removeChild(style);
+            }
+        }, 500);
+    }
+
+    // ===== QUICKSAND SHUFFLE EFFECT =====
+
+    /**
+     * Thực hiện shuffle logic cho Quicksand với flip card effect
+     */
+    ShuffleWithFlipEffect() {
+        // Lấy tất cả thẻ hiện tại (đã có thẻ mới được tạo từ moveCharacter)
+        const allCards = this.cardManager.getAllCards();
+
+        // Tạo mảng các vị trí để đổi chỗ ngẫu nhiên
+        const positions = Array.from({ length: allCards.length }, (_, i) => i);
+
+        // Đổi chỗ tất cả thẻ ngẫu nhiên kể cả character (Fisher-Yates shuffle)
+        for (let i = positions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [positions[i], positions[j]] = [positions[j], positions[i]];
+        }
+
+        // Thực hiện đổi chỗ với hiệu ứng flip card
+        const shuffledCards = [];
+        for (let i = 0; i < allCards.length; i++) {
+            if (allCards[i]) {
+                shuffledCards[positions[i]] = allCards[i];
+                // Cập nhật id và vị trí của thẻ
+                allCards[i].id = positions[i];
+                allCards[i].position = {
+                    row: Math.floor(positions[i] / 3),
+                    col: positions[i] % 3
+                };
+            }
+        }
+
+        // Cập nhật tất cả thẻ
+        this.cardManager.setAllCards(shuffledCards);
+
+        // Thực hiện flip card effect cho toàn bộ thẻ cùng lúc
+        const allCardElements = document.querySelectorAll('.card');
+
+        // Thêm class flip cho tất cả thẻ
+        allCardElements.forEach(element => {
+            element.classList.add('flipping');
+        });
+
+        // Đổi vị trí sau khi bắt đầu flip
+        // setTimeout(() => {
+            // Cập nhật tất cả thẻ
+            this.cardManager.setAllCards(shuffledCards);
+
+            // Xóa class flip sau khi animation hoàn thành
+            setTimeout(() => {
+                // Render lại toàn bộ grid với vị trí mới
+                this.animationManager.updateEntireGrid();
+
+                // Cập nhật UI
+                this.animationManager.eventManager.uiManager.updateUI();
+                // this.animationManager.eventManager.setupCardEvents();
+
+                // Game over được xử lý trong damageCharacterHP khi HP = 0
+            }, 600); // Thời gian flip animation
+        // }, 10); // Delay nhỏ để bắt đầu flip trước
+    }
+}

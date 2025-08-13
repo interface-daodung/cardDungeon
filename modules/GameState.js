@@ -19,6 +19,10 @@ class GameState {
         // ===== TOUCH STATE =====
         this.touchStartTime = null; // Thời điểm bắt đầu touch
         this.touchStartPos = null; // Vị trí bắt đầu touch
+        
+        // ===== EQUIPMENTS =====
+        this.equipments = []; // Mảng chứa các item đã trang bị
+        this.loadEquipments(); // Load equipments từ localStorage khi khởi tạo
     }
 
     // ===== KHỞI TẠO VÀ RESET =====
@@ -39,6 +43,10 @@ class GameState {
         this.touchStartTime = null; // Reset touch start time
         this.touchStartPos = null; // Reset touch start position
         
+        // ===== RESET EQUIPMENTS =====
+        this.equipments = []; // Reset equipments
+        this.loadEquipments(); // Load equipments từ localStorage khi khởi tạo
+        
         // Lưu ý: Không reset high score - giữ lại thành tích cao nhất
     }
 
@@ -48,10 +56,17 @@ class GameState {
      * Thêm điểm vào tổng điểm
      * @param {number} points - Số điểm cần thêm
      */
-    addScore(points) { 
+    addScore(points, Recharge = 0) { 
         // Đảm bảo points là số hợp lệ
         const validPoints = points || 0;
         this.score += validPoints; 
+        
+        // Cập nhật coinScoreGameTotal trong localStorage
+        this.updateCoinScoreGameTotal(validPoints);
+        
+        if(Recharge > 0 && this.equipments.length > 0){
+            this.CooldownReduction(Recharge);
+        }
         this.updateHighScore(); // Cập nhật high score khi score thay đổi
     }
     
@@ -197,5 +212,87 @@ class GameState {
      */
     getHighScore() {
         return this.highScore;
+    }
+
+    /**
+     * Lấy danh sách equipments hiện tại
+     * @returns {Array} Mảng các item đã trang bị
+     */
+    getEquipments() {
+        return this.equipments;
+    }
+
+    /**
+     * Load equipments từ localStorage selectEquipments
+     * Nếu có dữ liệu thì tạo các item class tương ứng
+     */
+    loadEquipments() {
+        try {
+            const selectEquipments = localStorage.getItem('selectEquipments');
+            console.log(selectEquipments);
+            if (selectEquipments) {
+                const equippedNameIds = JSON.parse(selectEquipments);
+                
+                if (Array.isArray(equippedNameIds) && equippedNameIds.length > 0) {
+                    // Tạo các item class từ nameId
+                    this.equipments = equippedNameIds.map(nameId => {
+                        try {
+                            // Sử dụng ItemFactory static method để tạo item
+                            const item = ItemFactory.getInstance().createItem(nameId);
+                            return item;
+                            console.log(item);
+                        } catch (error) {
+                            console.error(`Lỗi khi tạo item với nameId: ${nameId}`, error);
+                            return null;
+                        }
+                    }).filter(item => item !== null); // Lọc bỏ các item null
+                    
+                    console.log('Đã load equipments:', this.equipments);
+                } else {
+                    this.equipments = [];
+                }
+            } else {
+                this.equipments = [];
+            }
+        } catch (error) {
+            console.error('Lỗi khi load equipments từ localStorage:', error);
+            this.equipments = [];
+        }
+    }
+
+    // ===== QUẢN LÝ COOLDOWN REDUCTION =====
+
+    /**
+     * Giảm cooldown của tất cả equipments
+     * @param {number} recharge - Số điểm cooldown giảm
+     */
+    CooldownReduction(recharge) {
+        this.equipments.forEach(equipment => {
+            equipment.cooldown = Math.max(0, equipment.cooldown - recharge);
+        });
+    }
+
+    // ===== QUẢN LÝ COIN SCORE GAME TOTAL =====
+
+    /**
+     * Cập nhật coinScoreGameTotal trong localStorage
+     * @param {number} points - Số điểm cần cộng vào tổng
+     */
+    updateCoinScoreGameTotal(points) {
+        try {
+            // Lấy giá trị hiện tại từ localStorage
+            const currentTotal = localStorage.getItem('coinScoreGameTotal');
+            const currentValue = currentTotal ? parseInt(currentTotal) : 0;
+            
+            // Cộng thêm điểm mới
+            const newTotal = currentValue + points;
+            
+            // Lưu lại vào localStorage
+            localStorage.setItem('coinScoreGameTotal', newTotal.toString());
+            
+            //console.log(`Đã cập nhật coinScoreGameTotal: ${currentValue} + ${points} = ${newTotal}`);
+        } catch (error) {
+            console.error('Lỗi khi cập nhật coinScoreGameTotal:', error);
+        }
     }
 } 

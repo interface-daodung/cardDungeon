@@ -5,7 +5,7 @@ class CoinUp5 extends Card {
     constructor() {
         super(
             "Cộng Hưởng Nguyên Tố: Phong Tự Do", 
-            "coinUp", 
+            "coin", 
             "resources/coinUp5.webp", 
             "coinUp5"
         );
@@ -21,7 +21,7 @@ class CoinUp5 extends Card {
      */
     cardEffect(characterManager = null, gameState = null, cardManager = null) {
         // Thêm điểm số 
-        gameState.addScore(this.score);
+        gameState.addScore(this.score,3);
         
         return {
             type: 'coinUp',

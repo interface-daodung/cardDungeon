@@ -21,7 +21,7 @@ class Coin3 extends Card {
      */
     cardEffect(characterManager, gameState, cardManager) {
         // Thêm điểm số
-        gameState.addScore(this.score);
+        gameState.addScore(this.score,1);
         
         return {
             type: 'coin',

@@ -438,97 +438,6 @@ class AnimationManager {
     }
 
 
-
-    /**
-     * Tạo thẻ void thay thế thẻ bị hủy
-     * @param {number} cardIndex - Index của thẻ
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-    //  */
-    // createVoidCard(cardIndex, cardManager) {
-    //     const voidCard = cardManager.cardFactory.createVoid();
-    //     voidCard.id = cardIndex;
-    //     voidCard.position = { 
-    //         row: Math.floor(cardIndex / 3), 
-    //         col: cardIndex % 3 
-    //     };
-    //     cardManager.updateCard(cardIndex, voidCard);
-    //     this.renderCardsWithAppearEffect(cardIndex);
-    // }
-
-    /**
-     * Tạo coin từ trap khi damage = 0
-     * @param {number} trapIndex - Index của trap
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     */
-    // createCoinFromTrap(trapIndex, cardManager) {
-    //     const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-    //     coinCard.id = trapIndex;
-    //     coinCard.position = { 
-    //         row: Math.floor(trapIndex / 3), 
-    //         col: trapIndex % 3 
-    //     };
-    //     cardManager.updateCard(trapIndex, coinCard);
-    //     this.renderCardsWithAppearEffect(trapIndex);
-    // }
-
-    /**
-     * Tạo coin mặc định
-     * @param {number} cardIndex - Index của thẻ
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     */
-    // createDefaultCoin(cardIndex, cardManager) {
-    //     const coinCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-    //     coinCard.id = cardIndex;
-    //     coinCard.position = { 
-    //         row: Math.floor(cardIndex / 3), 
-    //         col: cardIndex % 3 
-    //     };
-    //     cardManager.updateCard(cardIndex, coinCard);
-    //     this.renderCardsWithAppearEffect(cardIndex);
-
-    //     setTimeout(() => {
-    //         if (this.eventManager) {
-    //             this.eventManager.setupCardEvents();
-    //         }
-    //     }, 200);
-    // }
-
-    /**
-     * Tạo thẻ reward từ kill effect
-     * @param {number} cardIndex - Index của thẻ
-     * @param {Object} reward - Thông tin reward
-     * @param {CardManager} cardManager - Manager quản lý thẻ
-     */
-    // createRewardCard(cardIndex, reward, cardManager) {
-    //     let newCard;
-
-    //     if (reward.type === 'food3') {
-    //         newCard = cardManager.cardFactory.createCard('Food3');
-    //     } else if (reward.type === 'coin') {
-    //         newCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-    //     } else if (reward.type === 'abysslector') {
-    //         newCard = reward.card;
-    //     } else {
-    //         newCard = cardManager.cardFactory.createDynamicCoin(this.characterManager);
-    //     }
-
-    //     if (newCard) {
-    //         newCard.id = cardIndex;
-    //         newCard.position = { 
-    //             row: Math.floor(cardIndex / 3), 
-    //             col: cardIndex % 3 
-    //         };
-    //         cardManager.updateCard(cardIndex, newCard);
-    //         this.renderCardsWithAppearEffect(cardIndex);
-
-    //         setTimeout(() => {
-    //             if (this.eventManager) {
-    //                 this.eventManager.setupCardEvents();
-    //             }
-    //         }, 200);
-    //     }
-    // }
-
     /**
      * Tạo popup hiển thị damage
      * @param {HTMLElement} element - Element để thêm popup vào
@@ -546,7 +455,7 @@ class AnimationManager {
         if (element && element.appendChild) {
             element.appendChild(popup);
         } else {
-            console.log(` card-----------------${card}`)
+            console.log(` card-------lỗi fallback----------${card}`)
             document.querySelector(`[data-card-id="${card.id}"]`).appendChild(popup);
         }
         setTimeout(() => {
@@ -582,14 +491,35 @@ class AnimationManager {
             setTimeout(() => {
                 if (cardElement) {
                     cardElement.classList.remove('combat-attacking');
-                    this.updateEntireGrid();
+                    this.updateCardStatus(card.id);
                 } else {
                     console.log(` card---curse---${card}--------fallback remove lỗi ?????????`);
                 }
 
             }, 300);
-        }
-        if (['Mystic Heaven', 'Ocean', 'Forest'].includes(damageType)) {
+        } else if (damageType === 'foodUp' || damageType === 'weaponUp') {
+            console.log(` card--curse---------------${card}------`);
+            if (cardElement && cardElement?.classList.add) {
+                cardElement.style.setProperty('border-color', '#00AA00', 'important'); // xanh lá đậm
+                cardElement.style.setProperty('box-shadow', '0 0 15px rgba(107, 209, 107, 0.8)', 'important');
+
+                cardElement.classList.add('combat-attacking');
+            } else {
+                // thường thì không fallback
+                console.log(` card--------curse---------${card}--------fallback`)
+                document.querySelector(`[data-card-id="${card.id}"]`).classList.add('combat-attacking');
+            }
+
+            setTimeout(() => {
+                if (cardElement) {
+                    cardElement.classList.remove('combat-attacking');
+                    this.updateCardStatus(card.id);
+                } else {
+                    console.log(` card---curse---${card}--------fallback remove lỗi ?????????`);
+                }
+
+            }, 300);
+        } else if (['Mystic Heaven', 'Ocean', 'Forest', 'item' ].includes(damageType)) {
 
             console.log(` card-----------------${card}--------not fallback`);
             if (cardElement && cardElement?.classList.add) {
@@ -603,7 +533,7 @@ class AnimationManager {
             setTimeout(() => {
                 if (cardElement) {
                     cardElement.classList.remove('combat-attacking');
-                    this.updateEntireGrid();
+                    this.updateCardStatus(card.id);
                 } else {
                     console.log(` card------${card}--------fallback remove lỗi ?????????`);
                 }
@@ -938,7 +868,7 @@ class AnimationManager {
                 // Tạo ảnh nhỏ và thêm vào góc dưới bên phải
                 const badgeElement = document.createElement('img');
                 badgeElement.className = 'card-badge';
-                badgeElement.src = `resources/${this.characterManager.getCharacterWeaponObject().nameId}_Badge.webp`; // thay bằng đường dẫn ảnh thực tế
+                badgeElement.src = `resources/badge/${this.characterManager.getCharacterWeaponObject().nameId}.webp`; // thay bằng đường dẫn ảnh thực tế
                 badgeElement.alt = 'badge';
                 cardElement.appendChild(badgeElement);
 
@@ -1034,23 +964,6 @@ class AnimationManager {
         });
     }
 
-    /**
-     * Tìm vị trí của một card trong grid
-     * @param {number} cardIndex - Index của card cần tìm vị trí
-     * @returns {HTMLElement | null} Element của vị trí cần chèn
-     */
-    // getGridPosition(cardIndex) {
-    //     const grid = document.getElementById('cards-grid');
-    //     if (!grid) return null;
-
-    //     const gridChildren = Array.from(grid.children);
-
-    //     if (targetPosition < gridChildren.length) {
-    //         return Array.from(grid.children)[cardIndex];
-    //     }
-
-    //     return null;
-    // }
 
     /**
      * Xóa tất cả CSS styles và animation classes khỏi element
@@ -1064,50 +977,50 @@ class AnimationManager {
 
     // ===== CÁC HÀM UPDATE DISPLAY =====
 
-    /**
+    /** hàm cũ 
      * Cập nhật hiển thị character (HP và weapon)
      */
-    updateCharacterDisplay() {
-        const characterElement = document.querySelector('.card.character');
-        if (characterElement) {
-            const hpDisplay = characterElement.querySelector('.hp-display');
-            if (hpDisplay) {
-                hpDisplay.textContent = this.characterManager.getCharacterHP();
-            }
+    // updateCharacterDisplay() {
+    //     const characterElement = document.querySelector('.card.character');
+    //     if (characterElement) {
+    //         const hpDisplay = characterElement.querySelector('.hp-display');
+    //         if (hpDisplay) {
+    //             hpDisplay.textContent = this.characterManager.getCharacterHP();
+    //         }
 
-            let weaponDisplay = characterElement.querySelector('.weapon-display');
-            if (this.characterManager.getCharacterWeaponDurability() > 0) {
-                if (!weaponDisplay) {
-                    weaponDisplay = document.createElement('div');
-                    weaponDisplay.className = 'weapon-display';
-                    characterElement.appendChild(weaponDisplay);
-                }
-                weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
-            } else if (weaponDisplay) {
-                weaponDisplay.remove();
-            }
-        }
-    }
+    //         let weaponDisplay = characterElement.querySelector('.weapon-display');
+    //         if (this.characterManager.getCharacterWeaponDurability() > 0) {
+    //             if (!weaponDisplay) {
+    //                 weaponDisplay = document.createElement('div');
+    //                 weaponDisplay.className = 'weapon-display';
+    //                 characterElement.appendChild(weaponDisplay);
+    //             }
+    //             weaponDisplay.textContent = this.characterManager.getCharacterWeaponDurability();
+    //         } else if (weaponDisplay) {
+    //             weaponDisplay.remove();
+    //         }
+    //     }
+    // }
 
     /**
-     * Cập nhật hiển thị monster HP
+     * Cập nhật hiển thị monster HP code cũ 
      * @param {number} monsterIndex - Index của monster cần cập nhật
      * đã lỗi thời cần sớm xóa và thay đổi
      */
-    updateMonsterDisplay(monsterIndex) {
-        const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
-        if (monsterElement && this.cardManager.getCard(monsterIndex)) {
-            const monster = this.cardManager.getCard(monsterIndex);
+    // updateMonsterDisplay(monsterIndex) {
+    //     const monsterElement = document.querySelector(`[data-index="${monsterIndex}"]`);
+    //     if (monsterElement && this.cardManager.getCard(monsterIndex)) {
+    //         const monster = this.cardManager.getCard(monsterIndex);
 
-            this.addEnemySpecialStyling(monsterElement, monster);
+    //         this.addEnemySpecialStyling(monsterElement, monster);
 
-            const hpDisplay = monsterElement.querySelector('.hp-display');
-            if (hpDisplay) {
-                hpDisplay.textContent = monster.hp || 0;
-            }
+    //         const hpDisplay = monsterElement.querySelector('.hp-display');
+    //         if (hpDisplay) {
+    //             hpDisplay.textContent = monster.hp || 0;
+    //         }
 
-        }
-    }
+    //     }
+    // }
 
     /**
      * Cập nhật hiển thị boom countdown và damage
@@ -1145,22 +1058,6 @@ class AnimationManager {
         }
     }
 
-    /**
-     * Cập nhật hiển thị damage của trap
-     * @param {number} trapIndex - Index của trap
-     */
-    // updateTrapDamageDisplay(trapIndex) {
-    //     const trapElement = document.querySelector(`[data-index="${trapIndex}"]`);
-    //     if (trapElement) {
-    //         const damageDisplay = trapElement.querySelector('.damage-display');
-    //         if (damageDisplay) {
-    //             const trapCard = this.cardManager.getCard(trapIndex);
-    //             if (trapCard && trapCard.damage !== undefined) {
-    //                 damageDisplay.textContent = trapCard.damage;
-    //             }
-    //         }
-    //     }
-    // }
 
     // ===== CÁC HÀM ANIMATION BỔ SUNG =====
 
@@ -1780,6 +1677,108 @@ class AnimationManager {
         };
 
         requestAnimationFrame(animate);
+    }
+
+    /**
+     * Cập nhật hiển thị cho một thẻ cụ thể tại vị trí index
+     * @param {number} index - Index của thẻ cần cập nhật
+     */
+    updateCardStatus(index) {
+        const card = this.cardManager.getCard(index);
+        if (!card) {
+            console.warn(`🎬 Card not found at index ${index}`);
+            return;
+        }
+
+        const existingElement = document.querySelector(`[data-index="${index}"]`);
+        
+        if (existingElement) {
+            // Cập nhật element hiện có
+            this.createOrUpdateCardElement(card, index, true, existingElement);
+
+            
+        } else {
+            console.warn(`🎬 Card element not found at index ${index}`);
+        }
+
+        // Setup events nếu cần
+        if (this.eventManager) {
+            // Có thể cần setup lại events cho thẻ này
+            // this.eventManager.setupCardEventsForIndex(index);
+        }
+    }
+
+
+    /**
+     * Tạo hiệu ứng nổi cho healing potion
+     * Hiệu ứng: Ảnh xuất hiện ở giữa game-main, từ 20px tăng lên 300px rồi biến mất trong 0.5s
+     */
+    startUseItemEffectAnimation(image) {
+        this.queueAnimation(() => {
+            return new Promise((resolve) => {
+                // Tìm container game-main
+                const gameMain = document.querySelector('.game-main');
+                if (!gameMain) {
+                    console.warn('🎬 Game main container not found');
+                    resolve();
+                    return;
+                }
+
+                // Tạo element ảnh healing potion
+                const potionImage = document.createElement('img');
+                potionImage.src = image;
+                potionImage.style.cssText = `
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 20px;
+                    height: 20px;
+                    opacity: 0.8;
+                    z-index: 1000;
+                    pointer-events: none;
+                    transition: none;
+                `;
+
+                // Thêm ảnh vào game-main
+                gameMain.appendChild(potionImage);
+
+                // Tạo animation với requestAnimationFrame
+                const startTime = performance.now();
+                const duration = 500; // 0.5s
+                const startSize = 20;
+                const endSize = 300;
+
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function để tạo hiệu ứng mượt mà
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    
+                    // Tính kích thước hiện tại
+                    const currentSize = startSize + (endSize - startSize) * easeOut;
+                    
+                    // Cập nhật kích thước và opacity
+                    potionImage.style.width = `${currentSize}px`;
+                    potionImage.style.height = `${currentSize}px`;
+                    potionImage.style.opacity = 0.8 * (1 - progress);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Hoàn thành animation, xóa ảnh
+                        if (potionImage.parentNode) {
+                            potionImage.parentNode.removeChild(potionImage);
+                        }
+                        resolve();
+                    }
+                };
+
+                // Bắt đầu animation
+                requestAnimationFrame(animate);
+            });
+        }, 'Healing Potion Float Effect', 3); // Priority 3 (cao hơn các animation thông thường)
     }
 
 }

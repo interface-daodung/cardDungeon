@@ -16,11 +16,11 @@ class LoadingManager {
         
         this.tips = [
             "💡 Mẹo: Ghép các thẻ cùng loại để tạo ra thẻ mạnh hơn!",
-            "⚔️ Warrior có thể tấn công kẻ địch để bảo vệ bản thân",
+            "⚔️ Nhân vật có thể tấn công kẻ địch để bảo vệ bản thân",
             "🛡️ Sử dụng Shield để bảo vệ khỏi sát thương",
             "💰 Thu thập Coin để tăng điểm số",
-            "🍖 Food giúp hồi phục HP cho Warrior",
-            "🗡️ Sword tăng sức tấn công cho Warrior",
+            "🍖 Food giúp hồi phục HP cho nhân vật",
+            "🗡️ Sword tăng sức tấn công cho nhân vật",
             "💣 Boom sẽ nổ sau vài lượt, hãy cẩn thận!",
             "🎁 Treasure chứa nhiều phần thưởng quý giá",
             "☠️ Poison làm giảm HP theo thời gian",
@@ -43,7 +43,6 @@ class LoadingManager {
         
         // Danh sách hình ảnh cần preload
         this.imageList = [
-            'resources/warrior.webp',
             'resources/fatui0.webp',
             'resources/fatui1.webp',
             'resources/fatui2.webp',
@@ -92,7 +91,14 @@ class LoadingManager {
             'resources/dragon.webp',
             'resources/narwhal.webp',
             'resources/operative.webp',
-            'resources/void.webp'
+            'resources/void.webp',
+            'resources/eula.webp',
+            'resources/nahida.webp',
+            'resources/zhongli.webp',
+            'resources/venti.webp',
+            'resources/raiden.webp',
+            'resources/mavuika.webp',
+            'resources/furina.webp'
         ];
         
         this.loadedImages = 0;
@@ -131,7 +137,6 @@ class LoadingManager {
             "modules/cards/CoinUp4.js",
             "modules/cards/CoinUp5.js",
             "modules/cards/CoinUp6.js",
-            "modules/cards/Warrior.js",
             "modules/cards/Trap.js",
             "modules/cards/Poison.js",
             "modules/cards/Boom.js",
@@ -153,7 +158,32 @@ class LoadingManager {
             "modules/cards/Operative.js",
             "modules/cards/Void.js",
             "modules/cards/CardFactory.js",
-            
+            // Item classes
+            "modules/items/Item.js",
+            "modules/items/ItemFactory.js",
+            "modules/items/HealingPotion.js",
+            "modules/items/Cooldown.js",
+            "modules/items/Repair.js",
+            "modules/items/WeaponUp.js",
+            "modules/items/BlackHole.js",
+            "modules/items/InfuseDendro.js",
+            "modules/items/ResCryo.js",
+            "modules/items/ResPyro.js",
+            "modules/items/FoodUp.js",
+            "modules/items/Key.js",
+            "modules/items/Teleportation.js",
+            "modules/items/Bow.js",
+            "modules/items/Sword.js",
+            "modules/items/Catalyst.js",
+            "modules/items/Damage.js",
+            // Character classes
+            "modules/cards/Eula.js",
+            "modules/cards/Nahida.js",
+            "modules/cards/Zhongli.js",
+            "modules/cards/Venti.js",
+            "modules/cards/Raiden.js",
+            "modules/cards/Mavuika.js",
+            "modules/cards/Furina.js",
             // Manager classes
             "modules/CardManager.js",
             "modules/GameState.js",

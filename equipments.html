@@ -1,11 +1,98 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Inventory</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Style cho item đã trang bị */
+    .grid-item.equipped {
+      opacity: 0.5;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .grid-item.equipped:hover {
+      opacity: 0.5;
+    }
+
+    /* Style cho nút nâng cấp mới */
+    .btn-upgrade .upgrade-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .btn-upgrade .upgrade-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-upgrade #priceUpgrade {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Style khi priceUpgrade = 'max' */
+    .btn-upgrade #priceUpgrade.max-level {
+      font-size: 20px;
+      color: white;
+      font-weight: 900;
+    }
+
+    .btn-upgrade #priceUpgrade.max-level + .upgrade-text,
+    .btn-upgrade .upgrade-text.hidden,
+    .btn-upgrade .btn-icon.hidden {
+      display: none;
+    }
+
+    /* Style cho thông báo popup */
+    .message-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .message-popup.show {
+      opacity: 1;
+    }
+
+    .message-content {
+      background-color: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease-out;
+    }
+
+    .message-popup.show .message-content {
+      transform: translateY(0);
+    }
+  </style>
 </head>
+
 <body class="equipments-page">
 
   <!-- Icon Xu + điểm -->
@@ -21,71 +108,8 @@
 
 
   <div class="container">
-    <!-- Lưới 15 ô -->
-    <div class="grid">
-      <!-- Ví dụ 15 ô item giống nhau -->
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/hp.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/infuseDendro.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/damage.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/teleportation.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/key.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/WeaponUp.webp" alt="Item" class="darken" />
-      </div>
-
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/foodUp.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/repair.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/Cooldown.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/blackHole.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/Bow.webp" alt="Item" class="darken" />
-      </div>
-
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/Catalyst.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/Sword.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/resPyro.webp" alt="Item" class="darken" />
-      </div>
-      <div class="item">
-        <div class="item-bg"></div>
-        <img src="item/resCryo.webp" alt="Item" class="darken" />
-      </div>
+    <div class="grid" id="itemGrid">
+      <!-- Items sẽ được tạo động bằng JavaScript -->
     </div>
 
     <!-- 3 ô trang bị lớn -->
@@ -107,234 +131,623 @@
     <!-- Nút quay lại -->
     <!-- <a href="menu game.html" class="back-btn">Quay lại</a> -->
   </div>
-  <a href="index.html" class="back-btn">Quay lại</a>
+  <div class="back-btn" id="confirmBtn">Xác Nhận</div>
 
-<!-- Dialog cha -->
-<div class="item-dialog-wrapper" id="itemDialogWrapper" style="display:none;">
-  <!-- Dialog chính -->
-  <div class="item-dialog">
-    <h2 id="dialogItemName">Tên Item</h2>
-    <div class="dialog-content">
-      <img id="dialogItemIcon" src="" alt="icon" class="dialog-icon">
-      <p id="dialogItemDesc">Mô tả item...</p>
+  <!-- Dialog cha -->
+  <div class="item-dialog-wrapper" id="itemDialogWrapper" style="display:none;">
+    <!-- Dialog chính -->
+    <div class="item-dialog">
+      <!-- Header với gradient -->
+      <div class="dialog-header">
+        <h2 id="dialogItemName">Tên Item</h2>
+        <button class="dialog-close" onclick="closeDialog()">×</button>
+      </div>
+
+      <!-- Nội dung dialog -->
+      <div class="dialog-content">
+        <div class="item-icon-container">
+          <img id="dialogItemIcon" src="" alt="icon" class="dialog-icon">
+          <div class="icon-glow"></div>
+        </div>
+        <div class="item-info">
+          <p id="dialogItemDesc">Mô tả item...</p>
+          <div class="item-stats" id="itemStats">
+            <!-- Stats sẽ được cập nhật động -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Thanh nút điều khiển -->
+      <div class="dialog-actions">
+        <button id="btnUpgrade" class="btn-upgrade">
+          <span class="btn-icon">🪙</span>
+          <div class="upgrade-content">
+            <span class="upgrade-text">Nâng cấp</span>
+            <span id="priceUpgrade">0</span>
+          </div>
+        </button>
+        <button id="btnSelect" class="btn-select">
+          <span class="btn-icon">✅</span>
+          <span>Lựa chọn</span>
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Thanh nút điều khiển -->
-  <div class="dialog-actions">
-    <button id="btnUpgrade">Nâng cấp</button>
-    <button id="btnSelect">Lựa chọn</button>
+  <!-- Thông báo popup -->
+  <div id="messagePopup" class="message-popup" style="display: none;">
+    <div class="message-content">
+      <span id="messageText"></span>
+    </div>
   </div>
-</div>
 
-    <script>
-  // Lấy danh sách item trong lưới và trang bị
-  const gridItems = document.querySelectorAll('.grid .item');
-  const equipmentSlots = document.querySelectorAll('.equipments .item');
+  <!-- Sử dụng items-bundle thay vì ES6 modules -->
+  <script src="items-bundle.js"></script>
 
-  // Mảng lưu vị trí đang được trang bị (index item grid)
-  let equippedIndices = [];
+  <script>
+    // Khởi tạo ItemFactory từ items-bundle
+    const itemFactory = new ItemFactory();
 
-  // Hàm kiểm tra số item đang trang bị
-  function equippedCount() {
-    return equippedIndices.length;
-  }
+    // Lấy danh sách item class
+    const itemList = itemFactory.getItemClassList();
 
-  // Xử lý click item trong lưới
-  gridItems.forEach((item, idx) => {
-    item.addEventListener('click', () => {
-      if (equippedCount() >= 3) return; // Đủ 3 rồi, không thêm nữa
-      if (equippedIndices.includes(idx)) return; // Item này đã trang bị rồi
+    let equippedIndices = []; // lưu index item trong lưới đang được trang bị
+    let selectedItemIndex = null; // index item hiện đang mở dialog
+    let selectedFromEquip = false; // true nếu mở từ ô trang bị
 
-      // Tìm ô trang bị trống (không có ảnh)
-      let emptySlot = null;
-      for (const slot of equipmentSlots) {
-        const img = slot.querySelector('img');
-        if (img.style.display === 'none' || img.src === '') {
-          emptySlot = slot;
-          break;
+    // Lấy phần tử dialog
+    const dialogWrapper = document.getElementById('itemDialogWrapper');
+    const dialogName = document.getElementById('dialogItemName');
+    const dialogIcon = document.getElementById('dialogItemIcon');
+    const dialogDesc = document.getElementById('dialogItemDesc');
+    const btnUpgrade = document.getElementById('btnUpgrade');
+    const btnSelect = document.getElementById('btnSelect');
+
+    // Hàm đóng dialog
+    function closeDialog() {
+      dialogWrapper.style.display = 'none';
+    }
+
+    // Lấy item trong lưới và ô trang bị
+    let gridItems = []; // Sẽ được cập nhật sau khi tạo items động
+    const equipmentSlots = document.querySelectorAll('.equipments .item');
+
+    // Tạo items động
+    function createItems() {
+      console.log('Bắt đầu tạo items...');
+      const itemGrid = document.getElementById('itemGrid');
+
+      itemList.forEach((itemInfo, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        itemDiv.dataset.nameId = itemInfo.nameId;
+        itemDiv.dataset.name = itemInfo.name;
+        itemDiv.dataset.description = itemInfo.description;
+        itemDiv.dataset.power = itemInfo.power;
+        itemDiv.dataset.cooldown = itemInfo.cooldown;
+        itemDiv.dataset.isConsumable = itemInfo.isConsumable;
+
+        itemDiv.innerHTML = `
+      <div class="item-bg"></div>
+      <img src="${itemInfo.img}" alt="${itemInfo.name}" class="darken" />
+    `;
+
+        // Thêm class để dễ dàng style cho item đã trang bị
+        itemDiv.classList.add('grid-item');
+
+        itemGrid.appendChild(itemDiv);
+      });
+
+      console.log('Đã tạo xong', itemList.length, 'items');
+
+      // Cập nhật gridItems ngay sau khi tạo xong
+      updateGridItems();
+
+      // Sau khi tạo xong items và cập nhật gridItems, load từ localStorage
+      console.log('Bắt đầu load từ localStorage...');
+      loadEquippedItemsFromStorage();
+
+      // Sau khi load xong từ localStorage, setup event listeners
+      console.log('Setup event listeners...');
+      setupGridItemEventListeners();
+    }
+
+    // Hàm cập nhật gridItems
+    function updateGridItems() {
+      gridItems = document.querySelectorAll('.grid .item');
+      console.log('Grid items updated:', gridItems);
+    }
+
+    // Hàm load các item đã được trang bị từ localStorage
+    function loadEquippedItemsFromStorage() {
+      console.log('Kiểm tra localStorage...');
+      const selectEquipments = localStorage.getItem('selectEquipments');
+
+      if (selectEquipments) {
+        try {
+          const equippedNameIds = JSON.parse(selectEquipments);
+          console.log('Tìm thấy equipped items:', equippedNameIds);
+
+          if (Array.isArray(equippedNameIds) && equippedNameIds.length > 0) {
+            // Tìm các item trong grid có nameId tương ứng
+            equippedNameIds.forEach((nameId, slotIndex) => {
+              if (slotIndex < 3) { // Chỉ tối đa 3 slot
+                console.log('Tìm item với nameId:', nameId, 'cho slot:', slotIndex);
+                const gridItem = Array.from(gridItems).find(item =>
+                  item.dataset.nameId === nameId
+                );
+
+                if (gridItem && equipmentSlots[slotIndex]) {
+                  console.log('Đã tìm thấy grid item, trang bị vào slot:', slotIndex);
+                  // Lấy thông tin từ grid item
+                  const imgGrid = gridItem.querySelector('img');
+
+                  // Trang bị vào equipment slot
+                  const equipmentSlot = equipmentSlots[slotIndex];
+                  const slotImg = equipmentSlot.querySelector('img');
+
+                  // Copy dataset và hiển thị
+                  slotImg.src = imgGrid.src;
+                  slotImg.style.display = 'block';
+
+                  // Copy dataset
+                  equipmentSlot.dataset.nameId = gridItem.dataset.nameId;
+                  equipmentSlot.dataset.name = gridItem.dataset.name;
+                  equipmentSlot.dataset.description = gridItem.dataset.description;
+                  equipmentSlot.dataset.power = gridItem.dataset.power;
+                  equipmentSlot.dataset.cooldown = gridItem.dataset.cooldown;
+                  equipmentSlot.dataset.isConsumable = gridItem.dataset.isConsumable;
+
+                  // Ẩn item trong grid
+                  imgGrid.style.display = 'none';
+
+                  // Thêm class để style item đã trang bị
+                  gridItem.classList.add('equipped');
+
+                  // Cập nhật equippedIndices
+                  equippedIndices[slotIndex] = Array.from(gridItems).indexOf(gridItem);
+                } else {
+                  console.log('Không tìm thấy grid item hoặc equipment slot cho nameId:', nameId);
+                }
+              }
+            });
+
+            console.log('Đã load', equippedNameIds.length, 'items từ localStorage');
+          }
+        } catch (error) {
+          console.error('Lỗi khi parse localStorage selectEquipments:', error);
+        }
+      } else {
+        console.log('Không có equipped items trong localStorage');
+      }
+    }
+
+    // Hàm mở dialog
+    function openItemDialog(name, iconSrc, desc, index, fromEquip) {
+      dialogName.textContent = name;
+      dialogIcon.src = iconSrc;
+      dialogDesc.textContent = desc;
+      selectedItemIndex = index;
+      selectedFromEquip = fromEquip;
+
+      // Cập nhật stats
+      if (fromEquip) {
+        // Nếu click từ equipment slot, lấy thông tin từ slot đó
+        const equipmentSlot = Array.from(equipmentSlots).find(slot =>
+          slot.querySelector('img').src === iconSrc
+        );
+        if (equipmentSlot) {
+          updateItemStatsFromDataset(equipmentSlot.dataset);
+          // Cập nhật giá nâng cấp cho item từ equipment slot
+          const nameId = equipmentSlot.dataset.nameId;
+          if (nameId) {
+            const price = priceUpgrade(nameId);
+            setNewPrice(price);
+          }
+        }
+      } else if (gridItems[index]) {
+        // Nếu click từ grid item
+        updateItemStats(gridItems[index]);
+        // Cập nhật giá nâng cấp cho item từ grid
+        const nameId = gridItems[index].dataset.nameId;
+        if (nameId) {
+          const price = priceUpgrade(nameId);
+          setNewPrice(price);
+        }
+      } else {
+        clearItemStats();
+      }
+
+      // Xử lý hiển thị nút
+      if (fromEquip) {
+        btnSelect.textContent = 'Bỏ chọn';
+        btnSelect.style.display = 'inline-block';
+      } else {
+        // Đếm số slot đã có item (dựa vào equippedIndices)
+        const equippedCount = equippedIndices.filter(index => index !== undefined).length;
+
+        if (equippedCount >= 3) {
+          btnSelect.style.display = 'none';
+        } else {
+          btnSelect.textContent = 'Lựa chọn';
+          btnSelect.style.display = 'inline-block';
         }
       }
-      if (!emptySlot) return; // Không còn slot trống
 
-      // Lấy ảnh và số lượng từ item grid
-      const imgGrid = item.querySelector('img');
-      const countGrid = item.querySelector('.item-count');
-
-      // Hiển thị ảnh item vào slot trống, show ảnh và số lượng
-      const imgEquip = emptySlot.querySelector('img');
-      const countEquip = emptySlot.querySelector('.item-count');
-
-      imgEquip.src = imgGrid.src;
-      imgEquip.style.display = 'block';
-
-      if (countEquip) {
-        countEquip.textContent = countGrid ? countGrid.textContent : '';
-        countEquip.style.display = 'block';
-      }
-
-      // Ẩn ảnh trong item grid để đánh dấu đã chọn
-      imgGrid.style.display = 'none';
-      if (countGrid) countGrid.style.display = 'none';
-
-      // Lưu index item đã trang bị
-      equippedIndices.push(idx);
-    });
-  });
-
-  // Xử lý click ô trang bị để trả item về lưới
-  equipmentSlots.forEach(slot => {
-    slot.addEventListener('click', () => {
-      const imgEquip = slot.querySelector('img');
-      const countEquip = slot.querySelector('.item-count');
-
-      if (imgEquip.style.display === 'none' || imgEquip.src === '') return; // slot trống, không làm gì
-
-      // Tìm item grid tương ứng để hiện lại ảnh
-      const idx = Array.from(gridItems).findIndex(item => {
-        return item.querySelector('img').src === imgEquip.src && item.querySelector('img').style.display === 'none';
-      });
-
-      if (idx !== -1) {
-        const itemGrid = gridItems[idx];
-        const imgGrid = itemGrid.querySelector('img');
-        const countGrid = itemGrid.querySelector('.item-count');
-        imgGrid.style.display = 'block';
-        if (countGrid) countGrid.style.display = 'block';
-
-        // Xóa khỏi mảng đã trang bị
-        equippedIndices = equippedIndices.filter(i => i !== idx);
-      }
-
-      // Xóa ảnh và số lượng trong slot trang bị (ẩn slot)
-      imgEquip.src = '';
-      imgEquip.style.display = 'none';
-      if (countEquip) {
-        countEquip.textContent = '';
-        countEquip.style.display = 'none';
-      }
-    });
-  });
-</script> 
-<!-- <script>
-let equippedIndices = []; // lưu index item trong lưới đang được trang bị
-let selectedItemIndex = null; // index item hiện đang mở dialog
-let selectedFromEquip = false; // true nếu mở từ ô trang bị
-
-// Lấy phần tử dialog
-const dialogWrapper = document.getElementById('itemDialogWrapper');
-const dialogName = document.getElementById('dialogItemName');
-const dialogIcon = document.getElementById('dialogItemIcon');
-const dialogDesc = document.getElementById('dialogItemDesc');
-const btnUpgrade = document.getElementById('btnUpgrade');
-const btnSelect = document.getElementById('btnSelect');
-
-// Lấy item trong lưới và ô trang bị
-const gridItems = document.querySelectorAll('.grid .item');
-const equipmentSlots = document.querySelectorAll('.equipments .item');
-console.log(gridItems);
-console.log(equipmentSlots);
-
-// Hàm mở dialog
-function openItemDialog(name, iconSrc, desc, index, fromEquip) {
-  dialogName.textContent = name;
-  dialogIcon.src = iconSrc;
-  dialogDesc.textContent = desc;
-  selectedItemIndex = index;
-  selectedFromEquip = fromEquip;
-
-  // Xử lý hiển thị nút
-  if (fromEquip) {
-    btnSelect.textContent = 'Bỏ chọn';
-    btnSelect.style.display = 'inline-block';
-  } else {
-    if (equippedIndices.length >= 3) {
-      btnSelect.style.display = 'none';
-    } else {
-      btnSelect.textContent = 'Lựa chọn';
-      btnSelect.style.display = 'inline-block';
+      dialogWrapper.style.display = 'flex';
     }
-  }
 
-  dialogWrapper.style.display = 'flex';
-}
-
-// Đóng dialog khi click ngoài
-dialogWrapper.addEventListener('click', (e) => {
-  if (e.target === dialogWrapper) {
-    dialogWrapper.style.display = 'none';
-  }
-});
-
-// Click nút Nâng cấp
-btnUpgrade.addEventListener('click', () => {
-  alert('Nâng cấp item: ' + dialogName.textContent);
-});
-
-// Click nút Lựa chọn / Bỏ chọn
-btnSelect.addEventListener('click', () => {
-  if (selectedFromEquip) {
-    // Bỏ chọn
-    const gridItem = gridItems[selectedItemIndex];
-    gridItem.querySelector('img').style.display = 'block';
-    const countGrid = gridItem.querySelector('.item-count');
-    if (countGrid) {
-      countGrid.style.display = 'block';
+    // Hàm cập nhật stats của item từ DOM element
+    function updateItemStats(item) {
+      updateItemStatsFromDataset(item.dataset);
     }
-    equipmentSlots.forEach(slot => {
-      if (slot.querySelector('img').src === dialogIcon.src) {
-        slot.querySelector('img').src = '';
-        slot.querySelector('img').style.display = 'none';
-        slot.querySelector('.item-count').style.display = 'none';
+
+    // Hàm cập nhật stats của item từ dataset
+    function updateItemStatsFromDataset(dataset) {
+      const statsContainer = document.getElementById('itemStats');
+      const power = dataset.power || '0';
+      const cooldown = dataset.cooldown || '0';
+      const isConsumable = dataset.isConsumable === 'true';
+
+      statsContainer.innerHTML = `
+    <div class="stat-item">
+      <span class="stat-icon">⚔️</span>
+      <span class="stat-label">Sức mạnh:</span>
+      <span class="stat-value">+${power}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">⏱️</span>
+      <span class="stat-label">Cooldown:</span>
+      <span class="stat-value">${cooldown}s</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">${isConsumable ? '🍶' : '⚔️'}</span>
+      <span class="stat-label">Loại:</span>
+      <span class="stat-value">${isConsumable ? 'Tiêu thụ' : 'Vũ khí'}</span>
+    </div>
+  `;
+    }
+
+    // Hàm xóa stats
+    function clearItemStats() {
+      const statsContainer = document.getElementById('itemStats');
+      statsContainer.innerHTML = '';
+    }
+
+    // Đóng dialog khi click ngoài
+    dialogWrapper.addEventListener('click', (e) => {
+      if (e.target === dialogWrapper) {
+        dialogWrapper.style.display = 'none';
       }
     });
-    equippedIndices = equippedIndices.filter(i => i !== selectedItemIndex);
-  } else {
-    // Lựa chọn
-    if (equippedIndices.length < 3 && !equippedIndices.includes(selectedItemIndex)) {
-      const emptySlot = Array.from(equipmentSlots).find(slot => {
-        return slot.querySelector('img').style.display === 'none' || slot.querySelector('img').src === '';
-      });
-      if (emptySlot) {
+
+
+
+    // Click nút Lựa chọn / Bỏ chọn
+    btnSelect.addEventListener('click', () => {
+      if (selectedFromEquip) {
+        // Bỏ chọn
         const gridItem = gridItems[selectedItemIndex];
-        const imgGrid = gridItem.querySelector('img');
-        const countGrid = gridItem.querySelector('.item-count');
+        gridItem.querySelector('img').style.display = 'block';
 
-        emptySlot.querySelector('img').src = imgGrid.src;
-        emptySlot.querySelector('img').style.display = 'block';
-        if (countGrid) {
-          emptySlot.querySelector('.item-count').textContent = countGrid.textContent;
-          emptySlot.querySelector('.item-count').style.display = 'block';
+        // Xóa class equipped khi bỏ chọn
+        gridItem.classList.remove('equipped');
+
+        // Tìm slot chứa item cần bỏ chọn
+        const slotToRemove = Array.from(equipmentSlots).find(slot =>
+          slot.dataset.nameId === gridItem.dataset.nameId
+        );
+
+        if (slotToRemove) {
+          // Xóa item khỏi slot
+          slotToRemove.querySelector('img').src = '';
+          slotToRemove.querySelector('img').style.display = 'none';
+
+          // Xóa dataset khi bỏ chọn item
+          delete slotToRemove.dataset.nameId;
+          delete slotToRemove.dataset.name;
+          delete slotToRemove.dataset.description;
+          delete slotToRemove.dataset.power;
+          delete slotToRemove.dataset.cooldown;
+          delete slotToRemove.dataset.isConsumable;
+
+          // Xóa index khỏi equippedIndices
+          const slotIndex = Array.from(equipmentSlots).indexOf(slotToRemove);
+          if (equippedIndices[slotIndex] !== undefined) {
+            equippedIndices[slotIndex] = undefined; // Đánh dấu slot trống
+          }
         }
+      } else {
+        // Lựa chọn
+        // Đếm số slot đã có item (dựa vào equippedIndices)
+        const equippedCount = equippedIndices.filter(index => index !== undefined).length;
 
-        imgGrid.style.display = 'none';
-        countGrid.style.display = 'none';
-        equippedIndices.push(selectedItemIndex);
+        if (equippedCount < 3 && !equippedIndices.some(index => index === selectedItemIndex)) {
+          // Kiểm tra item này đã được trang bị ở slot khác chưa
+          const currentItemSrc = gridItems[selectedItemIndex].querySelector('img').src;
+          const isDuplicate = Array.from(equipmentSlots).some(slot => {
+            const slotImg = slot.querySelector('img');
+            return slotImg.style.display !== 'none' && slotImg.src === currentItemSrc;
+          });
+
+          if (isDuplicate) {
+            showMessage('Item này đã được trang bị rồi!');
+            return;
+          }
+
+          // Tìm slot trống (không có item hoặc equippedIndices[slotIndex] === undefined)
+          const emptySlot = Array.from(equipmentSlots).find((slot, slotIndex) => {
+            return slot.querySelector('img').style.display === 'none' ||
+              slot.querySelector('img').src === '' ||
+              equippedIndices[slotIndex] === undefined;
+          });
+          if (emptySlot) {
+            const gridItem = gridItems[selectedItemIndex];
+            const imgGrid = gridItem.querySelector('img');
+
+            // Copy tất cả dataset từ grid item vào equipment slot
+            const emptySlotImg = emptySlot.querySelector('img');
+            emptySlotImg.src = imgGrid.src;
+            emptySlotImg.style.display = 'block';
+
+            // Copy dataset
+            emptySlot.dataset.nameId = gridItem.dataset.nameId;
+            emptySlot.dataset.name = gridItem.dataset.name;
+            emptySlot.dataset.description = gridItem.dataset.description;
+            emptySlot.dataset.power = gridItem.dataset.power;
+            emptySlot.dataset.cooldown = gridItem.dataset.cooldown;
+            emptySlot.dataset.isConsumable = gridItem.dataset.isConsumable;
+
+            imgGrid.style.display = 'none';
+
+            // Thêm class để style item đã trang bị
+            gridItem.classList.add('equipped');
+
+            // Tìm vị trí slot và cập nhật equippedIndices
+            const slotIndex = Array.from(equipmentSlots).indexOf(emptySlot);
+            equippedIndices[slotIndex] = selectedItemIndex;
+          }
+        }
+      }
+
+      // Tắt Dialog ngay lập tức
+      dialogWrapper.style.display = 'none';
+    });
+
+    // Hàm tính giá nâng cấp
+    function priceUpgrade(nameId) {
+      const level = localStorage.getItem(`${nameId}Level`);
+      if (level) {
+        const currentLevel = parseInt(level) + 1;
+        if (currentLevel > 8) {
+          return 'max'; // fix code để giá trị này hơp lệ và nếu html id priceUpgrade = max thì hiển thị css to hơn và ẩn upgrade-text
+        }
+        return 100 * currentLevel;
+      } else {
+        return 100;
       }
     }
-  }
-  dialogWrapper.style.display = 'none';
-});
 
-// Gán sự kiện click mở dialog cho item trong lưới
-gridItems.forEach((item, idx) => {
-  item.addEventListener('click', () => {
-    const img = item.querySelector('img');
-    if (img.style.display === 'none') return; // đã trang bị, không cho chọn nữa
-    openItemDialog('Item ' + (idx+1), img.src, 'Mô tả của item ' + (idx+1), idx, false);
-  });
-});
+    // Hàm hiển thị thông báo
+    function showMessage(message) {
+      const popup = document.getElementById('messagePopup');
+      const messageText = document.getElementById('messageText');
+      
+      if (popup && messageText) {
+        messageText.textContent = message;
+        popup.style.display = 'flex';
+        
+        // Hiển thị với animation
+        setTimeout(() => {
+          popup.classList.add('show');
+        }, 10);
+        
+        // Ẩn sau 0.8s
+        setTimeout(() => {
+          popup.classList.remove('show');
+          setTimeout(() => {
+            popup.style.display = 'none';
+          }, 200);
+        }, 800);
+      }
+    }
 
-// Gán sự kiện click mở dialog cho item trong trang bị
-equipmentSlots.forEach((slot, idx) => {
-  slot.addEventListener('click', () => {
-    const img = slot.querySelector('img');
-    if (img.style.display === 'none' || img.src === '') return;
-    const gridIndex = equippedIndices[idx] ?? equippedIndices.find(i => gridItems[i].querySelector('img').src === img.src);
-    openItemDialog('Item Equip', img.src, 'Mô tả trang bị', gridIndex, true);
-  });
-});
-</script> -->
+    // Hàm cập nhật giá và CSS cho priceUpgrade
+    function setNewPrice(newPrice) {
+      const priceElement = document.getElementById('priceUpgrade');
+      const upgradeTextElement = document.querySelector('.upgrade-text');
+      const btnIconElement = document.querySelector('.btn-upgrade .btn-icon');
+      
+      if (priceElement) {
+        priceElement.textContent = newPrice;
+        
+        if (newPrice === 'max') {
+          priceElement.classList.add('max-level');
+          if (upgradeTextElement) {
+            upgradeTextElement.classList.add('hidden');
+          }
+          if (btnIconElement) {
+            btnIconElement.classList.add('hidden');
+          }
+        } else {
+          priceElement.classList.remove('max-level');
+          if (upgradeTextElement) {
+            upgradeTextElement.classList.remove('hidden');
+          }
+          if (btnIconElement) {
+            btnIconElement.classList.remove('hidden');
+          }
+        }
+      }
+    }
+
+    // Hàm xử lý nâng cấp
+    function Upgrading(nameId) {
+      const price = priceUpgrade(nameId);
+      
+      if (price === 'max') {
+        // Hiện thông báo đã cấp tối đa
+        showMessage('Item đã được nâng cấp tối đa!');
+        return;
+      }
+      
+      const coinScoreTotal = localStorage.getItem('coinScoreGameTotal');
+      if (coinScoreTotal >= price) {
+        // Trừ tiền
+        const newCoinScore = parseInt(coinScoreTotal) - price;
+        localStorage.setItem('coinScoreGameTotal', newCoinScore);
+        
+        // Cập nhật lại coinScoreGameTotal và <span id="score">
+        updateScoreDisplay();
+        
+        // Tăng level
+        const level = localStorage.getItem(`${nameId}Level`);
+        if (level != null) {
+          localStorage.setItem(`${nameId}Level`, parseInt(level) + 1);
+        } else {
+          localStorage.setItem(`${nameId}Level`, 1);
+        }
+        
+        // Cập nhật giá hiển thị
+        const newPrice = priceUpgrade(nameId);
+        setNewPrice(newPrice);
+        
+        showMessage('Nâng cấp thành công!');
+      } else {
+        // Hiện thông báo không đủ tiền
+        showMessage('Không đủ tiền để nâng cấp!');
+      }
+    }
+
+    // Hàm cập nhật score từ localStorage
+    function updateScoreDisplay() {
+      try {
+        // Lấy giá trị coinScoreGameTotal từ localStorage
+        const coinScoreTotal = localStorage.getItem('coinScoreGameTotal');
+        const scoreValue = coinScoreTotal ? parseInt(coinScoreTotal) : 0;
+        
+        // Cập nhật hiển thị score
+        const scoreElement = document.getElementById('score');
+        if (scoreElement) {
+          scoreElement.textContent = scoreValue.toLocaleString(); // Format số với dấu phẩy
+        }
+      } catch (error) {
+        console.error('Lỗi khi cập nhật score display:', error);
+      }
+    }
+
+    // Chạy khi DOM load xong
+    document.addEventListener('DOMContentLoaded', () => {
+      createItems();
+      updateScoreDisplay(); // Cập nhật score khi trang load
+
+      // Thêm event listener cho nút Xác Nhận
+      const confirmBtn = document.getElementById('confirmBtn');
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', () => {
+          // Lấy danh sách nameId của các item đang được trang bị
+          const equippedNameIds = [];
+
+          equipmentSlots.forEach(slot => {
+            const img = slot.querySelector('img');
+            if (img.style.display !== 'none' && img.src !== '') {
+              const nameId = slot.dataset.nameId;
+              if (nameId) {
+                equippedNameIds.push(nameId);
+              }
+            }
+          });
+
+          // Lưu vào localStorage
+          localStorage.setItem('selectEquipments', JSON.stringify(equippedNameIds));
+
+          // Chuyển về trang index.html
+          window.location.href = 'index.html';
+        });
+      }
+
+      // Thêm event listener cho nút nâng cấp
+      btnUpgrade.addEventListener('click', () => {
+        if (selectedItemIndex !== null) {
+          let nameId = null;
+          
+          if (selectedFromEquip) {
+            // Nếu item từ equipment slot
+            const equipmentSlot = Array.from(equipmentSlots).find(slot =>
+              slot.querySelector('img').src === dialogIcon.src
+            );
+            if (equipmentSlot) {
+              nameId = equipmentSlot.dataset.nameId;
+            }
+          } else {
+            // Nếu item từ grid
+            if (gridItems[selectedItemIndex]) {
+              nameId = gridItems[selectedItemIndex].dataset.nameId;
+            }
+          }
+          
+          if (nameId) {
+            Upgrading(nameId);
+          }
+        }
+      });
+    });
+
+    // Gán sự kiện click mở dialog cho item trong lưới
+    function setupGridItemEventListeners() {
+      console.log('Setup event listeners cho', gridItems.length, 'grid items');
+      gridItems.forEach((item, idx) => {
+        item.addEventListener('click', () => {
+          const img = item.querySelector('img');
+
+          // Kiểm tra item có thể click được không
+          if (img.style.display === 'none' || equippedIndices.includes(idx)) {
+            return; // đã trang bị hoặc không thể chọn, không cho mở dialog
+          }
+
+          // Lấy thông tin từ dataset
+          const name = item.dataset.name || `Item ${idx + 1}`;
+          const description = item.dataset.description || 'Mô tả của item';
+          const power = item.dataset.power || '0';
+          const cooldown = item.dataset.cooldown || '0';
+
+          // Tạo mô tả chi tiết
+          const detailedDescription = `${description}\n\nSức mạnh: ${power}\nCooldown: ${cooldown}s`;
+
+          openItemDialog(name, img.src, detailedDescription, idx, false);
+        });
+      });
+      console.log('Đã setup xong event listeners');
+    }
+
+
+
+    // Gán sự kiện click mở dialog cho item trong trang bị
+    equipmentSlots.forEach((slot, idx) => {
+      slot.addEventListener('click', () => {
+        const img = slot.querySelector('img');
+        if (img.style.display === 'none' || img.src === '') return;
+
+        // Lấy thông tin từ dataset của equipment slot
+        const name = slot.dataset.name || 'Item Equip';
+        const description = slot.dataset.description || 'Mô tả trang bị';
+        const power = slot.dataset.power || '0';
+        const cooldown = slot.dataset.cooldown || '0';
+
+        // Tạo mô tả chi tiết
+        const detailedDescription = `${description}\n\nSức mạnh: ${power}\nCooldown: ${cooldown}s`;
+
+        const gridIndex = equippedIndices[idx] ?? equippedIndices.find(i => gridItems[i].querySelector('img').src === img.src);
+        openItemDialog(name, img.src, detailedDescription, gridIndex, true);
+      });
+    });
+
+    // Export để sử dụng trong script khác (nếu cần)
+    window.itemFactory = itemFactory;
+    window.createItems = createItems;
+
+  </script>
 
 </body>
+
 </html>
